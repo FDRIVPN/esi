@@ -18,17 +18,13 @@
             position: relative;
             user-select: none;
         }
-        #mainCoin {
-            width: 350px; /* اندازه سکه اصلی */
-            height: 350px;
-        }
         #coin {
-            width: 100px; /* اندازه سکه کوچک */
-            height: 100px;
-            position: absolute;
-            left: 50px;
-            bottom: 50px;
-            cursor: pointer;
+            width: 350px; /* اندازه سکه */
+            height: 350px;
+            position: absolute; /* برای تعیین موقعیت دقیق */
+            top: 50%; /* قرار دادن در مرکز عمودی */
+            left: 50%; /* قرار دادن در مرکز افقی */
+            transform: translate(-50%, -50%); /* جابجایی برای مرکز */
         }
         #score {
             position: absolute;
@@ -59,8 +55,7 @@
 <body>
 
 <div id="score">0</div>
-<img id="mainCoin" src="ggg.png" alt="Main Coin">
-<img id="coin" src="Coin_6.png" alt="Coin for Points">
+<img id="coin" src="ggg.png" alt="Coin">
 
 <script>
     const scoreElement = document.getElementById('score');
@@ -69,26 +64,32 @@
 
     // به‌روزرسانی امتیاز
     function updateScore(event) {
-        score++;
-        localStorage.setItem('score', score);
-        scoreElement.textContent = `Score: ${score}`;
+        const coinRect = coinElement.getBoundingClientRect();
 
-        // اضافه کردن +1 در جایی که کلیک شده
-        const plusOne = document.createElement('div');
-        plusOne.textContent = '+1';
-        plusOne.classList.add('plus-one');
-        plusOne.style.left = `${event.clientX}px`;
-        plusOne.style.top = `${event.clientY}px`;
-        document.body.appendChild(plusOne);
+        // بررسی اینکه آیا کلیک در داخل محدوده سکه است یا نه
+        if (event.clientX >= coinRect.left && event.clientX <= coinRect.right &&
+            event.clientY >= coinRect.top && event.clientY <= coinRect.bottom) {
+            score++;
+            localStorage.setItem('score', score);
+            scoreElement.textContent = `Score: ${score}`;
 
-        // حذف +1 پس از اتمام انیمیشن
-        setTimeout(() => {
-            plusOne.remove();
-        }, 1000);
+            // اضافه کردن +1 در جایی که کلیک شده
+            const plusOne = document.createElement('div');
+            plusOne.textContent = '+1';
+            plusOne.classList.add('plus-one');
+            plusOne.style.left = `${event.clientX}px`;
+            plusOne.style.top = `${event.clientY}px`;
+            document.body.appendChild(plusOne);
+
+            // حذف +1 پس از اتمام انیمیشن
+            setTimeout(() => {
+                plusOne.remove();
+            }, 1000);
+        }
     }
 
-    // رویداد کلیک روی سکه کوچک
-    coinElement.addEventListener('click', updateScore);
+    // رویداد کلیک روی بدنه برای امتیاز
+    document.body.addEventListener('click', updateScore);
 
     // نمایش امتیاز اولیه
     scoreElement.textContent = `Score: ${score}`;
