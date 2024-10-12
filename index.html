@@ -95,6 +95,11 @@
         event.preventDefault(); // جلوگیری از منوی راست‌کلیک
     });
 
+    // جلوگیری از رفتار پیش‌فرض لمس
+    coinElement.addEventListener('touchstart', function(event) {
+        event.preventDefault(); // جلوگیری از نمایش لینک تصویر
+    });
+
     // نمایش امتیاز اولیه
     scoreElement.textContent = `Score: ${score}`;
 </script>
