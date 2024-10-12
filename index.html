@@ -9,20 +9,21 @@
             margin: 0;
             overflow: hidden;
             background-image: url('./background.png'); /* تصویر پس‌زمینه */
-            background-size: cover; /* تصویر تمام صفحه */
-            background-position: center; /* قرارگیری تصویر در مرکز */
+            background-size: cover; /* تمام صفحه کردن تصویر */
+            background-position: center; /* مرکز تصویر */
             display: flex;
             justify-content: center;
             align-items: center;
             flex-direction: column;
             height: 100vh;
-            position: relative; /* برای نمایش +1 در موقعیت‌های مختلف */
+            position: relative;
         }
         #coin {
             width: 350px; /* اندازه سکه */
             height: 350px; /* اندازه سکه */
-            cursor: pointer; /* نشان‌گر ماوس روی سکه */
+            cursor: pointer;
             user-select: none; /* جلوگیری از انتخاب تصویر */
+            outline: none; /* حذف حالت سبز هنگام کلیک */
         }
         #score {
             position: absolute;
@@ -34,7 +35,7 @@
         }
         .plus-one {
             position: absolute;
-            font-size: 20px;
+            font-size: 30px; /* هم‌اندازه امتیاز */
             color: white;
             animation: fadeOut 1s forwards;
         }
