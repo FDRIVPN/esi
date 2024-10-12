@@ -65,7 +65,7 @@
     let score = parseInt(localStorage.getItem('score')) || 0;
 
     // به‌روزرسانی امتیاز
-    function updateScore() {
+    function updateScore(x, y) {
         score++;
         localStorage.setItem('score', score); // ذخیره امتیاز در localStorage
         scoreElement.textContent = `Score: ${score}`; // به‌روز رسانی نمایش امتیاز
@@ -75,16 +75,25 @@
         plusOneElement.className = 'plus-one';
         plusOneElement.textContent = '+1';
         document.body.appendChild(plusOneElement);
-        const rect = coinElement.getBoundingClientRect();
-        plusOneElement.style.left = `${rect.left + rect.width / 2}px`;
-        plusOneElement.style.top = `${rect.top + rect.height / 2}px`;
+        plusOneElement.style.left = `${x}px`;
+        plusOneElement.style.top = `${y}px`;
         setTimeout(() => {
             plusOneElement.remove(); // حذف عنصر پس از یک ثانیه
         }, 1000);
     }
 
     // رویداد کلیک روی سکه
-    coinElement.addEventListener('click', updateScore);
+    coinElement.addEventListener('click', function(event) {
+        // دریافت مختصات کلیک
+        const clickX = event.clientX;
+        const clickY = event.clientY;
+        updateScore(clickX, clickY); // به‌روزرسانی امتیاز و نمایش +1
+    });
+
+    // جلوگیری از نمایش لینک تصویر در حالت لمسی
+    coinElement.addEventListener('contextmenu', function(event) {
+        event.preventDefault(); // جلوگیری از منوی راست‌کلیک
+    });
 
     // نمایش امتیاز اولیه
     scoreElement.textContent = `Score: ${score}`;
