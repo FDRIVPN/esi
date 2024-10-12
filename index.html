@@ -16,7 +16,7 @@
             align-items: center;
             height: 100vh;
             position: relative;
-            user-select: none;
+            user-select: none; /* جلوگیری از انتخاب متن */
         }
         #coin {
             width: 350px; /* اندازه سکه */
@@ -64,6 +64,7 @@
 
     // به‌روزرسانی امتیاز
     function updateScore(event) {
+        event.preventDefault(); // جلوگیری از نمایش لینک تصویر
         const coinRect = coinElement.getBoundingClientRect();
 
         // بررسی اینکه آیا کلیک در داخل محدوده سکه است یا نه
