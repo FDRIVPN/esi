@@ -8,7 +8,7 @@
         body {
             margin: 0;
             overflow: hidden;
-            background-image: url('./background.png'); /* تصویر پس‌زمینه */
+            background-image: url('./background.png'); /* تصویر پس‌زمینه اصلی */
             background-size: cover;
             background-position: center;
             display: flex;
@@ -18,12 +18,17 @@
             position: relative;
             user-select: none;
         }
-        #coin {
-            width: 350px; /* اندازه سکه */
+        #mainCoin {
+            width: 350px; /* اندازه سکه اصلی */
             height: 350px;
+        }
+        #coin {
+            width: 100px; /* اندازه سکه کوچک */
+            height: 100px;
+            position: absolute;
+            left: 50px;
+            bottom: 50px;
             cursor: pointer;
-            user-select: none;
-            outline: none;
         }
         #score {
             position: absolute;
@@ -54,7 +59,8 @@
 <body>
 
 <div id="score">0</div>
-<img id="coin" src="ggg.png" alt="Coin">
+<img id="mainCoin" src="ggg.png" alt="Main Coin">
+<img id="coin" src="Coin_6.png" alt="Coin for Points">
 
 <script>
     const scoreElement = document.getElementById('score');
@@ -81,7 +87,7 @@
         }, 1000);
     }
 
-    // رویداد کلیک روی سکه
+    // رویداد کلیک روی سکه کوچک
     coinElement.addEventListener('click', updateScore);
 
     // نمایش امتیاز اولیه
