@@ -17,6 +17,7 @@
             height: 100vh;
             position: relative;
             user-select: none; /* جلوگیری از انتخاب متن */
+            touch-action: manipulation; /* جلوگیری از رفتار پیش‌فرض لمس */
         }
         #coin {
             width: 350px; /* اندازه سکه */
@@ -25,6 +26,7 @@
             top: 50%; /* قرار دادن در مرکز عمودی */
             left: 50%; /* قرار دادن در مرکز افقی */
             transform: translate(-50%, -50%); /* جابجایی برای مرکز */
+            touch-action: none; /* جلوگیری از رفتار پیش‌فرض لمس */
         }
         #score {
             position: absolute;
@@ -63,34 +65,26 @@
     let score = parseInt(localStorage.getItem('score')) || 0;
 
     // به‌روزرسانی امتیاز
-    function updateScore(event) {
-        event.preventDefault(); // جلوگیری از نمایش لینک تصویر
-        const coinRect = coinElement.getBoundingClientRect();
+    function updateScore() {
+        score++;
+        localStorage.setItem('score', score); // ذخیره امتیاز در localStorage
+        scoreElement.textContent = `Score: ${score}`; // به‌روز رسانی نمایش امتیاز
 
-        // بررسی اینکه آیا کلیک در داخل محدوده سکه است یا نه
-        if (event.clientX >= coinRect.left && event.clientX <= coinRect.right &&
-            event.clientY >= coinRect.top && event.clientY <= coinRect.bottom) {
-            score++;
-            localStorage.setItem('score', score);
-            scoreElement.textContent = `Score: ${score}`;
-
-            // اضافه کردن +1 در جایی که کلیک شده
-            const plusOne = document.createElement('div');
-            plusOne.textContent = '+1';
-            plusOne.classList.add('plus-one');
-            plusOne.style.left = `${event.clientX}px`;
-            plusOne.style.top = `${event.clientY}px`;
-            document.body.appendChild(plusOne);
-
-            // حذف +1 پس از اتمام انیمیشن
-            setTimeout(() => {
-                plusOne.remove();
-            }, 1000);
-        }
+        // نمایش +1 در محل کلیک
+        const plusOneElement = document.createElement('div');
+        plusOneElement.className = 'plus-one';
+        plusOneElement.textContent = '+1';
+        document.body.appendChild(plusOneElement);
+        const rect = coinElement.getBoundingClientRect();
+        plusOneElement.style.left = `${rect.left + rect.width / 2}px`;
+        plusOneElement.style.top = `${rect.top + rect.height / 2}px`;
+        setTimeout(() => {
+            plusOneElement.remove(); // حذف عنصر پس از یک ثانیه
+        }, 1000);
     }
 
-    // رویداد کلیک روی بدنه برای امتیاز
-    document.body.addEventListener('click', updateScore);
+    // رویداد کلیک روی سکه
+    coinElement.addEventListener('click', updateScore);
 
     // نمایش امتیاز اولیه
     scoreElement.textContent = `Score: ${score}`;
