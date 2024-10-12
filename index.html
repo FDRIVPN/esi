@@ -99,13 +99,9 @@
     });
 
     // جلوگیری از نمایش لینک تصویر و منوی راست‌کلیک
-    const preventDefaultAction = (event) => {
+    coinElement.addEventListener('contextmenu', function(event) {
         event.preventDefault(); // جلوگیری از منوی راست‌کلیک
-    };
-
-    coinElement.addEventListener('contextmenu', preventDefaultAction); // برای کلیک راست
-    coinElement.addEventListener('mousedown', preventDefaultAction); // برای کلیک ماوس
-    coinElement.addEventListener('touchstart', preventDefaultAction); // برای لمس
+    });
 
     // نمایش امتیاز اولیه
     scoreElement.textContent = `Score: ${score}`;
