@@ -33,7 +33,7 @@
             top: 20px;
             left: 20px;
             font-size: 30px;
-            color: white;
+            color: white; /* رنگ سفید برای امتیاز */
             font-family: sans-serif;
         }
         .plus-one {
@@ -90,15 +90,14 @@
         updateScore(clickX, clickY); // به‌روزرسانی امتیاز و نمایش +1
     });
 
-    // جلوگیری از نمایش لینک تصویر در حالت لمسی
-    coinElement.addEventListener('contextmenu', function(event) {
+    // جلوگیری از نمایش لینک تصویر و منوی راست‌کلیک
+    const preventDefaultAction = (event) => {
         event.preventDefault(); // جلوگیری از منوی راست‌کلیک
-    });
+    };
 
-    // جلوگیری از رفتار پیش‌فرض لمس
-    coinElement.addEventListener('touchstart', function(event) {
-        event.preventDefault(); // جلوگیری از نمایش لینک تصویر
-    });
+    coinElement.addEventListener('contextmenu', preventDefaultAction); // برای کلیک راست
+    coinElement.addEventListener('mousedown', preventDefaultAction); // برای کلیک ماوس
+    coinElement.addEventListener('touchstart', preventDefaultAction); // برای لمس
 
     // نمایش امتیاز اولیه
     scoreElement.textContent = `Score: ${score}`;
