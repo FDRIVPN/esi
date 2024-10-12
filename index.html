@@ -26,7 +26,6 @@
             top: 50%; /* قرار دادن در مرکز عمودی */
             left: 50%; /* قرار دادن در مرکز افقی */
             transform: translate(-50%, -50%); /* جابجایی برای مرکز */
-            touch-action: none; /* جلوگیری از رفتار پیش‌فرض لمس */
         }
         #score {
             position: absolute;
@@ -87,7 +86,17 @@
         // دریافت مختصات کلیک
         const clickX = event.clientX;
         const clickY = event.clientY;
-        updateScore(clickX, clickY); // به‌روزرسانی امتیاز و نمایش +1
+
+        // بررسی کلیک در داخل منطقه سکه
+        const coinRect = coinElement.getBoundingClientRect();
+        if (
+            clickX >= coinRect.left &&
+            clickX <= coinRect.right &&
+            clickY >= coinRect.top &&
+            clickY <= coinRect.bottom
+        ) {
+            updateScore(clickX, clickY); // به‌روزرسانی امتیاز و نمایش +1
+        }
     });
 
     // جلوگیری از نمایش لینک تصویر و منوی راست‌کلیک
