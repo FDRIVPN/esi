@@ -9,33 +9,33 @@
             margin: 0;
             overflow: hidden;
             background-image: url('./background.png'); /* تصویر پس‌زمینه */
-            background-size: cover; /* تمام صفحه کردن تصویر */
-            background-position: center; /* مرکز تصویر */
+            background-size: cover;
+            background-position: center;
             display: flex;
             justify-content: center;
             align-items: center;
-            flex-direction: column;
             height: 100vh;
             position: relative;
+            user-select: none;
         }
         #coin {
             width: 350px; /* اندازه سکه */
-            height: 350px; /* اندازه سکه */
+            height: 350px;
             cursor: pointer;
-            user-select: none; /* جلوگیری از انتخاب تصویر */
-            outline: none; /* حذف حالت سبز هنگام کلیک */
+            user-select: none;
+            outline: none;
         }
         #score {
             position: absolute;
-            top: 100px;
-            left: 100px;
+            top: 20px;
+            left: 20px;
             font-size: 30px;
             color: white;
             font-family: sans-serif;
         }
         .plus-one {
             position: absolute;
-            font-size: 30px; /* هم‌اندازه امتیاز */
+            font-size: 30px;
             color: white;
             animation: fadeOut 1s forwards;
         }
@@ -46,7 +46,7 @@
             }
             100% {
                 opacity: 0;
-                transform: translateY(-50px); /* حرکت به سمت بالا */
+                transform: translateY(-50px);
             }
         }
     </style>
@@ -54,28 +54,28 @@
 <body>
 
 <div id="score">0</div>
-<img id="coin" src="./ggg.png" alt="Coin">
+<img id="coin" src="ggg.png" alt="Coin">
 
 <script>
     const scoreElement = document.getElementById('score');
     const coinElement = document.getElementById('coin');
-    let score = parseInt(localStorage.getItem('score')) || 0; // دریافت امتیاز از localStorage
+    let score = parseInt(localStorage.getItem('score')) || 0;
 
     // به‌روزرسانی امتیاز
     function updateScore(event) {
         score++;
-        localStorage.setItem('score', score); // ذخیره امتیاز در localStorage
-        scoreElement.textContent = `Score: ${score}`; // به‌روز رسانی نمایش امتیاز
+        localStorage.setItem('score', score);
+        scoreElement.textContent = `Score: ${score}`;
 
-        // ایجاد عنصر برای نمایش +1
+        // اضافه کردن +1 در جایی که کلیک شده
         const plusOne = document.createElement('div');
-        plusOne.className = 'plus-one';
         plusOne.textContent = '+1';
+        plusOne.classList.add('plus-one');
         plusOne.style.left = `${event.clientX}px`;
         plusOne.style.top = `${event.clientY}px`;
         document.body.appendChild(plusOne);
 
-        // حذف عنصر +1 بعد از انیمیشن
+        // حذف +1 پس از اتمام انیمیشن
         setTimeout(() => {
             plusOne.remove();
         }, 1000);
