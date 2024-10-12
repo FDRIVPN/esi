@@ -16,11 +16,13 @@
             align-items: center;
             flex-direction: column;
             height: 100vh;
+            position: relative; /* برای نمایش +1 در موقعیت‌های مختلف */
         }
         #coin {
             width: 350px; /* اندازه سکه */
             height: 350px; /* اندازه سکه */
             cursor: pointer; /* نشان‌گر ماوس روی سکه */
+            user-select: none; /* جلوگیری از انتخاب تصویر */
         }
         #score {
             position: absolute;
@@ -30,13 +32,27 @@
             color: white;
             font-family: sans-serif;
         }
+        .plus-one {
+            position: absolute;
+            font-size: 20px;
+            color: white;
+            animation: fadeOut 1s forwards;
+        }
+        @keyframes fadeOut {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50px); /* حرکت به سمت بالا */
+            }
+        }
     </style>
 </head>
 <body>
 
 <div id="score">0</div>
-
-<!-- بارگذاری تصویر سکه از مسیر فعلی -->
 <img id="coin" src="./ggg.png" alt="Coin">
 
 <script>
@@ -45,10 +61,23 @@
     let score = parseInt(localStorage.getItem('score')) || 0; // دریافت امتیاز از localStorage
 
     // به‌روزرسانی امتیاز
-    function updateScore() {
+    function updateScore(event) {
         score++;
         localStorage.setItem('score', score); // ذخیره امتیاز در localStorage
         scoreElement.textContent = `Score: ${score}`; // به‌روز رسانی نمایش امتیاز
+
+        // ایجاد عنصر برای نمایش +1
+        const plusOne = document.createElement('div');
+        plusOne.className = 'plus-one';
+        plusOne.textContent = '+1';
+        plusOne.style.left = `${event.clientX}px`;
+        plusOne.style.top = `${event.clientY}px`;
+        document.body.appendChild(plusOne);
+
+        // حذف عنصر +1 بعد از انیمیشن
+        setTimeout(() => {
+            plusOne.remove();
+        }, 1000);
     }
 
     // رویداد کلیک روی سکه
