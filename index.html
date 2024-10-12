@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Coin Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column; /* برای چیدمان عمودی */
+            height: 100vh;
+        }
+        #coin {
+            width: 600px; /* اندازه سکه */
+            height: 600px; /* اندازه سکه */
+            cursor: pointer; /* نشان‌گر ماوس روی سکه */
+        }
+        #score {
+            position: absolute;
+            top: 200px;
+            left: 200px;
+            font-size: 30px;
+            color: white; /* رنگ سفید برای امتیاز */
+            font-family: sans-serif;
+        }
+    </style>
+</head>
+<body>
+
+<div id="score">Score: 0</div>
+<img id="coin" src="ggg.png" alt="Coin">
+
+<script>
+    const scoreElement = document.getElementById('score');
+    const coinElement = document.getElementById('coin');
+    let score = parseInt(localStorage.getItem('score')) || 0; // دریافت امتیاز از localStorage
+
+    // به‌روزرسانی امتیاز
+    function updateScore() {
+        score++;
+        localStorage.setItem('score', score); // ذخیره امتیاز در localStorage
+        scoreElement.textContent = `Score: ${score}`; // به‌روز رسانی نمایش امتیاز
+    }
+
+    // رویداد کلیک روی سکه
+    coinElement.addEventListener('click', updateScore);
+
+    // نمایش امتیاز اولیه
+    scoreElement.textContent = ` ${score}`;
+</script>
+
+</body>
+  </html>
