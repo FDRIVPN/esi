@@ -10,14 +10,12 @@
             overflow: hidden;
             background-image: url('./background.png'); /* تصویر پس‌زمینه */
             background-size: cover;
-            background-position: center;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             position: relative;
             user-select: none; /* جلوگیری از انتخاب متن */
-            touch-action: manipulation; /* جلوگیری از رفتار پیش‌فرض لمس */
         }
         #coin {
             width: 350px; /* اندازه سکه */
@@ -26,6 +24,7 @@
             top: 50%; /* قرار دادن در مرکز عمودی */
             left: 50%; /* قرار دادن در مرکز افقی */
             transform: translate(-50%, -50%); /* جابجایی برای مرکز */
+            pointer-events: all; /* برای امکان کلیک */
         }
         #score {
             position: absolute;
@@ -55,7 +54,7 @@
 </head>
 <body>
 
-<div id="score">0</div>
+<div id="score">Score: 0</div>
 <img id="coin" src="ggg.png" alt="Coin">
 
 <script>
