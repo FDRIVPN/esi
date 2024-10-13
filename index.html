@@ -76,11 +76,11 @@
     function updateScore() {
         score++;
         localStorage.setItem('score', score);
-        scoreElement.textContent = score;
+        scoreElement.textContent = score; // نمایش امتیاز به‌روز شده
     }
 
     // نمایش امتیاز اولیه
-    scoreElement.textContent = score;
+    scoreElement.textContent = score; // اینجا مقدار اولیه امتیاز را نمایش می‌دهیم
 
     // نمایش +1 در محل کلیک
     function showPlusOne(x, y) {
