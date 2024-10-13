@@ -14,18 +14,21 @@
             align-items: center;
             flex-direction: column;
             height: 100vh;
+            background-image: url('background.png'); /* پس‌زمینه */
+            background-size: cover;
         }
         #coin {
             width: 350px;
             height: 350px;
             cursor: pointer;
+            position: relative;
         }
         #scoreContainer {
-            position: absolute;
-            top: 20px;
-            left: 20px;
             display: flex;
             align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: -60px; /* امتیاز به بالای سکه چسبیده باشد */
         }
         #scoreImg {
             width: 50px;
@@ -33,20 +36,36 @@
             margin-right: 10px;
         }
         #score {
-            font-size: 30px;
+            font-size: 40px;
             color: white;
             font-family: sans-serif;
+        }
+        .plusOne {
+            position: absolute;
+            font-size: 30px;
+            color: white;
+            animation: fadeOut 1s forwards;
+        }
+        @keyframes fadeOut {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-30px); /* حرکت به بالا */
+            }
         }
     </style>
 </head>
 <body>
 
 <div id="scoreContainer">
-    <img id="scoreImg" src="Coin_6.png" alt="Coin Image for Score"> <!-- تصویر سکه -->
+    <img id="scoreImg" src="Coin_6.png" alt="Coin Image for Score"> <!-- تصویر سکه امتیاز -->
     <div id="score">0</div> <!-- نمایش امتیاز کاربر -->
 </div>
 
-<img id="coin" src="ggg.png" alt="Coin">
+<img id="coin" src="ggg.png" alt="Coin"> <!-- تصویر اصلی سکه -->
 
 <script>
     const coinElement = document.getElementById('coin');
@@ -57,14 +76,36 @@
     function updateScore() {
         score++;
         localStorage.setItem('score', score);
-        scoreElement.textContent = score; // به‌روزرسانی نمایش امتیاز
+        scoreElement.textContent = score;
     }
 
     // نمایش امتیاز اولیه
     scoreElement.textContent = score;
 
+    // نمایش +1 در محل کلیک
+    function showPlusOne(x, y) {
+        const plusOne = document.createElement('div');
+        plusOne.textContent = '+1';
+        plusOne.classList.add('plusOne');
+        plusOne.style.left = `${x}px`;
+        plusOne.style.top = `${y}px`;
+        document.body.appendChild(plusOne);
+
+        setTimeout(() => {
+            plusOne.remove(); // حذف +1 بعد از 1 ثانیه
+        }, 1000);
+    }
+
     // رویداد کلیک روی سکه
-    coinElement.addEventListener('click', updateScore);
+    coinElement.addEventListener('click', function(event) {
+        updateScore();
+
+        // نمایش +1 در محل کلیک
+        const rect = coinElement.getBoundingClientRect();
+        const clickX = event.clientX;
+        const clickY = event.clientY;
+        showPlusOne(clickX, clickY);
+    });
 </script>
 
 </body>
