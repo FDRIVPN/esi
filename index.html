@@ -8,103 +8,63 @@
         body {
             margin: 0;
             overflow: hidden;
-            background-image: url('./background.png'); /* تصویر پس‌زمینه */
-            background-size: cover;
+            background-color: black;
             display: flex;
             justify-content: center;
             align-items: center;
+            flex-direction: column;
             height: 100vh;
-            position: relative;
-            user-select: none; /* جلوگیری از انتخاب متن */
         }
         #coin {
-            width: 350px; /* اندازه سکه */
+            width: 350px;
             height: 350px;
-            position: absolute; /* برای تعیین موقعیت دقیق */
-            top: 50%; /* قرار دادن در مرکز عمودی */
-            left: 50%; /* قرار دادن در مرکز افقی */
-            transform: translate(-50%, -50%); /* جابجایی برای مرکز */
-            pointer-events: all; /* برای امکان کلیک */
+            cursor: pointer;
         }
-        #score {
+        #scoreContainer {
             position: absolute;
             top: 20px;
             left: 20px;
-            font-size: 30px;
-            color: white; /* رنگ سفید برای امتیاز */
-            font-family: sans-serif;
+            display: flex;
+            align-items: center;
         }
-        .plus-one {
-            position: absolute;
+        #scoreImg {
+            width: 50px;
+            height: 50px;
+            margin-right: 10px;
+        }
+        #score {
             font-size: 30px;
             color: white;
-            animation: fadeOut 1s forwards;
-        }
-        @keyframes fadeOut {
-            0% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-50px);
-            }
+            font-family: sans-serif;
         }
     </style>
 </head>
 <body>
 
-<div id="score">Score: 0</div>
+<div id="scoreContainer">
+    <img id="scoreImg" src="Coin_6.png" alt="Coin Image for Score"> <!-- تصویر سکه -->
+    <div id="score">0</div> <!-- نمایش امتیاز کاربر -->
+</div>
+
 <img id="coin" src="ggg.png" alt="Coin">
 
 <script>
-    const scoreElement = document.getElementById('score');
     const coinElement = document.getElementById('coin');
+    const scoreElement = document.getElementById('score');
     let score = parseInt(localStorage.getItem('score')) || 0;
 
     // به‌روزرسانی امتیاز
-    function updateScore(x, y) {
-        score++; // افزایش امتیاز
-        localStorage.setItem('score', score); // ذخیره امتیاز در localStorage
-        scoreElement.textContent = `Score: ${score}`; // به‌روز رسانی نمایش امتیاز
-
-        // نمایش +1 در محل کلیک
-        const plusOneElement = document.createElement('div');
-        plusOneElement.className = 'plus-one';
-        plusOneElement.textContent = '+1';
-        document.body.appendChild(plusOneElement);
-        plusOneElement.style.left = `${x}px`;
-        plusOneElement.style.top = `${y}px`;
-        setTimeout(() => {
-            plusOneElement.remove(); // حذف عنصر پس از یک ثانیه
-        }, 1000);
+    function updateScore() {
+        score++;
+        localStorage.setItem('score', score);
+        scoreElement.textContent = score; // به‌روزرسانی نمایش امتیاز
     }
 
-    // رویداد کلیک روی سکه
-    coinElement.addEventListener('click', function(event) {
-        // دریافت مختصات کلیک
-        const clickX = event.clientX;
-        const clickY = event.clientY;
-
-        // بررسی کلیک در داخل منطقه سکه
-        const coinRect = coinElement.getBoundingClientRect();
-        if (
-            clickX >= coinRect.left &&
-            clickX <= coinRect.right &&
-            clickY >= coinRect.top &&
-            clickY <= coinRect.bottom
-        ) {
-            updateScore(clickX, clickY); // به‌روزرسانی امتیاز و نمایش +1
-        }
-    });
-
-    // جلوگیری از نمایش لینک تصویر و منوی راست‌کلیک
-    coinElement.addEventListener('contextmenu', function(event) {
-        event.preventDefault(); // جلوگیری از منوی راست‌کلیک
-    });
-
     // نمایش امتیاز اولیه
-    scoreElement.textContent = `Score: ${score}`;
+    scoreElement.textContent = score;
+
+    // رویداد کلیک روی سکه
+    coinElement.addEventListener('click', updateScore);
 </script>
 
 </body>
