@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coin Game</title>
     <style>
         body {
@@ -12,116 +12,105 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            flex-direction: column;
             height: 100vh;
-        }
-        #coin {
-            width: 350px;
-            height: 350px;
-            cursor: pointer;
-        }
-        #scoreContainer {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: absolute;
-            top: 50px;
-        }
-        #score {
-            font-size: 30px;
             color: white;
             font-family: sans-serif;
+        }
+        #score-section {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+        }
+        #score-section img {
+            width: 50px;
+            height: 50px;
+        }
+        #score-display {
+            font-size: 30px;
             margin-left: 10px;
         }
-        #message {
-            color: black;
-            font-size: 20px;
-            font-family: sans-serif;
-            display: none; /* برای کاربران عادی */
-        }
-        #gameContainer {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        #adminButton {
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            display: none; /* فقط برای مدیر */
+        #adminSection {
+            display: none; /* این بخش فقط برای مدیر نمایش داده می‌شود */
         }
         #userInfo {
-            display: none; /* برای نمایش اطلاعات کاربران */
-            color: white;
-            font-size: 18px;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
 
-<div id="gameContainer">
-    <div id="scoreContainer">
-        <img src="Coin_6.png" alt="Coin Icon" style="width: 40px;">
-        <div id="score">0</div>
-    </div>
-    <img id="coin" src="ggg.png" alt="Coin">
+<!-- بخش امتیاز -->
+<div id="score-section">
+    <img src="Coin_6.png" alt="Coin">
+    <span id="score-display">0</span>
 </div>
-<div id="message">Mini-app is under maintenance</div>
-<button id="adminButton">Show User Info</button>
-<div id="userInfo"></div>
+
+<!-- بخش مربوط به مدیر -->
+<div id="adminSection">
+    <h1>Admin Panel</h1>
+    <div id="userInfo"></div>
+</div>
 
 <script>
-    const userId = 765041693; // آی‌دی عددی مدیر
-    const currentUserId = 765041693; // فرض بر اینکه اینجا آی‌دی کاربر واقعی را داشته باشید
+    const managerId = 765041693; // شناسه عددی مدیر
+    const currentUserId = 765041693; // فرض کنید این اطلاعات از سرور یا تلگرام دریافت می‌شود
 
-    const scoreElement = document.getElementById('score');
-    const coinElement = document.getElementById('coin');
-    const messageElement = document.getElementById('message');
-    const gameContainer = document.getElementById('gameContainer');
-    const adminButton = document.getElementById('adminButton');
-    const userInfoElement = document.getElementById('userInfo');
-    let score = parseInt(localStorage.getItem('score')) || 0;
+    // بررسی اینکه آیا کاربر مدیر است یا نه
+    if (currentUserId == managerId) {
+        document.getElementById('adminSection').style.display = 'block'; // بخش مدیر را نمایش می‌دهد
+        // اطلاعات کاربران (مثال)
+        const users = [
+            {username: 'user1', coins: 100},
+            {username: 'user2', coins: 250}
+        ];
 
-    const users = [
-        { username: 'user1', coins: 100 },
-        { username: 'user2', coins: 200 },
-        { username: 'user3', coins: 300 }
-    ]; // اطلاعات نمونه کاربران
-
-    // نمایش اطلاعات کاربران برای مدیر
-    function showUserInfo() {
-        let userInfoHtml = '';
+        const userInfoDisplay = document.getElementById('userInfo');
         users.forEach(user => {
-            userInfoHtml += `Username: ${user.username}, Coins: ${user.coins}<br>`;
+            const userElement = document.createElement('div');
+            userElement.textContent = `Username: ${user.username}, Coins: ${user.coins}`;
+            userInfoDisplay.appendChild(userElement);
         });
-        userInfoElement.innerHTML = userInfoHtml;
-        userInfoElement.style.display = 'block';
-    }
-
-    // به‌روزرسانی امتیاز
-    function updateScore() {
-        score++;
-        localStorage.setItem('score', score);
-        scoreElement.textContent = score;
-    }
-
-    coinElement.addEventListener('click', updateScore);
-
-    // بررسی آی‌دی کاربر برای نمایش صفحه مناسب
-    if (currentUserId !== userId) {
-        gameContainer.style.display = 'none';
-        document.body.style.backgroundColor = 'white';
-        messageElement.style.display = 'block';
     } else {
-        adminButton.style.display = 'block';
+        // کاربر عادی است: نمایش پیغام تعمیر
+        document.body.innerHTML = '<div style="color: black; background-color: white; height: 100vh; display: flex; justify-content: center; align-items: center;"><h1>Mini app is currently under maintenance</h1></div>';
     }
 
-    // رویداد کلیک دکمه برای نمایش اطلاعات کاربران
-    adminButton.addEventListener('click', showUserInfo);
+    // امتیاز را در بالای سکه به‌روزرسانی می‌کند
+    let score = parseInt(localStorage.getItem('score')) || 0;
+    document.getElementById('score-display').textContent = score;
 
-    scoreElement.textContent = score;
+    document.body.addEventListener('click', function(event) {
+        const coinElement = document.querySelector('#score-section img');
+        const rect = coinElement.getBoundingClientRect();
+        const x = event.clientX;
+        const y = event.clientY;
+
+        // بررسی اینکه آیا روی تصویر سکه کلیک شده است
+        if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+            score++;
+            localStorage.setItem('score', score); // ذخیره‌سازی امتیاز جدید
+            document.getElementById('score-display').textContent = score;
+
+            // نمایش +1 در محل کلیک
+            const plusOne = document.createElement('div');
+            plusOne.textContent = '+1';
+            plusOne.style.position = 'absolute';
+            plusOne.style.left = `${x}px`;
+            plusOne.style.top = `${y}px`;
+            plusOne.style.color = 'white';
+            plusOne.style.fontSize = '20px';
+            plusOne.style.transition = 'top 0.5s, opacity 0.5s';
+            document.body.appendChild(plusOne);
+
+            setTimeout(() => {
+                plusOne.style.top = `${y - 50}px`;
+                plusOne.style.opacity = '0';
+                setTimeout(() => plusOne.remove(), 500);
+            }, 0);
+        }
+    });
 </script>
 
 </body>
