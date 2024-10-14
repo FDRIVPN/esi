@@ -8,7 +8,6 @@
         body {
             margin: 0;
             overflow: hidden;
-            background-color: black;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -27,7 +26,7 @@
             align-items: center;
             justify-content: center;
             position: absolute;
-            top: -60px; /* امتیاز به بالای سکه چسبیده باشد */
+            top: -60px;
         }
         #scoreImg {
             width: 50px;
@@ -52,57 +51,57 @@
             }
             100% {
                 opacity: 0;
-                transform: translateY(-30px); /* حرکت به بالا */
+                transform: translateY(-30px);
             }
         }
         #inactiveMessage {
             font-size: 30px;
-            color: white;
+            color: black;
+            background-color: white;
+            text-align: center;
         }
     </style>
 </head>
 <body>
 
-<!-- اینجا محتوای صفحه اصلی قرار دارد -->
 <div id="mainContent" style="display: none;">
     <div id="scoreContainer">
-        <img id="scoreImg" src="Coin_6.png" alt="Coin Image for Score"> <!-- تصویر سکه امتیاز -->
-        <div id="score">0</div> <!-- نمایش امتیاز کاربر -->
+        <img id="scoreImg" src="Coin_6.png" alt="Coin Image for Score">
+        <div id="score">0</div>
     </div>
-    <img id="coin" src="ggg.png" alt="Coin"> <!-- تصویر اصلی سکه -->
+    <img id="coin" src="ggg.png" alt="Coin">
 </div>
 
-<!-- اینجا پیامی برای کاربران غیر مدیر نمایش داده می‌شود -->
 <div id="inactiveMessage" style="display: none;">
     This page is not active right now. Manager ID: 765041693
 </div>
 
 <script>
+    // فرض کنیم که این اطلاعات از تلگرام دریافت می‌شود
     const managerId = '765041693'; // آی‌دی مدیر
-    const userId = prompt("Please enter your user ID:"); // دریافت آی‌دی کاربر از طریق ورودی (در دنیای واقعی باید از طریق سرور گرفته شود)
+    const userId = '123456789'; // فرض کنید این آی‌دی کاربر از طریق API تلگرام گرفته شده است
+    const userIsManager = (userId === managerId);
 
-    // بررسی اینکه آیا کاربر مدیر است یا خیر
-    if (userId === managerId) {
-        document.getElementById('mainContent').style.display = 'block'; // نمایش محتوای اصلی برای مدیر
+    if (userIsManager) {
+        document.body.style.backgroundImage = 'url("manager_background.jpg")'; // قرار دادن بک‌گراند برای مدیر
+        document.getElementById('mainContent').style.display = 'block';
     } else {
-        document.getElementById('inactiveMessage').style.display = 'block'; // نمایش پیام برای کاربران دیگر
+        document.body.style.backgroundColor = 'white'; // نمایش پس‌زمینه سفید
+        document.getElementById('inactiveMessage').style.display = 'block';
     }
 
     const coinElement = document.getElementById('coin');
     const scoreElement = document.getElementById('score');
     let score = parseInt(localStorage.getItem('score')) || 0;
 
-    // به‌روزرسانی امتیاز
     function updateScore() {
         score++;
         localStorage.setItem('score', score);
-        scoreElement.textContent = score; // نمایش امتیاز به‌روز شده
+        scoreElement.textContent = score;
     }
 
-    // نمایش امتیاز اولیه
-    scoreElement.textContent = score; // اینجا مقدار اولیه امتیاز را نمایش می‌دهیم
+    scoreElement.textContent = score;
 
-    // نمایش +1 در محل کلیک
     function showPlusOne(x, y) {
         const plusOne = document.createElement('div');
         plusOne.textContent = '+1';
@@ -112,16 +111,13 @@
         document.body.appendChild(plusOne);
 
         setTimeout(() => {
-            plusOne.remove(); // حذف +1 بعد از 1 ثانیه
+            plusOne.remove();
         }, 1000);
     }
 
-    // رویداد کلیک روی سکه
     coinElement.addEventListener('click', function(event) {
         updateScore();
 
-        // نمایش +1 در محل کلیک
-        const rect = coinElement.getBoundingClientRect();
         const clickX = event.clientX;
         const clickY = event.clientY;
         showPlusOne(clickX, clickY);
