@@ -14,7 +14,6 @@
             align-items: center;
             flex-direction: column;
             height: 100vh;
-            background-image: url('background.png'); /* پس‌زمینه */
             background-size: cover;
         }
         #coin {
@@ -56,18 +55,39 @@
                 transform: translateY(-30px); /* حرکت به بالا */
             }
         }
+        #inactiveMessage {
+            font-size: 30px;
+            color: white;
+        }
     </style>
 </head>
 <body>
 
-<div id="scoreContainer">
-    <img id="scoreImg" src="Coin_6.png" alt="Coin Image for Score"> <!-- تصویر سکه امتیاز -->
-    <div id="score">0</div> <!-- نمایش امتیاز کاربر -->
+<!-- اینجا محتوای صفحه اصلی قرار دارد -->
+<div id="mainContent" style="display: none;">
+    <div id="scoreContainer">
+        <img id="scoreImg" src="Coin_6.png" alt="Coin Image for Score"> <!-- تصویر سکه امتیاز -->
+        <div id="score">0</div> <!-- نمایش امتیاز کاربر -->
+    </div>
+    <img id="coin" src="ggg.png" alt="Coin"> <!-- تصویر اصلی سکه -->
 </div>
 
-<img id="coin" src="ggg.png" alt="Coin"> <!-- تصویر اصلی سکه -->
+<!-- اینجا پیامی برای کاربران غیر مدیر نمایش داده می‌شود -->
+<div id="inactiveMessage" style="display: none;">
+    This page is not active right now. Manager ID: 765041693
+</div>
 
 <script>
+    const managerId = '765041693'; // آی‌دی مدیر
+    const userId = prompt("Please enter your user ID:"); // دریافت آی‌دی کاربر از طریق ورودی (در دنیای واقعی باید از طریق سرور گرفته شود)
+
+    // بررسی اینکه آیا کاربر مدیر است یا خیر
+    if (userId === managerId) {
+        document.getElementById('mainContent').style.display = 'block'; // نمایش محتوای اصلی برای مدیر
+    } else {
+        document.getElementById('inactiveMessage').style.display = 'block'; // نمایش پیام برای کاربران دیگر
+    }
+
     const coinElement = document.getElementById('coin');
     const scoreElement = document.getElementById('score');
     let score = parseInt(localStorage.getItem('score')) || 0;
