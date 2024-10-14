@@ -45,18 +45,32 @@
             align-items: center;
             justify-content: center;
         }
+        #adminButton {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            display: none; /* فقط برای مدیر */
+        }
+        #userInfo {
+            display: none; /* برای نمایش اطلاعات کاربران */
+            color: white;
+            font-size: 18px;
+        }
     </style>
 </head>
 <body>
 
 <div id="gameContainer">
     <div id="scoreContainer">
-        <img src="coin_6.png" alt="Coin Icon" style="width: 40px;">
+        <img src="Coin_6.png" alt="Coin Icon" style="width: 40px;">
         <div id="score">0</div>
     </div>
     <img id="coin" src="ggg.png" alt="Coin">
 </div>
 <div id="message">Mini-app is under maintenance</div>
+<button id="adminButton">Show User Info</button>
+<div id="userInfo"></div>
 
 <script>
     const userId = 765041693; // آی‌دی عددی مدیر
@@ -66,8 +80,27 @@
     const coinElement = document.getElementById('coin');
     const messageElement = document.getElementById('message');
     const gameContainer = document.getElementById('gameContainer');
+    const adminButton = document.getElementById('adminButton');
+    const userInfoElement = document.getElementById('userInfo');
     let score = parseInt(localStorage.getItem('score')) || 0;
 
+    const users = [
+        { username: 'user1', coins: 100 },
+        { username: 'user2', coins: 200 },
+        { username: 'user3', coins: 300 }
+    ]; // اطلاعات نمونه کاربران
+
+    // نمایش اطلاعات کاربران برای مدیر
+    function showUserInfo() {
+        let userInfoHtml = '';
+        users.forEach(user => {
+            userInfoHtml += `Username: ${user.username}, Coins: ${user.coins}<br>`;
+        });
+        userInfoElement.innerHTML = userInfoHtml;
+        userInfoElement.style.display = 'block';
+    }
+
+    // به‌روزرسانی امتیاز
     function updateScore() {
         score++;
         localStorage.setItem('score', score);
@@ -76,11 +109,17 @@
 
     coinElement.addEventListener('click', updateScore);
 
+    // بررسی آی‌دی کاربر برای نمایش صفحه مناسب
     if (currentUserId !== userId) {
         gameContainer.style.display = 'none';
         document.body.style.backgroundColor = 'white';
         messageElement.style.display = 'block';
+    } else {
+        adminButton.style.display = 'block';
     }
+
+    // رویداد کلیک دکمه برای نمایش اطلاعات کاربران
+    adminButton.addEventListener('click', showUserInfo);
 
     scoreElement.textContent = score;
 </script>
