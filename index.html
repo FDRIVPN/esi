@@ -13,115 +13,64 @@
             align-items: center;
             flex-direction: column;
             height: 100vh;
-            background-size: cover;
+            font-family: sans-serif;
+            background-color: black; /* پس‌زمینه پیش‌فرض */
         }
-        #coin {
+        #gameCanvas, #coin {
             width: 350px;
             height: 350px;
             cursor: pointer;
-            position: relative;
-        }
-        #scoreContainer {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: absolute;
-            top: -60px;
-        }
-        #scoreImg {
-            width: 50px;
-            height: 50px;
-            margin-right: 10px;
+            display: none; /* به طور پیش‌فرض مخفی است */
         }
         #score {
-            font-size: 40px;
-            color: white;
-            font-family: sans-serif;
-        }
-        .plusOne {
-            position: absolute;
             font-size: 30px;
             color: white;
-            animation: fadeOut 1s forwards;
-        }
-        @keyframes fadeOut {
-            0% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
+            display: none; /* به طور پیش‌فرض مخفی است */
         }
         #inactiveMessage {
-            font-size: 30px;
-            color: black;
-            background-color: white;
-            text-align: center;
+            font-size: 24px;
+            color: white;
+            display: none; /* به طور پیش‌فرض مخفی است */
         }
     </style>
 </head>
 <body>
 
-<div id="mainContent" style="display: none;">
-    <div id="scoreContainer">
-        <img id="scoreImg" src="Coin_6.png" alt="Coin Image for Score">
-        <div id="score">0</div>
-    </div>
-    <img id="coin" src="ggg.png" alt="Coin">
-</div>
+<div id="score">Score: 0</div>
+<img id="coin" src="ggg.png" alt="Coin">
+<div id="inactiveMessage">This system is currently inactive. Manager ID: 765041693</div>
 
-<div id="inactiveMessage" style="display: none;">
-    This page is not active right now. Manager ID: 765041693
-</div>
-
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script>
-    // فرض کنیم که این اطلاعات از تلگرام دریافت می‌شود
-    const managerId = '765041693'; // آی‌دی مدیر
-    const userId = '123456789'; // فرض کنید این آی‌دی کاربر از طریق API تلگرام گرفته شده است
-    const userIsManager = (userId === managerId);
+    const managerId = "765041693"; // ID مدیر
+    const scoreElement = document.getElementById('score');
+    const coinElement = document.getElementById('coin');
+    const inactiveMessage = document.getElementById('inactiveMessage');
 
-    if (userIsManager) {
-        document.body.style.backgroundImage = 'url("manager_background.jpg")'; // قرار دادن بک‌گراند برای مدیر
-        document.getElementById('mainContent').style.display = 'block';
+    // بررسی اطلاعات کاربر از تلگرام
+    Telegram.WebApp.ready();
+    const userId = Telegram.WebApp.initDataUnsafe.user ? Telegram.WebApp.initDataUnsafe.user.id : null;
+
+    // اگر کاربر مدیر است، صفحه بازی را نمایش بده
+    if (userId == managerId) {
+        document.body.style.backgroundImage = 'url("background.png")';  // پس‌زمینه مخصوص مدیر
+        scoreElement.style.display = 'block';
+        coinElement.style.display = 'block';
     } else {
-        document.body.style.backgroundColor = 'white'; // نمایش پس‌زمینه سفید
-        document.getElementById('inactiveMessage').style.display = 'block';
+        // اگر کاربر مدیر نیست، صفحه غیرفعال را نمایش بده
+        inactiveMessage.style.display = 'block';
     }
 
-    const coinElement = document.getElementById('coin');
-    const scoreElement = document.getElementById('score');
+    // امتیازدهی در صورت کلیک روی سکه
     let score = parseInt(localStorage.getItem('score')) || 0;
-
-    function updateScore() {
+    coinElement.addEventListener('click', function() {
         score++;
         localStorage.setItem('score', score);
-        scoreElement.textContent = score;
-    }
-
-    scoreElement.textContent = score;
-
-    function showPlusOne(x, y) {
-        const plusOne = document.createElement('div');
-        plusOne.textContent = '+1';
-        plusOne.classList.add('plusOne');
-        plusOne.style.left = `${x}px`;
-        plusOne.style.top = `${y}px`;
-        document.body.appendChild(plusOne);
-
-        setTimeout(() => {
-            plusOne.remove();
-        }, 1000);
-    }
-
-    coinElement.addEventListener('click', function(event) {
-        updateScore();
-
-        const clickX = event.clientX;
-        const clickY = event.clientY;
-        showPlusOne(clickX, clickY);
+        scoreElement.textContent = `Score: ${score}`;
     });
+
+    // نمایش امتیاز اولیه
+    scoreElement.textContent = `Score: ${score}`;
 </script>
 
 </body>
