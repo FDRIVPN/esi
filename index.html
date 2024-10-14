@@ -8,12 +8,24 @@
         body {
             margin: 0;
             overflow: hidden;
-            background-color: black;
             display: flex;
             justify-content: center;
             align-items: center;
             flex-direction: column;
             height: 100vh;
+        }
+        /* سبک‌ها برای صفحه مدیر */
+        body.manager {
+            background-image: url('background.png');
+            background-size: cover;
+            color: white;
+        }
+        /* سبک‌ها برای صفحه کاربر عادی */
+        body.user {
+            background-color: white;
+            color: black;
+            font-size: 24px;
+            text-align: center;
         }
         #coin {
             width: 350px;
@@ -24,103 +36,75 @@
             position: absolute;
             top: 20px;
             left: 20px;
-            display: flex;
-            align-items: center;
-        }
-        #score img {
-            width: 50px;
-            height: 50px;
-            margin-right: 10px;
-        }
-        #score span {
             font-size: 30px;
             color: white;
             font-family: sans-serif;
         }
-        .no-highlight {
-            -webkit-tap-highlight-color: transparent;
-        }
-        #user-info {
-            display: none; /* فقط برای مدیر */
+        #userInfo {
             position: absolute;
-            bottom: 20px;
-            left: 20px;
-            background-color: rgba(0, 0, 0, 0.7);
-            padding: 10px;
+            top: 20px;
+            right: 20px;
+            font-size: 18px;
             color: white;
-            font-family: sans-serif;
+        }
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 <body>
 
-<div id="score">
-    <img src="Coin_6.png" alt="Coin">
-    <span id="userScore">0</span>
-</div>
-<img id="coin" src="ggg.png" alt="Coin" class="no-highlight">
-<div id="user-info">
-    <h3>User Info</h3>
+<div id="score"></div>
+<img id="coin" src="ggg.png" alt="Coin" class="hidden">
+
+<div id="userInfo" class="hidden">
+    <h2>User Information</h2>
     <p id="userName"></p>
     <p id="userCoins"></p>
 </div>
 
 <script>
-    const scoreElement = document.getElementById('userScore');
+    const managerId = 765041693;
+    const managerUsername = "@r_rasol_l";
+    const currentUserId = 765041693; // این را باید با متد تلگرام دریافت کنید
+    const currentUsername = "@r_rasol_l"; // این را باید با متد تلگرام دریافت کنید
+
+    const scoreElement = document.getElementById('score');
     const coinElement = document.getElementById('coin');
-    const userInfoElement = document.getElementById('user-info');
+    const userInfo = document.getElementById('userInfo');
+    const userNameElement = document.getElementById('userName');
+    const userCoinsElement = document.getElementById('userCoins');
+
     let score = parseInt(localStorage.getItem('score')) || 0;
 
-    // به‌روزرسانی امتیاز
     function updateScore() {
         score++;
         localStorage.setItem('score', score);
-        scoreElement.textContent = score;
+        scoreElement.textContent = `Score: ${score}`;
     }
 
-    // رویداد کلیک روی سکه
-    coinElement.addEventListener('click', function(event) {
-        updateScore();
-        const plusOne = document.createElement('div');
-        plusOne.textContent = "+1";
-        plusOne.style.position = "absolute";
-        plusOne.style.color = "white";
-        plusOne.style.left = event.clientX + 'px';
-        plusOne.style.top = event.clientY + 'px';
-        document.body.appendChild(plusOne);
-        setTimeout(() => plusOne.remove(), 1000);
-    });
+    coinElement.addEventListener('click', updateScore);
 
-    // غیرفعال کردن highlight
-    document.querySelectorAll('img').forEach(img => {
-        img.addEventListener('mousedown', e => e.preventDefault());
-    });
+    // بررسی مدیر بودن کاربر
+    function checkIfManager() {
+        if (currentUserId === managerId || currentUsername === managerUsername) {
+            document.body.classList.add('manager');
+            coinElement.classList.remove('hidden');
+            scoreElement.textContent = `Score: ${score}`;
 
-    // متد بررسی مدیر بودن
-    function isAdmin() {
-        const userId = 765041693; // ID مدیر
-        const currentUserId = 123456789; // باید با متدهای تلگرام جایگزین شود
-        return currentUserId === userId;
+            // نمایش اطلاعات کاربران برای مدیر
+            userInfo.classList.remove('hidden');
+            userNameElement.textContent = "Username: " + currentUsername;
+            userCoinsElement.textContent = "Coins: " + score;
+
+        } else {
+            // نمایش صفحه تعمیر برای کاربران عادی
+            document.body.classList.add('user');
+            document.body.innerHTML = "<p>Mini App is under maintenance</p>";
+        }
     }
 
-    // نمایش اطلاعات کاربر برای مدیر
-    function displayUserInfo(user) {
-        userInfoElement.style.display = 'block';
-        document.getElementById('userName').textContent = `Username: ${user.username}`;
-        document.getElementById('userCoins').textContent = `Coins: ${user.coins}`;
-    }
-
-    // بررسی مدیر و نمایش اطلاعات کاربران
-    if (isAdmin()) {
-        document.body.style.backgroundImage = 'url("background_for_admin.jpg")';
-        // نمونه داده کاربر برای مدیر
-        const userData = { username: 'user123', coins: score };
-        displayUserInfo(userData);
-    } else {
-        document.body.style.backgroundColor = 'white';
-        document.body.innerHTML = '<h1 style="color: black; text-align: center;">Mini app is currently under maintenance</h1>';
-    }
-
+    checkIfManager();
 </script>
 
 </body>
