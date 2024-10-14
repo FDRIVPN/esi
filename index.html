@@ -8,69 +8,81 @@
         body {
             margin: 0;
             overflow: hidden;
+            background-color: black;
             display: flex;
             justify-content: center;
             align-items: center;
             flex-direction: column;
             height: 100vh;
-            font-family: sans-serif;
-            background-color: black; /* پس‌زمینه پیش‌فرض */
         }
-        #gameCanvas, #coin {
+        #coin {
             width: 350px;
             height: 350px;
             cursor: pointer;
-            display: none; /* به طور پیش‌فرض مخفی است */
+        }
+        #scoreContainer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 50px;
         }
         #score {
             font-size: 30px;
             color: white;
-            display: none; /* به طور پیش‌فرض مخفی است */
+            font-family: sans-serif;
+            margin-left: 10px;
         }
-        #inactiveMessage {
-            font-size: 24px;
-            color: white;
-            display: none; /* به طور پیش‌فرض مخفی است */
+        #message {
+            color: black;
+            font-size: 20px;
+            font-family: sans-serif;
+            display: none; /* برای کاربران عادی */
+        }
+        #gameContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 </head>
 <body>
 
-<div id="score">Score: 0</div>
-<img id="coin" src="ggg.png" alt="Coin">
-<div id="inactiveMessage">This system is currently inactive. Manager ID: 765041693</div>
+<div id="gameContainer">
+    <div id="scoreContainer">
+        <img src="coin_6.png" alt="Coin Icon" style="width: 40px;">
+        <div id="score">0</div>
+    </div>
+    <img id="coin" src="ggg.png" alt="Coin">
+</div>
+<div id="message">Mini-app is under maintenance</div>
 
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script>
-    const managerId = "765041693"; // ID مدیر
+    const userId = 765041693; // آی‌دی عددی مدیر
+    const currentUserId = 765041693; // فرض بر اینکه اینجا آی‌دی کاربر واقعی را داشته باشید
+
     const scoreElement = document.getElementById('score');
     const coinElement = document.getElementById('coin');
-    const inactiveMessage = document.getElementById('inactiveMessage');
-
-    // بررسی اطلاعات کاربر از تلگرام
-    Telegram.WebApp.ready();
-    const userId = Telegram.WebApp.initDataUnsafe.user ? Telegram.WebApp.initDataUnsafe.user.id : null;
-
-    // اگر کاربر مدیر است، صفحه بازی را نمایش بده
-    if (userId == managerId) {
-        document.body.style.backgroundImage = 'url("background.png")';  // پس‌زمینه مخصوص مدیر
-        scoreElement.style.display = 'block';
-        coinElement.style.display = 'block';
-    } else {
-        // اگر کاربر مدیر نیست، صفحه غیرفعال را نمایش بده
-        inactiveMessage.style.display = 'block';
-    }
-
-    // امتیازدهی در صورت کلیک روی سکه
+    const messageElement = document.getElementById('message');
+    const gameContainer = document.getElementById('gameContainer');
     let score = parseInt(localStorage.getItem('score')) || 0;
-    coinElement.addEventListener('click', function() {
+
+    function updateScore() {
         score++;
         localStorage.setItem('score', score);
-        scoreElement.textContent = `Score: ${score}`;
-    });
+        scoreElement.textContent = score;
+    }
 
-    // نمایش امتیاز اولیه
-    scoreElement.textContent = `Score: ${score}`;
+    coinElement.addEventListener('click', updateScore);
+
+    if (currentUserId !== userId) {
+        gameContainer.style.display = 'none';
+        document.body.style.backgroundColor = 'white';
+        messageElement.style.display = 'block';
+    }
+
+    scoreElement.textContent = score;
 </script>
 
 </body>
