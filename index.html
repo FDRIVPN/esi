@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coin Game</title>
     <style>
         body {
             margin: 0;
             overflow: hidden;
-            background-image: url('background.jpg'); /* نام عکس بک‌گراند */
-            background-size: cover; /* اندازه‌گیری بک‌گراند */
+            background-image: url('background.jpg');
+            background-size: cover;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -33,7 +33,7 @@
             color: black;
         }
         #userInfoButton {
-            display: none; /* پنهان به صورت پیش‌فرض */
+            display: none;
             margin-top: 20px;
             padding: 10px 20px;
             font-size: 20px;
@@ -55,9 +55,7 @@
 <button id="userInfoButton" onclick="showUserInfo()">Show User Info</button>
 
 <script>
-    const adminId = 765041693;  // شناسه عددی مدیر
-    const botToken = '7308080366:AAEZlSs4KRjLcwXsRF2jyDwriDkx-2egbpg';  // توکن ربات تلگرام شما
-
+    const userId = 765041693;  // شناسه عددی کاربر فعلی
     const scoreElement = document.getElementById('score');
     const userScoreElement = document.getElementById('userScore');
     const coinElement = document.getElementById('coin');
@@ -65,63 +63,63 @@
     const userInfoButton = document.getElementById('userInfoButton');
     let score = parseInt(localStorage.getItem('score')) || 0;
 
-    // دیکشنری برای ذخیره امتیاز کاربران (از localStorage خوانده می‌شود)
-    let userScores = JSON.parse(localStorage.getItem('userScores')) || {};
-
-    // به‌روزرسانی امتیاز کاربر فعلی
+    // به‌روزرسانی امتیاز
     function updateScore() {
         score++;
         localStorage.setItem('score', score);
         userScoreElement.textContent = score;
 
-        const userId = 765041693;  // شناسه عددی کاربر فعلی (این را از تلگرام بگیرید)
-        userScores[userId] = score;  // ذخیره امتیاز کاربر
-        localStorage.setItem('userScores', JSON.stringify(userScores));  // ذخیره دیکشنری امتیازات
+        // نمایش +1 در جای کلیک
+        const plusOne = document.createElement('div');
+        plusOne.textContent = '+1';
+        plusOne.style.position = 'absolute';
+        plusOne.style.color = 'white';
+        plusOne.style.fontSize = '30px'; // اندازه بزرگتر برای +1
+        plusOne.style.top = `${event.clientY}px`;
+        plusOne.style.left = `${event.clientX}px`;
+        document.body.appendChild(plusOne);
+        setTimeout(() => plusOne.remove(), 1000);
     }
 
     // رویداد کلیک روی سکه
     coinElement.addEventListener('click', updateScore);
 
-    // بررسی اینکه آیا کاربر مدیر است یا خیر
-    function checkIfAdmin(userId) {
-        return userId === adminId;
-    }
+    // بررسی مدیر بودن کاربر
+    async function checkUserRole() {
+        try {
+            const response = await fetch(`/api/check_user_role/${userId}`);
+            const data = await response.json();
 
-    // فرض کنید این اطلاعات کاربر فعلی است (این را از تلگرام دریافت کنید)
-    const userId = 765041693;  // شناسه عددی کاربر فعلی (از تلگرام بگیرید)
-
-    if (checkIfAdmin(userId)) {
-        // مدیر است، صفحه بازی نمایش داده شود
-        scoreElement.style.display = 'block';
-        coinElement.style.display = 'block';
-        messageElement.style.display = 'none';
-        userScoreElement.textContent = score;
-        userInfoButton.style.display = 'block';  // نمایش دکمه اطلاعات کاربر
-
-        // نمایش امتیازات کاربران برای مدیر
-        userInfoButton.addEventListener('click', () => {
-            let userInfo = '';
-            for (let [user, score] of Object.entries(userScores)) {
-                userInfo += `User ID: ${user}, Score: ${score}\n`;
+            if (data.is_admin) {
+                scoreElement.style.display = 'block';
+                coinElement.style.display = 'block';
+                messageElement.style.display = 'none';
+                userScoreElement.textContent = score;
+                userInfoButton.style.display = 'block'; // نمایش دکمه اطلاعات کاربر
+            } else {
+                document.body.style.backgroundColor = 'white';
+                messageElement.style.color = 'black';
+                scoreElement.style.display = 'none';
+                coinElement.style.display = 'none';
             }
-            alert(userInfo);  // اطلاعات کاربران را نمایش می‌دهد
-        });
-    } else {
-        // کاربر عادی است، صفحه سفید و پیام تعمیرات نمایش داده شود
-        document.body.style.backgroundColor = 'white';
-        messageElement.style.color = 'black';
-        scoreElement.style.display = 'none';
-        coinElement.style.display = 'none';
+        } catch (error) {
+            console.error('Error fetching user role:', error);
+        }
     }
 
-    // تابع برای نمایش اطلاعات کاربران (تنها برای مدیر)
-    function showUserInfo() {
-        let userInfo = '';
-        for (let [user, score] of Object.entries(userScores)) {
-            userInfo += `User ID: ${user}, Score: ${score}\n`;
+    // نمایش اطلاعات کاربران برای مدیر
+    async function showUserInfo() {
+        try {
+            const response = await fetch('/api/user_data');
+            const data = await response.json();
+            alert(JSON.stringify(data, null, 2));  // نمایش اطلاعات به صورت JSON
+        } catch (error) {
+            console.error('Error fetching user data:', error);
         }
-        alert(userInfo);  // اطلاعات کاربران را نمایش می‌دهد
     }
+
+    // اجرا بررسی کاربر
+    checkUserRole();
 </script>
 
 </body>
