@@ -39,25 +39,31 @@
             align-items: center; /* تراز عمودی محتویات */
             position: absolute; /* موقعیت‌گذاری مطلق */
             top: 75px; /* فاصله از بالا */
-            left: calc(50% + 30px); /* تراز افقی از وسط */
+            left: 50%; /* تراز افقی در وسط */
             transform: translateX(-50%); /* تراز افقی مرکز */
         }
         #userScore {
             font-size: 48px; /* اندازه متن امتیاز */
-            color: black; /* رنگ امتیاز */
+            color: white; /* رنگ امتیاز */
             margin-left: 5px; /* فاصله 5 پیکسل از تصویر زیبایی */
         }
         .coin-row {
             position: absolute; /* موقعیت‌گذاری مطلق */
             bottom: 30px; /* فاصله 30 پیکسل از پایین صفحه */
             display: flex; /* نمایش به صورت افقی */
-            gap: 10px; /* فاصله 10 پیکسل بین سکه‌ها */
+            gap: 30px; /* فاصله 30 پیکسل بین سکه‌ها */
         }
         .coin-image {
-            background: url('ggg.png') no-repeat center center; /* تصویر سکه */
+            background: url('image1.png') no-repeat center center; /* تصویر سکه */
             background-size: contain;
             width: 50px; /* عرض سکه */
             height: 50px; /* ارتفاع سکه */
+        }
+        .coin-image:nth-child(2) {
+            background: url('image2.png') no-repeat center center; /* تصویر دوم */
+        }
+        .coin-image:nth-child(3) {
+            background: url('image3.png') no-repeat center center; /* تصویر سوم */
         }
     </style>
 </head>
