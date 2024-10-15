@@ -13,7 +13,7 @@
             display: flex;
             flex-direction: column; /* چینش عمودی */
             justify-content: center;
-            align-items: center;
+            align-items: center; /* تراز افقی در وسط */
             height: 100vh; /* ارتفاع کامل صفحه */
             position: relative; /* برای موقعیت‌یابی */
         }
@@ -23,6 +23,7 @@
             width: 350px; /* عرض سکه */
             height: 350px; /* ارتفاع سکه */
             margin-top: 10px; /* فاصله 10 پیکسل از امتیاز */
+            cursor: pointer; /* نشانگر ماوس */
         }
         #coinIcon {
             background: url('Coin_6.png') no-repeat center center; /* تصویر زیبایی */
@@ -43,11 +44,18 @@
             font-size: 48px; /* اندازه متن امتیاز */
             color: white; /* رنگ امتیاز */
         }
+        .plus-one {
+            position: absolute;
+            color: white;
+            font-size: 30px;
+            transition: transform 0.5s ease, opacity 0.5s ease;
+            opacity: 1;
+        }
         .coin-row {
             position: absolute; /* موقعیت‌گذاری مطلق */
             bottom: 30px; /* فاصله 30 پیکسل از پایین صفحه */
             display: flex; /* نمایش به صورت افقی */
-            gap: 30px; /* فاصله 30 پیکسل بین سکه‌ها */
+            gap: 10px; /* فاصله 10 پیکسل بین سکه‌ها */
         }
         .coin-image {
             background: url('Image1.png') no-repeat center center; /* تصویر سکه */
@@ -85,12 +93,33 @@
         let score = parseInt(localStorage.getItem('score')) || 0;
         scoreElement.textContent = score;
 
-        // وقتی روی سکه کلیک می‌شود، امتیاز افزایش پیدا می‌کند
-        coinElement.addEventListener('click', () => {
+        function showPlusOne(x, y) {
+            const plusOne = document.createElement('div');
+            plusOne.textContent = '+1';
+            plusOne.className = 'plus-one';
+            plusOne.style.top = `${y}px`; // قرار دادن در محل کلیک
+            plusOne.style.left = `${x}px`;
+            document.body.appendChild(plusOne);
+            setTimeout(() => {
+                plusOne.style.opacity = '0'; 
+                setTimeout(() => plusOne.remove(), 500); 
+            }, 1000);
+        }
+
+        function updateScore(event) {
             score++;
             localStorage.setItem('score', score); // ذخیره امتیاز در localStorage
             scoreElement.textContent = score;
-        });
+
+            // محل کلیک را محاسبه کنید
+            const x = event.clientX;
+            const y = event.clientY;
+            showPlusOne(x, y);
+        }
+
+        // وقتی روی سکه کلیک می‌شود، امتیاز افزایش پیدا می‌کند
+        coinElement.addEventListener('click', (event) => updateScore(event));
+        coinElement.addEventListener('touchstart', (event) => updateScore(event.touches[0])); // پشتیبانی از لمس
     </script>
 </body>
 </html>
