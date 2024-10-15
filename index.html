@@ -55,9 +55,8 @@
 <button id="userInfoButton" onclick="showUserInfo()">Show User Info</button>
 
 <script>
-    const adminId = 765041693;
-    const adminUsername = "@r_rasol_l";
-    const botToken = '7308080366:AAEZlSs4KRjLcwXsRF2jyDwriDkx-2egbpg'; // توکن بات تلگرام خود را اینجا قرار دهید
+    const adminId = 765041693;  // شناسه عددی مدیر
+    const botToken = '7308080366:AAEZlSs4KRjLcwXsRF2jyDwriDkx-2egbpg';  // توکن ربات تلگرام شما
 
     const scoreElement = document.getElementById('score');
     const userScoreElement = document.getElementById('userScore');
@@ -66,69 +65,62 @@
     const userInfoButton = document.getElementById('userInfoButton');
     let score = parseInt(localStorage.getItem('score')) || 0;
 
-    // به‌روزرسانی امتیاز
+    // دیکشنری برای ذخیره امتیاز کاربران (از localStorage خوانده می‌شود)
+    let userScores = JSON.parse(localStorage.getItem('userScores')) || {};
+
+    // به‌روزرسانی امتیاز کاربر فعلی
     function updateScore() {
         score++;
         localStorage.setItem('score', score);
         userScoreElement.textContent = score;
 
-        // نمایش +1 در جای کلیک
-        const plusOne = document.createElement('div');
-        plusOne.textContent = '+1';
-        plusOne.style.position = 'absolute';
-        plusOne.style.color = 'white';
-        plusOne.style.fontSize = '30px'; // اندازه بزرگتر برای +1
-        plusOne.style.top = `${event.clientY}px`;
-        plusOne.style.left = `${event.clientX}px`;
-        document.body.appendChild(plusOne);
-        setTimeout(() => plusOne.remove(), 1000);
+        const userId = 765041693;  // شناسه عددی کاربر فعلی (این را از تلگرام بگیرید)
+        userScores[userId] = score;  // ذخیره امتیاز کاربر
+        localStorage.setItem('userScores', JSON.stringify(userScores));  // ذخیره دیکشنری امتیازات
     }
 
     // رویداد کلیک روی سکه
     coinElement.addEventListener('click', updateScore);
 
-    // دریافت اطلاعات کاربر از طریق API تلگرام
-    async function getUserInfo(userId) {
-        try {
-            const response = await fetch(`https://api.telegram.org/bot${botToken}/getChatMember?chat_id=@your_channel_username&user_id=${userId}`); // اینجا نام کاربر خود را بگذارید
-            const data = await response.json();
-
-            if (data.ok && (data.result.user.id === adminId || data.result.user.username === adminUsername)) {
-                return {
-                    id: data.result.user.id,
-                    username: data.result.user.username
-                };
-            } else {
-                return null; // کاربر عادی است
-            }
-        } catch (error) {
-            console.error('Error fetching user info:', error);
-            return null;
-        }
+    // بررسی اینکه آیا کاربر مدیر است یا خیر
+    function checkIfAdmin(userId) {
+        return userId === adminId;
     }
 
-    // بررسی مدیر بودن یا نبودن کاربر
-    const userId = 765041693; // ID کاربر فعلی را اینجا بگذارید
-    getUserInfo(userId).then(userInfo => {
-        if (userInfo) {
-            // مدیر است، صفحه بازی نمایش داده شود
-            scoreElement.style.display = 'block';
-            coinElement.style.display = 'block';
-            messageElement.style.display = 'none';
-            userScoreElement.textContent = score;
-            userInfoButton.style.display = 'block'; // نمایش دکمه اطلاعات کاربر
-        } else {
-            // کاربر عادی است، صفحه سفید و پیام نمایش داده شود
-            document.body.style.backgroundColor = 'white';
-            messageElement.style.color = 'black';
-            scoreElement.style.display = 'none';
-            coinElement.style.display = 'none';
-        }
-    });
+    // فرض کنید این اطلاعات کاربر فعلی است (این را از تلگرام دریافت کنید)
+    const userId = 765041693;  // شناسه عددی کاربر فعلی (از تلگرام بگیرید)
 
+    if (checkIfAdmin(userId)) {
+        // مدیر است، صفحه بازی نمایش داده شود
+        scoreElement.style.display = 'block';
+        coinElement.style.display = 'block';
+        messageElement.style.display = 'none';
+        userScoreElement.textContent = score;
+        userInfoButton.style.display = 'block';  // نمایش دکمه اطلاعات کاربر
+
+        // نمایش امتیازات کاربران برای مدیر
+        userInfoButton.addEventListener('click', () => {
+            let userInfo = '';
+            for (let [user, score] of Object.entries(userScores)) {
+                userInfo += `User ID: ${user}, Score: ${score}\n`;
+            }
+            alert(userInfo);  // اطلاعات کاربران را نمایش می‌دهد
+        });
+    } else {
+        // کاربر عادی است، صفحه سفید و پیام تعمیرات نمایش داده شود
+        document.body.style.backgroundColor = 'white';
+        messageElement.style.color = 'black';
+        scoreElement.style.display = 'none';
+        coinElement.style.display = 'none';
+    }
+
+    // تابع برای نمایش اطلاعات کاربران (تنها برای مدیر)
     function showUserInfo() {
-        // اینجا می‌توانید کد برای نمایش اطلاعات کاربران را قرار دهید
-        alert('Showing user information'); // فقط برای آزمایش
+        let userInfo = '';
+        for (let [user, score] of Object.entries(userScores)) {
+            userInfo += `User ID: ${user}, Score: ${score}\n`;
+        }
+        alert(userInfo);  // اطلاعات کاربران را نمایش می‌دهد
     }
 </script>
 
