@@ -11,6 +11,7 @@
             margin: 0;
             font-family: Arial, sans-serif;
             display: flex;
+            flex-direction: column; /* چینش عمودی */
             justify-content: center;
             align-items: center;
             height: 100vh; /* ارتفاع کامل صفحه */
@@ -21,6 +22,7 @@
             background-size: contain;
             width: 350px; /* عرض سکه */
             height: 350px; /* ارتفاع سکه */
+            margin-bottom: 10px; /* فاصله 10 پیکسل از امتیاز */
         }
         #coinIcon {
             background: url('Coin_6.png') no-repeat center center; /* تصویر زیبایی */
@@ -34,22 +36,43 @@
         }
         #score-container {
             display: flex;
-            flex-direction: column; /* نمایش به صورت ستونی */
             align-items: center; /* تراز عمودی محتویات */
-            margin-top: 30px; /* فاصله 30 پیکسل از بالا */
+            position: absolute; /* موقعیت‌گذاری مطلق */
+            top: 75px; /* فاصله از بالا */
+            left: calc(50% + 30px); /* تراز افقی از وسط */
+            transform: translateX(-50%); /* تراز افقی مرکز */
         }
         #userScore {
             font-size: 48px; /* اندازه متن امتیاز */
             color: black; /* رنگ امتیاز */
-            margin-top: 10px; /* فاصله 10 پیکسل از سکه */
+            margin-left: 5px; /* فاصله 5 پیکسل از تصویر زیبایی */
+        }
+        .coin-row {
+            position: absolute; /* موقعیت‌گذاری مطلق */
+            bottom: 30px; /* فاصله 30 پیکسل از پایین صفحه */
+            display: flex; /* نمایش به صورت افقی */
+            gap: 10px; /* فاصله 10 پیکسل بین سکه‌ها */
+        }
+        .coin-image {
+            background: url('ggg.png') no-repeat center center; /* تصویر سکه */
+            background-size: contain;
+            width: 50px; /* عرض سکه */
+            height: 50px; /* ارتفاع سکه */
         }
     </style>
 </head>
 <body>
     <div id="score-container">
-        <div id="coin"></div>
         <div id="coinIcon"></div>
         <span id="userScore">0</span>
+    </div>
+    
+    <div id="coin"></div>
+
+    <div class="coin-row">
+        <div class="coin-image"></div>
+        <div class="coin-image"></div>
+        <div class="coin-image"></div>
     </div>
 
     <script>
