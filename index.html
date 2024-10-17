@@ -6,7 +6,7 @@
     <title>Coin Game</title>
     <style>
         html, body {
-            background-color: black; /* پس‌زمینه مشکی که همیشه وجود دارد */
+            background-color: black; /* پس‌زمینه مشکی */
             margin: 0;
             font-family: Arial, sans-serif;
             height: 100%;
@@ -26,11 +26,33 @@
             color: white; /* رنگ امتیاز سفید */
         }
         #bottom-bar {
-            position: fixed; /* نوار همیشه در پایین صفحه */
+            position: fixed; /* نوار ثابت در پایین صفحه */
             bottom: 0;
             width: 100%;
-            height: 60px; /* ارتفاع 60 پیکسل */
-            background-color: #1a1a1a; /* رنگ تیره‌تر از سیاه */
+            height: 150px; /* ارتفاع 150 پیکسل */
+            background-color: #1a1a1a; /* رنگ تیره‌تر از مشکی */
+            display: flex;
+            justify-content: space-around; /* تقسیم فضا به صورت مساوی بین عکس‌ها */
+            align-items: center; /* تنظیم تصاویر در مرکز عمودی */
+        }
+        .icon-container {
+            text-align: center; /* تراز مرکز برای هر عکس و متن */
+        }
+        .icon-container img {
+            width: 50px; /* اندازه تصاویر */
+            height: 50px;
+            transform: rotate(15deg); /* زاویه برای تصاویر */
+        }
+        .icon-container:nth-child(2) img {
+            transform: rotate(-15deg); /* زاویه مخالف برای تصویر دوم */
+        }
+        .icon-container:nth-child(3) img {
+            transform: rotate(15deg); /* زاویه مشابه برای تصویر سوم */
+        }
+        .icon-container p {
+            margin: 5px 0 0 0; /* فاصله مناسب زیر تصاویر */
+            color: white; /* رنگ متن سفید */
+            font-size: 16px; /* اندازه متن */
         }
     </style>
 </head>
@@ -39,7 +61,20 @@
         <span id="userScore">0</span>
     </div>
 
-    <div id="bottom-bar"></div>
+    <div id="bottom-bar">
+        <div class="icon-container">
+            <img src="image1.png" alt="Home">
+            <p>Home</p>
+        </div>
+        <div class="icon-container">
+            <img src="image2.png" alt="Lig">
+            <p>Lig</p>
+        </div>
+        <div class="icon-container">
+            <img src="image3.png" alt="Friend">
+            <p>Friend</p>
+        </div>
+    </div>
 
     <script>
         const scoreElement = document.getElementById('userScore');
