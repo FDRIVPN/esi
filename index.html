@@ -5,32 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coin Game</title>
     <style>
-        body {
-            background-color: black; /* پس‌زمینه مشکی */
+        html, body {
+            background-color: black; /* پس‌زمینه مشکی که همیشه وجود دارد */
             margin: 0;
             font-family: Arial, sans-serif;
-            height: 100vh; /* ارتفاع کامل صفحه */
+            height: 100%;
             display: flex;
             justify-content: center;
-            align-items: center; /* تراز عمودی و افقی */
+            align-items: center;
             position: relative;
         }
         #score-container {
-            position: absolute; /* موقعیت‌گذاری مطلق */
-            top: calc(50% - 30px); /* 30 پیکسل بالاتر از وسط */
-            left: 50%; /* قرار گرفتن در مرکز افقی */
-            transform: translateX(-50%); /* انتقال به مرکز افقی */
+            position: absolute;
+            top: calc(50% - 60px); /* 60 پیکسل بالاتر از وسط صفحه */
+            left: 50%;
+            transform: translateX(-50%);
         }
         #userScore {
-            font-size: 48px; /* اندازه متن امتیاز */
+            font-size: 48px;
             color: white; /* رنگ امتیاز سفید */
         }
         #bottom-bar {
-            position: absolute;
+            position: fixed; /* نوار همیشه در پایین صفحه */
             bottom: 0;
             width: 100%;
-            height: 60px; /* ارتفاع 60 پیکسل از پایین صفحه */
-            background-color: gray; /* رنگ توسی */
+            height: 60px; /* ارتفاع 60 پیکسل */
+            background-color: #1a1a1a; /* رنگ تیره‌تر از سیاه */
         }
     </style>
 </head>
@@ -47,7 +47,6 @@
         // دریافت امتیاز از localStorage یا تنظیم آن به 0 اگر موجود نباشد
         let score = parseInt(localStorage.getItem('score')) || 0;
         scoreElement.textContent = score;
-
     </script>
 </body>
 </html>
