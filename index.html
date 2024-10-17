@@ -29,8 +29,8 @@
             position: fixed; /* نوار ثابت در پایین صفحه */
             bottom: 0;
             width: 100%;
-            height: 150px; /* ارتفاع 150 پیکسل */
-            background-color: #1a1a1a; /* رنگ تیره‌تر از مشکی */
+            height: 70px; /* ارتفاع 70 پیکسل */
+            background-color: #1a1a1a; /* رنگ تیره */
             display: flex;
             justify-content: space-around; /* تقسیم فضا به صورت مساوی بین عکس‌ها */
             align-items: center; /* تنظیم تصاویر در مرکز عمودی */
@@ -39,14 +39,18 @@
             text-align: center; /* تراز مرکز برای هر عکس و متن */
         }
         .icon-container img {
-            width: 50px; /* اندازه تصاویر */
-            height: 50px;
-            /* هیچ چرخشی برای تصاویر */
+            width: 30px; /* اندازه تصاویر */
+            height: 30px; /* اندازه تصاویر */
         }
         .icon-container p {
             margin: 5px 0 0 0; /* فاصله مناسب زیر تصاویر */
-            color: white; /* رنگ متن سفید */
-            font-size: 16px; /* اندازه متن */
+            font-size: 30px; /* اندازه متن 30 پیکسل */
+        }
+        .icon-container p:first-child {
+            color: white; /* رنگ متن اولین عکس سفید */
+        }
+        .icon-container p:not(:first-child) {
+            color: #7d7d7d; /* رنگ توسی برای بقیه متن‌ها */
         }
     </style>
 </head>
