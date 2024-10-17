@@ -17,8 +17,9 @@
         }
         #score-container {
             position: absolute; /* موقعیت‌گذاری مطلق */
-            top: 50%; /* موقعیت وسط صفحه */
-            transform: translateY(-50%) translateY(-30px); /* 30 پیکسل بالاتر از وسط */
+            top: calc(50% - 30px); /* 30 پیکسل بالاتر از وسط */
+            left: 50%; /* قرار گرفتن در مرکز افقی */
+            transform: translateX(-50%); /* انتقال به مرکز افقی */
         }
         #userScore {
             font-size: 48px; /* اندازه متن امتیاز */
