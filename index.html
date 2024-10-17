@@ -6,120 +6,47 @@
     <title>Coin Game</title>
     <style>
         body {
-            background-image: url('background.png'); /* پس‌زمینه از تصویر PNG */
-            background-size: cover; /* اندازه پس‌زمینه */
+            background-color: black; /* پس‌زمینه مشکی */
             margin: 0;
             font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column; /* چینش عمودی */
-            justify-content: center;
-            align-items: center; /* تراز افقی در وسط */
             height: 100vh; /* ارتفاع کامل صفحه */
-            position: relative; /* برای موقعیت‌یابی */
-        }
-        #coin {
-            background: url('ggg.png') no-repeat center center; /* تصویر سکه */
-            background-size: contain;
-            width: 350px; /* عرض سکه */
-            height: 350px; /* ارتفاع سکه */
-            margin-top: 10px; /* فاصله 10 پیکسل از امتیاز */
-            cursor: pointer; /* نشانگر ماوس */
-        }
-        #coinIcon {
-            background: url('Coin_6.png') no-repeat center center; /* تصویر زیبایی */
-            background-size: contain;
-            width: 50px; /* عرض تصویر زیبایی */
-            height: 50px; /* ارتفاع تصویر زیبایی */
-            margin-right: 10px; /* فاصله 10 پیکسل از امتیاز */
+            display: flex;
+            justify-content: center;
+            align-items: center; /* تراز عمودی و افقی */
+            position: relative;
         }
         #score-container {
-            display: flex;
-            align-items: center; /* تراز عمودی محتویات */
             position: absolute; /* موقعیت‌گذاری مطلق */
-            top: 30px; /* فاصله از بالا */
-            left: 50%; /* تراز افقی در وسط */
-            transform: translateX(-50%); /* تراز افقی مرکز */
+            top: 50%; /* موقعیت وسط صفحه */
+            transform: translateY(-50%) translateY(-30px); /* 30 پیکسل بالاتر از وسط */
         }
         #userScore {
             font-size: 48px; /* اندازه متن امتیاز */
-            color: white; /* رنگ امتیاز */
+            color: white; /* رنگ امتیاز سفید */
         }
-        .plus-one {
+        #bottom-bar {
             position: absolute;
-            color: white;
-            font-size: 30px;
-            transition: transform 0.5s ease, opacity 0.5s ease;
-            opacity: 1;
-        }
-        .coin-row {
-            position: absolute; /* موقعیت‌گذاری مطلق */
-            bottom: 30px; /* فاصله 30 پیکسل از پایین صفحه */
-            display: flex; /* نمایش به صورت افقی */
-            gap: 10px; /* فاصله 10 پیکسل بین سکه‌ها */
-        }
-        .coin-image {
-            background: url('Image1.png') no-repeat center center; /* تصویر سکه */
-            background-size: contain;
-            width: 100px; /* عرض سکه */
-            height: 100px; /* ارتفاع سکه */
-        }
-        .coin-image:nth-child(2) {
-            background: url('Image2.png') no-repeat center center; /* تصویر دوم */
-        }
-        .coin-image:nth-child(3) {
-            background: url('Image3.png') no-repeat center center; /* تصویر سوم */
+            bottom: 0;
+            width: 100%;
+            height: 60px; /* ارتفاع 60 پیکسل از پایین صفحه */
+            background-color: gray; /* رنگ توسی */
         }
     </style>
 </head>
 <body>
     <div id="score-container">
-        <div id="coinIcon"></div>
         <span id="userScore">0</span>
     </div>
-    
-    <div id="coin"></div>
 
-    <div class="coin-row">
-        <div class="coin-image"></div>
-        <div class="coin-image"></div>
-        <div class="coin-image"></div>
-    </div>
+    <div id="bottom-bar"></div>
 
     <script>
         const scoreElement = document.getElementById('userScore');
-        const coinElement = document.getElementById('coin');
-        
+
         // دریافت امتیاز از localStorage یا تنظیم آن به 0 اگر موجود نباشد
         let score = parseInt(localStorage.getItem('score')) || 0;
         scoreElement.textContent = score;
 
-        function showPlusOne(x, y) {
-            const plusOne = document.createElement('div');
-            plusOne.textContent = '+1';
-            plusOne.className = 'plus-one';
-            plusOne.style.top = `${y}px`; // قرار دادن در محل کلیک
-            plusOne.style.left = `${x}px`;
-            document.body.appendChild(plusOne);
-            setTimeout(() => {
-                plusOne.style.opacity = '0'; 
-                setTimeout(() => plusOne.remove(), 500); 
-            }, 1000);
-        }
-
-        function updateScore(event) {
-            score++;
-            localStorage.setItem('score', score); // ذخیره امتیاز در localStorage
-            scoreElement.textContent = score;
-
-            // محل کلیک را محاسبه کنید
-            const x = event.clientX;
-            const y = event.clientY;
-            showPlusOne(x, y);
-        }
-
-        // وقتی روی سکه کلیک می‌شود، امتیاز افزایش پیدا می‌کند
-        coinElement.addEventListener('click', (event) => updateScore(event));
-        coinElement.addEventListener('touchstart', (event) => updateScore(event.touches[0])); // پشتیبانی از لمس
     </script>
 </body>
 </html>
