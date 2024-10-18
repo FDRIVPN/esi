@@ -6,7 +6,7 @@
     <title>Coin Game</title>
     <style>
         html, body {
-            background-color: black; /* پس‌زمینه مشکی */
+            background-color: black;
             margin: 0;
             font-family: Arial, sans-serif;
             height: 100%;
@@ -17,95 +17,96 @@
         }
         #score-container {
             position: absolute;
-            top: calc(50% - 60px); /* 60 پیکسل بالاتر از وسط صفحه */
+            top: calc(50% - 60px);
             left: 50%;
             transform: translateX(-50%);
         }
         #userScore {
             font-size: 48px;
-            color: white; /* رنگ امتیاز سفید */
+            color: white;
         }
         #bottom-bar {
-            position: fixed; /* نوار ثابت در پایین صفحه */
+            position: fixed;
             bottom: 0;
             width: 100%;
-            height: 70px; /* ارتفاع 70 پیکسل */
-            background-color: #1a1a1a; /* رنگ تیره */
+            height: 150px; /* ارتفاع نوار پایین */
+            background-color: #1a1a1a;
             display: flex;
-            justify-content: space-around; /* تقسیم فضا به صورت مساوی بین عکس‌ها */
-            align-items: center; /* تنظیم تصاویر در مرکز عمودی */
+            justify-content: space-around;
+            align-items: center;
         }
         .icon-container {
-            text-align: center; /* تراز مرکز برای هر عکس و متن */
-            cursor: pointer; /* تغییر نشانگر ماوس هنگام هاور */
+            text-align: center;
+            cursor: pointer;
         }
         .icon-container img {
-            width: 20px; /* اندازه تصاویر */
-            height: 20px; /* اندازه تصاویر */
+            width: 40px; /* اندازه عکس‌ها */
+            height: 40px; /* اندازه عکس‌ها */
         }
         .icon-container p {
-            margin: 2px 0 0 0; /* فاصله ۲ پیکسل زیر تصاویر */
-            font-size: 14px; /* اندازه متن جدید */
-            font-weight: 300; /* نازک‌تر کردن متن‌ها */
+            margin: 2px 0 0 0;
+            font-size: 20px; /* اندازه متن */
+            font-weight: 300; /* نازکی متن */
+            color: #7d7d7d; /* رنگ متن معمولی */
         }
-        .active img, .active p {
-            color: white; /* عکس و متن سفید برای حالت فعال */
-        }
-        .icon-container:not(.active) img, .icon-container:not(.active) p {
-            color: #7d7d7d; /* رنگ توسی برای بقیه متن‌ها */
-        }
-        .icon-container p:first-child {
-            font-weight: 400; /* پهن‌تر کردن متن Home */
+        .active p {
+            color: white; /* رنگ متن فعال */
+            font-weight: 400; /* ضخامت متن فعال */
         }
     </style>
 </head>
 <body>
     <div id="score-container">
-        <span id="userScore">0</span> <!-- نمایش امتیاز -->
+        <span id="userScore">0</span> <!-- امتیاز کاربر -->
     </div>
 
     <div id="bottom-bar">
-        <div class="icon-container active" id="icon1">
+        <div class="icon-container" id="icon1">
             <img src="image1.png" alt="Home">
-            <p style="color: white; font-weight: 400;">Home</p> <!-- رنگ سفید و پهن‌تر برای متن Home -->
+            <p id="text1" style="color: white; font-weight: 400;">Home</p> <!-- متن Home سفید -->
         </div>
         <div class="icon-container" id="icon2">
-            <img src="image3.png" alt="Lig"> <!-- عکس سوم به جای عکس دوم -->
-            <p>Lig</p>
+            <img src="image2.png" alt="Lig">
+            <p id="text2">Lig</p>
         </div>
         <div class="icon-container" id="icon3">
-            <img src="image2.png" alt="Friend"> <!-- عکس دوم به جای عکس سوم -->
-            <p>Friend</p>
+            <img src="image3.png" alt="Friend">
+            <p id="text3">Friend</p>
         </div>
     </div>
 
     <script>
-        const icon1 = document.getElementById('icon1');
-        const icon2 = document.getElementById('icon2');
-        const icon3 = document.getElementById('icon3');
         const scoreElement = document.getElementById('userScore');
-
-        // دریافت امتیاز از localStorage یا تنظیم آن به 0 اگر موجود نباشد
-        let score = parseInt(localStorage.getItem('score')) || 0;
+        let score = parseInt(localStorage.getItem('score')) || 0; // دریافت امتیاز از localStorage
         scoreElement.textContent = score;
 
-        // تابع برای تغییر وضعیت به حالت فعال
-        function activateIcon(icon) {
-            // غیرفعال کردن تمامی عکس‌ها
-            document.querySelectorAll('.icon-container').forEach(el => {
-                el.classList.remove('active');
-                el.querySelector('p').style.fontWeight = '300'; // نازک کردن بقیه
-            });
-
-            // فعال کردن عکس مورد نظر
-            icon.classList.add('active');
-            icon.querySelector('p').style.fontWeight = '400'; // پهن‌تر کردن متن مربوط به عکس فعال
+        // افزایش امتیاز و ذخیره در localStorage
+        function increaseScore() {
+            score++;
+            localStorage.setItem('score', score); // ذخیره امتیاز
+            scoreElement.textContent = score;
         }
 
-        // رویداد کلیک برای عکس‌ها
-        icon1.addEventListener('click', () => activateIcon(icon1));
-        icon2.addEventListener('click', () => activateIcon(icon2));
-        icon3.addEventListener('click', () => activateIcon(icon3));
+        const icons = document.querySelectorAll('.icon-container');
+        const texts = document.querySelectorAll('.icon-container p');
+
+        // تغییر وضعیت به حالت فعال
+        function activateIcon(index) {
+            texts.forEach(text => {
+                text.style.color = '#7d7d7d'; // رنگ متن‌های معمولی
+                text.style.fontWeight = '300'; // نازکی متن معمولی
+            });
+            texts[index].style.color = 'white'; // رنگ متن فعال
+            texts[index].style.fontWeight = '400'; // ضخامت متن فعال
+        }
+
+        // رویداد کلیک برای هر آیکون
+        icons.forEach((icon, index) => {
+            icon.addEventListener('click', () => {
+                activateIcon(index);
+                increaseScore(); // هر کلیک باعث افزایش امتیاز می‌شود
+            });
+        });
     </script>
 </body>
 </html>
