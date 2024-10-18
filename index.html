@@ -49,7 +49,7 @@
             font-weight: 300; /* نازک‌تر کردن متن‌ها */
         }
         .active img, .active p {
-            color: white;
+            color: white; /* عکس و متن سفید برای حالت فعال */
         }
         .icon-container:not(.active) img, .icon-container:not(.active) p {
             color: #7d7d7d; /* رنگ توسی برای بقیه متن‌ها */
@@ -61,13 +61,13 @@
 </head>
 <body>
     <div id="score-container">
-        <span id="userScore">0</span>
+        <span id="userScore">0</span> <!-- نمایش امتیاز -->
     </div>
 
     <div id="bottom-bar">
         <div class="icon-container active" id="icon1">
             <img src="image1.png" alt="Home">
-            <p style="color: white;">Home</p> <!-- رنگ سفید برای متن Home -->
+            <p style="color: white; font-weight: 400;">Home</p> <!-- رنگ سفید و پهن‌تر برای متن Home -->
         </div>
         <div class="icon-container" id="icon2">
             <img src="image3.png" alt="Lig"> <!-- عکس سوم به جای عکس دوم -->
@@ -83,14 +83,23 @@
         const icon1 = document.getElementById('icon1');
         const icon2 = document.getElementById('icon2');
         const icon3 = document.getElementById('icon3');
+        const scoreElement = document.getElementById('userScore');
+
+        // دریافت امتیاز از localStorage یا تنظیم آن به 0 اگر موجود نباشد
+        let score = parseInt(localStorage.getItem('score')) || 0;
+        scoreElement.textContent = score;
 
         // تابع برای تغییر وضعیت به حالت فعال
         function activateIcon(icon) {
             // غیرفعال کردن تمامی عکس‌ها
-            document.querySelectorAll('.icon-container').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.icon-container').forEach(el => {
+                el.classList.remove('active');
+                el.querySelector('p').style.fontWeight = '300'; // نازک کردن بقیه
+            });
 
             // فعال کردن عکس مورد نظر
             icon.classList.add('active');
+            icon.querySelector('p').style.fontWeight = '400'; // پهن‌تر کردن متن مربوط به عکس فعال
         }
 
         // رویداد کلیک برای عکس‌ها
