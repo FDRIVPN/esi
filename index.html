@@ -37,21 +37,25 @@
         }
         .icon-container {
             text-align: center; /* تراز مرکز برای هر عکس و متن */
+            cursor: pointer; /* تغییر نشانگر ماوس هنگام هاور */
         }
         .icon-container img {
-            width: 20px; /* اندازه تصاویر جدید */
-            height: 20px; /* اندازه تصاویر جدید */
+            width: 20px; /* اندازه تصاویر */
+            height: 20px; /* اندازه تصاویر */
         }
         .icon-container p {
             margin: 2px 0 0 0; /* فاصله ۲ پیکسل زیر تصاویر */
             font-size: 14px; /* اندازه متن جدید */
             font-weight: 300; /* نازک‌تر کردن متن‌ها */
         }
-        .icon-container p:first-child {
-            color: white; /* رنگ متن اولین عکس سفید */
+        .active img, .active p {
+            color: white;
         }
-        .icon-container p:not(:first-child) {
+        .icon-container:not(.active) img, .icon-container:not(.active) p {
             color: #7d7d7d; /* رنگ توسی برای بقیه متن‌ها */
+        }
+        .icon-container p:first-child {
+            font-weight: 400; /* پهن‌تر کردن متن Home */
         }
     </style>
 </head>
@@ -61,26 +65,38 @@
     </div>
 
     <div id="bottom-bar">
-        <div class="icon-container">
+        <div class="icon-container active" id="icon1">
             <img src="image1.png" alt="Home">
             <p style="color: white;">Home</p> <!-- رنگ سفید برای متن Home -->
         </div>
-        <div class="icon-container">
+        <div class="icon-container" id="icon2">
             <img src="image3.png" alt="Lig"> <!-- عکس سوم به جای عکس دوم -->
             <p>Lig</p>
         </div>
-        <div class="icon-container">
+        <div class="icon-container" id="icon3">
             <img src="image2.png" alt="Friend"> <!-- عکس دوم به جای عکس سوم -->
             <p>Friend</p>
         </div>
     </div>
 
     <script>
-        const scoreElement = document.getElementById('userScore');
+        const icon1 = document.getElementById('icon1');
+        const icon2 = document.getElementById('icon2');
+        const icon3 = document.getElementById('icon3');
 
-        // دریافت امتیاز از localStorage یا تنظیم آن به 0 اگر موجود نباشد
-        let score = parseInt(localStorage.getItem('score')) || 0;
-        scoreElement.textContent = score;
+        // تابع برای تغییر وضعیت به حالت فعال
+        function activateIcon(icon) {
+            // غیرفعال کردن تمامی عکس‌ها
+            document.querySelectorAll('.icon-container').forEach(el => el.classList.remove('active'));
+
+            // فعال کردن عکس مورد نظر
+            icon.classList.add('active');
+        }
+
+        // رویداد کلیک برای عکس‌ها
+        icon1.addEventListener('click', () => activateIcon(icon1));
+        icon2.addEventListener('click', () => activateIcon(icon2));
+        icon3.addEventListener('click', () => activateIcon(icon3));
     </script>
 </body>
 </html>
