@@ -74,11 +74,12 @@
     <div id="header">
         <img src="tortles.png" alt="Tortles" style="width: 100px; height: auto;"> <!-- عکس tortles -->
         <div id="score-container">
-            امتیاز شما: <span id="userScore">0</span> <!-- نمایش امتیاز -->
+            Tortles: <span id="userScore">0</span> <!-- نمایش امتیاز با عنوان Tortles -->
         </div>
     </div>
 
     <div id="content">
+        <div id="homeContent">امتیاز شما: <span id="userScore">0</span></div>
         <div id="comingSoon" style="display: none;">Coming Soon...</div>
     </div>
 
@@ -110,11 +111,12 @@
         // نمایش محتوای صفحه
         function showContent(contentId) {
             // پنهان کردن تمامی محتوا
+            document.getElementById('homeContent').style.display = 'none';
             document.getElementById('comingSoon').style.display = 'none';
 
             // نمایش محتوا بر اساس آیکون کلیک شده
             if (contentId === 'home') {
-                scoreElement.textContent = score; // نمایش امتیاز در صفحه اصلی
+                document.getElementById('homeContent').style.display = 'block';
             } else {
                 document.getElementById('comingSoon').style.display = 'block';
             }
@@ -148,17 +150,17 @@
         // رویداد کلیک برای هر آیکون
         icon1.addEventListener('click', () => {
             activateIcon(icon1, 'image1.png', 'home'); // بازگرداندن تصویر Home به حالت اصلی
-            showContent('home'); // نمایش محتوای اصلی
+            scoreElement.textContent = score;
         });
 
         icon2.addEventListener('click', () => {
             activateIcon(icon2, 'image22.png', 'comingSoon'); // تغییر تصویر Lig به image22
-            showContent('comingSoon'); // نمایش Coming Soon
+            scoreElement.textContent = score;
         });
 
         icon3.addEventListener('click', () => {
             activateIcon(icon3, 'image33.png', 'comingSoon'); // تغییر تصویر Friend به image33
-            showContent('comingSoon'); // نمایش Coming Soon
+            scoreElement.textContent = score;
         });
 
         // نمایش محتوای اولیه (Home)
