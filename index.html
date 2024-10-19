@@ -94,41 +94,40 @@
         scoreElement.textContent = score;
 
         // تابع برای تغییر وضعیت به حالت فعال و تغییر عکس‌ها
-        function activateIcon(icon) {
-            // غیرفعال کردن تمامی عکس‌ها
+        function activateIcon(icon, newImageSrc) {
+            // غیرفعال کردن تمامی عکس‌ها و تغییر به حالت عادی
             document.querySelectorAll('.icon-container').forEach(el => {
                 el.classList.remove('active');
                 el.querySelector('p').style.fontWeight = '400'; // برگرداندن متن به حالت عادی
+                const img = el.querySelector('img');
+                if (el.id === 'icon1') {
+                    img.src = 'image11.png'; // تغییر تصویر Home به image11
+                } else if (el.id === 'icon2') {
+                    img.src = 'image3.png'; // بازگرداندن تصویر به حالت اولیه برای Lig
+                } else if (el.id === 'icon3') {
+                    img.src = 'image2.png'; // بازگرداندن تصویر به حالت اولیه برای Friend
+                }
             });
 
-            // فعال کردن عکس مورد نظر
+            // فعال کردن آیکون انتخابی
             icon.classList.add('active');
             icon.querySelector('p').style.fontWeight = '700'; // پهن‌تر کردن متن در حالت فعال
+            icon.querySelector('img').src = newImageSrc; // تغییر تصویر آیکون به عکس جدید
         }
 
-        // تغییر تصویر Home به image11
-        function updateHomeImage() {
-            icon1Img.src = 'image11.png';
-        }
-
-        // رویداد کلیک برای عکس‌ها
+        // رویداد کلیک برای هر آیکون
         icon1.addEventListener('click', () => {
-            activateIcon(icon1);
-            icon1Img.src = 'image1.png'; // بازگرداندن تصویر Home
+            activateIcon(icon1, 'image1.png'); // بازگرداندن تصویر Home به حالت اصلی
             scoreElement.textContent = score;
         });
 
         icon2.addEventListener('click', () => {
-            activateIcon(icon2);
-            icon2Img.src = 'image22.png'; // تغییر تصویر Lig
-            updateHomeImage(); // تغییر تصویر Home به image11
+            activateIcon(icon2, 'image22.png'); // تغییر تصویر Lig به image22
             scoreElement.textContent = score;
         });
 
         icon3.addEventListener('click', () => {
-            activateIcon(icon3);
-            icon3Img.src = 'image33.png'; // تغییر تصویر Friend
-            updateHomeImage(); // تغییر تصویر Home به image11
+            activateIcon(icon3, 'image33.png'); // تغییر تصویر Friend به image33
             scoreElement.textContent = score;
         });
     </script>
