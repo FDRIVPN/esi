@@ -65,15 +65,15 @@
 
     <div id="bottom-bar">
         <div class="icon-container active" id="icon1">
-            <img src="image1.png" alt="Home">
+            <img src="image1.png" alt="Home" id="icon1Img">
             <p>Home</p> <!-- رنگ سفید برای متن Home -->
         </div>
         <div class="icon-container" id="icon2">
-            <img src="image3.png" alt="Lig"> <!-- عکس سوم به جای عکس دوم -->
+            <img src="image3.png" alt="Lig" id="icon2Img"> <!-- عکس سوم به جای عکس دوم -->
             <p>Lig</p>
         </div>
         <div class="icon-container" id="icon3">
-            <img src="image2.png" alt="Friend"> <!-- عکس دوم به جای عکس سوم -->
+            <img src="image2.png" alt="Friend" id="icon3Img"> <!-- عکس دوم به جای عکس سوم -->
             <p>Friend</p>
         </div>
     </div>
@@ -83,12 +83,17 @@
         const icon2 = document.getElementById('icon2');
         const icon3 = document.getElementById('icon3');
         const scoreElement = document.getElementById('userScore');
+        
+        // تصاویر هر آیکون
+        const icon1Img = document.getElementById('icon1Img');
+        const icon2Img = document.getElementById('icon2Img');
+        const icon3Img = document.getElementById('icon3Img');
 
         // دریافت امتیاز از localStorage یا تنظیم آن به 0 اگر موجود نباشد
         let score = parseInt(localStorage.getItem('score')) || 0;
         scoreElement.textContent = score;
 
-        // تابع برای تغییر وضعیت به حالت فعال
+        // تابع برای تغییر وضعیت به حالت فعال و تغییر عکس‌ها
         function activateIcon(icon) {
             // غیرفعال کردن تمامی عکس‌ها
             document.querySelectorAll('.icon-container').forEach(el => {
@@ -101,20 +106,30 @@
             icon.querySelector('p').style.fontWeight = '700'; // پهن‌تر کردن متن در حالت فعال
         }
 
+        // تغییر تصویر Home به image11
+        function updateHomeImage() {
+            icon1Img.src = 'image11.png';
+        }
+
         // رویداد کلیک برای عکس‌ها
         icon1.addEventListener('click', () => {
             activateIcon(icon1);
-            scoreElement.textContent = score; // اینجا می‌توانید ویژگی‌های مربوط به Home را اعمال کنید
+            icon1Img.src = 'image1.png'; // بازگرداندن تصویر Home
+            scoreElement.textContent = score;
         });
 
         icon2.addEventListener('click', () => {
             activateIcon(icon2);
-            scoreElement.textContent = score; // ویژگی‌های مربوط به Home برای این آیکون هم اعمال می‌شود
+            icon2Img.src = 'image22.png'; // تغییر تصویر Lig
+            updateHomeImage(); // تغییر تصویر Home به image11
+            scoreElement.textContent = score;
         });
 
         icon3.addEventListener('click', () => {
             activateIcon(icon3);
-            scoreElement.textContent = score; // ویژگی‌های مربوط به Home برای این آیکون هم اعمال می‌شود
+            icon3Img.src = 'image33.png'; // تغییر تصویر Friend
+            updateHomeImage(); // تغییر تصویر Home به image11
+            scoreElement.textContent = score;
         });
     </script>
 </body>
