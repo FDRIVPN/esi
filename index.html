@@ -73,11 +73,11 @@
 </head>
 <body>
     <div id="content">
-        <div id="homeContent">
+        <div id="homeContent" style="text-align: center;">
             <img src="tortles.png" alt="Tortles" style="margin-bottom: 20px;"> <!-- تصویر در بالای صفحه -->
-            <div style="display: flex; align-items: center;">
-                <span>tortles</span> <!-- متن tortles -->
-                <span id="userScore" style="margin-left: 10px;">0</span> <!-- امتیاز -->
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <span id="userScore" style="margin-right: 10px;">0</span> <!-- امتیاز -->
+                <span style="margin-left: 10px;">tortles</span> <!-- متن tortles -->
             </div>
         </div>
         <div id="comingSoon" style="display: none;">Coming Soon...</div>
@@ -152,17 +152,17 @@
         // رویداد کلیک برای هر آیکون
         icon1.addEventListener('click', () => {
             activateIcon(icon1, 'image1.png', 'home'); // بازگرداندن تصویر Home به حالت اصلی
-            scoreElement.textContent = score;
+            scoreElement.textContent = score; // نمایش امتیاز
         });
 
         icon2.addEventListener('click', () => {
             activateIcon(icon2, 'image22.png', 'comingSoon'); // تغییر تصویر Lig به image22
-            scoreElement.textContent = score;
+            scoreElement.textContent = score; // نمایش امتیاز
         });
 
         icon3.addEventListener('click', () => {
             activateIcon(icon3, 'image33.png', 'comingSoon'); // تغییر تصویر Friend به image33
-            scoreElement.textContent = score;
+            scoreElement.textContent = score; // نمایش امتیاز
         });
 
         // نمایش محتوای اولیه (Home)
