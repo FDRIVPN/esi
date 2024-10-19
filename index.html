@@ -12,19 +12,16 @@
             height: 100%;
             display: flex;
             flex-direction: column; /* چیدمان عمودی */
-            align-items: center; /* تراز کردن در مرکز */
+            justify-content: center; /* مرکز قرار دادن محتوا */
+            align-items: center; /* مرکز قرار دادن محتوا */
         }
         #score-container {
-            display: flex; /* استفاده از فلیکس باکس */
-            align-items: center; /* تراز کردن عمودی */
+            position: absolute;
+            top: 20%; /* موقعیت نسبت به بالای صفحه */
+            left: 50%;
+            transform: translate(-50%, -50%);
             color: white; /* رنگ امتیاز سفید */
-            font-size: 48px; /* اندازه فونت */
-            margin-top: 20px; /* فاصله از بالای صفحه */
-        }
-        #score-container img {
-            width: 40px; /* اندازه تصویر */
-            height: 40px; /* اندازه تصویر */
-            margin-left: 10px; /* فاصله بین متن و تصویر */
+            font-size: 48px;
         }
         #bottom-bar {
             position: fixed; /* نوار ثابت در پایین صفحه */
@@ -42,14 +39,15 @@
             transition: color 0.3s, font-weight 0.3s; /* انیمیشن برای تغییر رنگ و وزن */
         }
         .icon-container img {
-            width: 20px; /* اندازه تصاویر ثابت */
-            height: 20px; /* اندازه تصاویر ثابت */
+            width: 20px; /* اندازه تصاویر */
+            height: 20px; /* اندازه تصاویر */
             transition: transform 0.3s; /* انیمیشن برای تغییر مقیاس */
         }
         .icon-container p {
             margin: 2px 0 0 0; /* فاصله ۲ پیکسل زیر تصاویر */
             font-size: 14px; /* اندازه متن جدید */
             font-weight: 300; /* نازک‌تر کردن متن‌ها */
+            display: none; /* پنهان کردن متن به صورت پیش‌فرض */
         }
         .active img {
             transform: scale(1.2); /* افزایش اندازه تصویر آیکون فعال */
@@ -57,6 +55,7 @@
         .active p {
             color: white; /* رنگ سفید برای متن آیکون فعال */
             font-weight: 700; /* پهن‌تر کردن متن در حالت فعال */
+            display: block; /* نمایش متن در حالت فعال */
         }
         .icon-container:not(.active) img {
             transform: scale(1); /* اندازه اصلی برای آیکون‌های غیر فعال */
@@ -73,13 +72,14 @@
     </style>
 </head>
 <body>
-    <div id="score-container">
-        <span id="userScore">0</span> <!-- امتیاز کاربر -->
-        <img src="tortles.png" alt="Tortles"> <!-- تصویر Tortles -->
-    </div>
-
     <div id="content">
-        <div id="homeContent">امتیاز شما: <span id="userScore">0</span></div>
+        <div id="homeContent">
+            <img src="tortles.png" alt="Tortles" style="margin-bottom: 20px;"> <!-- تصویر در بالای صفحه -->
+            <div style="display: flex; align-items: center;">
+                <span>tortles</span> <!-- متن tortles -->
+                <span id="userScore" style="margin-left: 10px;">0</span> <!-- امتیاز -->
+            </div>
+        </div>
         <div id="comingSoon" style="display: none;">Coming Soon...</div>
     </div>
 
@@ -136,12 +136,14 @@
                 } else if (el.id === 'icon3') {
                     img.src = 'image2.png'; // بازگرداندن تصویر به حالت اولیه برای Friend
                 }
+                el.querySelector('p').style.display = 'none'; // پنهان کردن متن
             });
 
             // فعال کردن آیکون انتخابی
             icon.classList.add('active');
             icon.querySelector('p').style.fontWeight = '700'; // پهن‌تر کردن متن در حالت فعال
             icon.querySelector('img').src = newImageSrc; // تغییر تصویر آیکون به عکس جدید
+            icon.querySelector('p').style.display = 'block'; // نمایش متن در حالت فعال
 
             // نمایش محتوای مناسب
             showContent(contentId);
@@ -149,17 +151,17 @@
 
         // رویداد کلیک برای هر آیکون
         icon1.addEventListener('click', () => {
-            activateIcon(icon1, 'image1.png', 'home');
+            activateIcon(icon1, 'image1.png', 'home'); // بازگرداندن تصویر Home به حالت اصلی
             scoreElement.textContent = score;
         });
 
         icon2.addEventListener('click', () => {
-            activateIcon(icon2, 'image22.png', 'comingSoon');
+            activateIcon(icon2, 'image22.png', 'comingSoon'); // تغییر تصویر Lig به image22
             scoreElement.textContent = score;
         });
 
         icon3.addEventListener('click', () => {
-            activateIcon(icon3, 'image33.png', 'comingSoon');
+            activateIcon(icon3, 'image33.png', 'comingSoon'); // تغییر تصویر Friend به image33
             scoreElement.textContent = score;
         });
 
