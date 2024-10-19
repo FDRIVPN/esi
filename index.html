@@ -39,7 +39,7 @@
         .icon-container img {
             width: 20px; /* اندازه تصاویر */
             height: 20px; /* اندازه تصاویر */
-            transition: opacity 0.3s; /* انیمیشن برای تغییر شفافیت */
+            transition: transform 0.3s; /* انیمیشن برای تغییر مقیاس */
         }
         .icon-container p {
             margin: 2px 0 0 0; /* فاصله ۲ پیکسل زیر تصاویر */
@@ -47,14 +47,14 @@
             font-weight: 300; /* نازک‌تر کردن متن‌ها */
         }
         .active img {
-            opacity: 0.5; /* کاهش شفافیت تصویر آیکون فعال */
+            transform: scale(1.2); /* افزایش اندازه تصویر آیکون فعال */
         }
         .active p {
             color: white; /* رنگ سفید برای متن آیکون فعال */
             font-weight: 700; /* پهن‌تر کردن متن در حالت فعال */
         }
         .icon-container:not(.active) img {
-            opacity: 1; /* شفافیت کامل برای آیکون‌های غیر فعال */
+            transform: scale(1); /* اندازه اصلی برای آیکون‌های غیر فعال */
         }
         #content {
             flex: 1; /* محتوا فضای باقیمانده را پر کند */
