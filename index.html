@@ -49,13 +49,12 @@
             font-weight: 300; /* نازک‌تر کردن متن‌ها */
         }
         .active img, .active p {
-            color: white; /* عکس و متن سفید برای حالت فعال */
+            color: white;
+            font-weight: 700; /* پهن‌تر کردن متن در حالت فعال */
         }
         .icon-container:not(.active) img, .icon-container:not(.active) p {
             color: #7d7d7d; /* رنگ توسی برای بقیه متن‌ها */
-        }
-        .icon-container p:first-child {
-            font-weight: 400; /* پهن‌تر کردن متن Home */
+            font-weight: 400; /* نازک‌تر کردن متن‌ها در حالت غیرفعال */
         }
     </style>
 </head>
@@ -67,7 +66,7 @@
     <div id="bottom-bar">
         <div class="icon-container active" id="icon1">
             <img src="image1.png" alt="Home">
-            <p style="color: white;">Home</p> <!-- رنگ سفید برای متن Home -->
+            <p>Home</p> <!-- رنگ سفید برای متن Home -->
         </div>
         <div class="icon-container" id="icon2">
             <img src="image3.png" alt="Lig"> <!-- عکس سوم به جای عکس دوم -->
@@ -92,16 +91,31 @@
         // تابع برای تغییر وضعیت به حالت فعال
         function activateIcon(icon) {
             // غیرفعال کردن تمامی عکس‌ها
-            document.querySelectorAll('.icon-container').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.icon-container').forEach(el => {
+                el.classList.remove('active');
+                el.querySelector('p').style.fontWeight = '400'; // برگرداندن متن به حالت عادی
+            });
 
             // فعال کردن عکس مورد نظر
             icon.classList.add('active');
+            icon.querySelector('p').style.fontWeight = '700'; // پهن‌تر کردن متن در حالت فعال
         }
 
         // رویداد کلیک برای عکس‌ها
-        icon1.addEventListener('click', () => activateIcon(icon1));
-        icon2.addEventListener('click', () => activateIcon(icon2));
-        icon3.addEventListener('click', () => activateIcon(icon3));
+        icon1.addEventListener('click', () => {
+            activateIcon(icon1);
+            scoreElement.textContent = score; // اینجا می‌توانید ویژگی‌های مربوط به Home را اعمال کنید
+        });
+
+        icon2.addEventListener('click', () => {
+            activateIcon(icon2);
+            scoreElement.textContent = score; // ویژگی‌های مربوط به Home برای این آیکون هم اعمال می‌شود
+        });
+
+        icon3.addEventListener('click', () => {
+            activateIcon(icon3);
+            scoreElement.textContent = score; // ویژگی‌های مربوط به Home برای این آیکون هم اعمال می‌شود
+        });
     </script>
 </body>
 </html>
