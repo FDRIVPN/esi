@@ -12,20 +12,21 @@
             height: 100%;
             display: flex;
             flex-direction: column; /* چیدمان عمودی */
-            align-items: center; /* مرکزچینی در محور افقی */
-        }
-        #header {
-            margin-top: 20px; /* فاصله بالای عکس */
-            text-align: center; /* مرکزچینی متن */
-            color: white; /* رنگ متن */
         }
         #score-container {
+            position: absolute;
+            top: calc(50% - 60px); /* 60 پیکسل بالاتر از وسط صفحه */
+            left: 50%;
+            transform: translateX(-50%);
             color: white; /* رنگ امتیاز سفید */
-            font-size: 48px; /* اندازه امتیاز */
-            margin-top: 10px; /* فاصله بین عکس و امتیاز */
-            display: flex; /* برای تراز کردن Tortles و امتیاز */
+            font-size: 48px;
+        }
+        #score {
+            display: flex; /* استفاده از فلیکس برای چیدمان */
             align-items: center; /* تراز عمودی */
-            gap: 10px; /* فاصله بین Tortles و امتیاز */
+        }
+        #tortles {
+            margin-right: 10px; /* فاصله بین tortles و امتیاز */
         }
         #bottom-bar {
             position: fixed; /* نوار ثابت در پایین صفحه */
@@ -74,29 +75,27 @@
     </style>
 </head>
 <body>
-    <div id="header">
-        <img src="tortles.png" alt="Tortles" style="width: 100px; height: auto;"> <!-- عکس tortles -->
-        <div id="score-container">
-            <span>Tortles</span> <span id="userScore">0</span> <!-- نمایش امتیاز با عنوان Tortles -->
-        </div>
-    </div>
-
     <div id="content">
-        <div id="homeContent">امتیاز شما: <span id="userScore">0</span></div>
+        <div id="homeContent">
+            <div id="score">
+                <span id="tortles">tortles</span>
+                <span id="userScore">0</span>
+            </div>
+        </div>
         <div id="comingSoon" style="display: none;">Coming Soon...</div>
     </div>
 
     <div id="bottom-bar">
         <div class="icon-container active" id="icon1">
             <img src="image1.png" alt="Home" id="icon1Img">
-            <p>Home</p>
+            <p>Home</p> <!-- رنگ سفید برای متن Home -->
         </div>
         <div class="icon-container" id="icon2">
-            <img src="image3.png" alt="Lig" id="icon2Img">
+            <img src="image3.png" alt="Lig" id="icon2Img"> <!-- عکس سوم به جای عکس دوم -->
             <p>Lig</p>
         </div>
         <div class="icon-container" id="icon3">
-            <img src="image2.png" alt="Friend" id="icon3Img">
+            <img src="image2.png" alt="Friend" id="icon3Img"> <!-- عکس دوم به جای عکس سوم -->
             <p>Friend</p>
         </div>
     </div>
