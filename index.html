@@ -11,19 +11,15 @@
             font-family: Arial, sans-serif;
             height: 100%;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
+            flex-direction: column; /* چیدمان عمودی */
         }
         #score-container {
             position: absolute;
             top: calc(50% - 60px); /* 60 پیکسل بالاتر از وسط صفحه */
             left: 50%;
             transform: translateX(-50%);
-        }
-        #userScore {
-            font-size: 48px;
             color: white; /* رنگ امتیاز سفید */
+            font-size: 48px;
         }
         #bottom-bar {
             position: fixed; /* نوار ثابت در پایین صفحه */
@@ -38,29 +34,43 @@
         .icon-container {
             text-align: center; /* تراز مرکز برای هر عکس و متن */
             cursor: pointer; /* تغییر نشانگر ماوس هنگام هاور */
+            transition: color 0.3s, font-weight 0.3s; /* انیمیشن برای تغییر رنگ و وزن */
         }
         .icon-container img {
             width: 20px; /* اندازه تصاویر */
             height: 20px; /* اندازه تصاویر */
+            transition: opacity 0.3s; /* انیمیشن برای تغییر شفافیت */
         }
         .icon-container p {
             margin: 2px 0 0 0; /* فاصله ۲ پیکسل زیر تصاویر */
             font-size: 14px; /* اندازه متن جدید */
             font-weight: 300; /* نازک‌تر کردن متن‌ها */
         }
-        .active img, .active p {
-            color: white;
+        .active img {
+            opacity: 0.5; /* کاهش شفافیت تصویر آیکون فعال */
+        }
+        .active p {
+            color: white; /* رنگ سفید برای متن آیکون فعال */
             font-weight: 700; /* پهن‌تر کردن متن در حالت فعال */
         }
-        .icon-container:not(.active) img, .icon-container:not(.active) p {
-            color: #7d7d7d; /* رنگ توسی برای بقیه متن‌ها */
-            font-weight: 400; /* نازک‌تر کردن متن‌ها در حالت غیرفعال */
+        .icon-container:not(.active) img {
+            opacity: 1; /* شفافیت کامل برای آیکون‌های غیر فعال */
+        }
+        #content {
+            flex: 1; /* محتوا فضای باقیمانده را پر کند */
+            display: none; /* پنهان کردن محتوای صفحه */
+            align-items: center;
+            justify-content: center;
+            color: white; /* رنگ متن */
+            font-size: 24px; /* اندازه متن */
+            text-align: center; /* مرکز متن */
         }
     </style>
 </head>
 <body>
-    <div id="score-container">
-        <span id="userScore">0</span> <!-- نمایش امتیاز -->
+    <div id="content">
+        <div id="homeContent">امتیاز شما: <span id="userScore">0</span></div>
+        <div id="comingSoon" style="display: none;">Coming Soon...</div>
     </div>
 
     <div id="bottom-bar">
@@ -84,17 +94,26 @@
         const icon3 = document.getElementById('icon3');
         const scoreElement = document.getElementById('userScore');
         
-        // تصاویر هر آیکون
-        const icon1Img = document.getElementById('icon1Img');
-        const icon2Img = document.getElementById('icon2Img');
-        const icon3Img = document.getElementById('icon3Img');
-
         // دریافت امتیاز از localStorage یا تنظیم آن به 0 اگر موجود نباشد
         let score = parseInt(localStorage.getItem('score')) || 0;
         scoreElement.textContent = score;
 
+        // نمایش محتوای صفحه
+        function showContent(contentId) {
+            // پنهان کردن تمامی محتوا
+            document.getElementById('homeContent').style.display = 'none';
+            document.getElementById('comingSoon').style.display = 'none';
+
+            // نمایش محتوا بر اساس آیکون کلیک شده
+            if (contentId === 'home') {
+                document.getElementById('homeContent').style.display = 'block';
+            } else {
+                document.getElementById('comingSoon').style.display = 'block';
+            }
+        }
+
         // تابع برای تغییر وضعیت به حالت فعال و تغییر عکس‌ها
-        function activateIcon(icon, newImageSrc) {
+        function activateIcon(icon, newImageSrc, contentId) {
             // غیرفعال کردن تمامی عکس‌ها و تغییر به حالت عادی
             document.querySelectorAll('.icon-container').forEach(el => {
                 el.classList.remove('active');
@@ -113,23 +132,29 @@
             icon.classList.add('active');
             icon.querySelector('p').style.fontWeight = '700'; // پهن‌تر کردن متن در حالت فعال
             icon.querySelector('img').src = newImageSrc; // تغییر تصویر آیکون به عکس جدید
+
+            // نمایش محتوای مناسب
+            showContent(contentId);
         }
 
         // رویداد کلیک برای هر آیکون
         icon1.addEventListener('click', () => {
-            activateIcon(icon1, 'image1.png'); // بازگرداندن تصویر Home به حالت اصلی
+            activateIcon(icon1, 'image1.png', 'home'); // بازگرداندن تصویر Home به حالت اصلی
             scoreElement.textContent = score;
         });
 
         icon2.addEventListener('click', () => {
-            activateIcon(icon2, 'image22.png'); // تغییر تصویر Lig به image22
+            activateIcon(icon2, 'image22.png', 'comingSoon'); // تغییر تصویر Lig به image22
             scoreElement.textContent = score;
         });
 
         icon3.addEventListener('click', () => {
-            activateIcon(icon3, 'image33.png'); // تغییر تصویر Friend به image33
+            activateIcon(icon3, 'image33.png', 'comingSoon'); // تغییر تصویر Friend به image33
             scoreElement.textContent = score;
         });
+
+        // نمایش محتوای اولیه (Home)
+        showContent('home');
     </script>
 </body>
 </html>
