@@ -12,14 +12,17 @@
             height: 100%;
             display: flex;
             flex-direction: column; /* چیدمان عمودی */
+            align-items: center; /* مرکزچینی در محور افقی */
+        }
+        #header {
+            margin-top: 20px; /* فاصله بالای عکس */
+            text-align: center; /* مرکزچینی متن */
+            color: white; /* رنگ متن */
         }
         #score-container {
-            position: absolute;
-            top: calc(50% - 60px); /* 60 پیکسل بالاتر از وسط صفحه */
-            left: 50%;
-            transform: translateX(-50%);
             color: white; /* رنگ امتیاز سفید */
-            font-size: 48px;
+            font-size: 48px; /* اندازه امتیاز */
+            margin-top: 10px; /* فاصله بین عکس و امتیاز */
         }
         #bottom-bar {
             position: fixed; /* نوار ثابت در پایین صفحه */
@@ -68,22 +71,28 @@
     </style>
 </head>
 <body>
+    <div id="header">
+        <img src="tortles.png" alt="Tortles" style="width: 100px; height: auto;"> <!-- عکس tortles -->
+        <div id="score-container">
+            امتیاز شما: <span id="userScore">0</span> <!-- نمایش امتیاز -->
+        </div>
+    </div>
+
     <div id="content">
-        <div id="homeContent">امتیاز شما: <span id="userScore">0</span></div>
         <div id="comingSoon" style="display: none;">Coming Soon...</div>
     </div>
 
     <div id="bottom-bar">
         <div class="icon-container active" id="icon1">
             <img src="image1.png" alt="Home" id="icon1Img">
-            <p>Home</p> <!-- رنگ سفید برای متن Home -->
+            <p>Home</p>
         </div>
         <div class="icon-container" id="icon2">
-            <img src="image3.png" alt="Lig" id="icon2Img"> <!-- عکس سوم به جای عکس دوم -->
+            <img src="image3.png" alt="Lig" id="icon2Img">
             <p>Lig</p>
         </div>
         <div class="icon-container" id="icon3">
-            <img src="image2.png" alt="Friend" id="icon3Img"> <!-- عکس دوم به جای عکس سوم -->
+            <img src="image2.png" alt="Friend" id="icon3Img">
             <p>Friend</p>
         </div>
     </div>
@@ -101,12 +110,11 @@
         // نمایش محتوای صفحه
         function showContent(contentId) {
             // پنهان کردن تمامی محتوا
-            document.getElementById('homeContent').style.display = 'none';
             document.getElementById('comingSoon').style.display = 'none';
 
             // نمایش محتوا بر اساس آیکون کلیک شده
             if (contentId === 'home') {
-                document.getElementById('homeContent').style.display = 'block';
+                scoreElement.textContent = score; // نمایش امتیاز در صفحه اصلی
             } else {
                 document.getElementById('comingSoon').style.display = 'block';
             }
@@ -120,7 +128,7 @@
                 el.querySelector('p').style.fontWeight = '400'; // برگرداندن متن به حالت عادی
                 const img = el.querySelector('img');
                 if (el.id === 'icon1') {
-                    img.src = 'image11.png'; // تغییر تصویر Home به image11
+                    img.src = 'image1.png'; // تغییر تصویر Home به image1
                 } else if (el.id === 'icon2') {
                     img.src = 'image3.png'; // بازگرداندن تصویر به حالت اولیه برای Lig
                 } else if (el.id === 'icon3') {
@@ -140,17 +148,17 @@
         // رویداد کلیک برای هر آیکون
         icon1.addEventListener('click', () => {
             activateIcon(icon1, 'image1.png', 'home'); // بازگرداندن تصویر Home به حالت اصلی
-            scoreElement.textContent = score;
+            showContent('home'); // نمایش محتوای اصلی
         });
 
         icon2.addEventListener('click', () => {
             activateIcon(icon2, 'image22.png', 'comingSoon'); // تغییر تصویر Lig به image22
-            scoreElement.textContent = score;
+            showContent('comingSoon'); // نمایش Coming Soon
         });
 
         icon3.addEventListener('click', () => {
             activateIcon(icon3, 'image33.png', 'comingSoon'); // تغییر تصویر Friend به image33
-            scoreElement.textContent = score;
+            showContent('comingSoon'); // نمایش Coming Soon
         });
 
         // نمایش محتوای اولیه (Home)
