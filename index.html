@@ -6,126 +6,117 @@
     <title>Coin Game</title>
     <style>
         html, body {
-            background-color: black;
+            background-color: black; /* پس‌زمینه مشکی */
             margin: 0;
             font-family: Arial, sans-serif;
-            height: 100%;
+            height: 100vh; /* ارتفاع کل صفحه */
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
             align-items: center;
-            overflow-y: auto; /* امکان اسکرول کردن به پایین */
+            overflow: hidden; /* جلوگیری از اسکرول */
         }
 
         #score-container {
             position: relative;
-            top: 20px;
+            top: 20px; /* فاصله از بالا */
             color: white;
-            font-size: 32px; /* کوچک‌تر کردن متن امتیاز */
             display: flex;
-            align-items: center;
-            justify-content: center;
             flex-direction: column;
+            align-items: center; /* مرکز قرار دادن محتوا */
         }
 
-        #score-content {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 10px;
+        #score-container img {
+            width: 100px; /* اندازه تصویر 100x100 */
+            height: 100px; /* اندازه تصویر 100x100 */
         }
 
-        #score-content img {
-            width: 150px; /* بزرگ‌تر کردن تصویر تورتلس */
-            height: 150px;
-            margin-right: 10px;
+        #userScore {
+            font-size: 40px; /* اندازه متن امتیاز */
+            margin-top: 10px; /* فاصله 10 پیکسل از تصویر */
         }
 
         #task-container {
             display: flex;
             flex-direction: column;
-            align-items: flex-start; /* متن Task و امتیاز به سمت چپ */
-        }
-
-        #task-container span {
-            font-size: 32px; /* اندازه متن امتیاز و Task برابر */
+            align-items: center; /* مرکز قرار دادن متن */
+            margin-top: 10px; /* فاصله از امتیاز */
         }
 
         #task-container hr {
-            width: 100%; /* خط زیر Task */
-            margin-top: 5px;
-            border: 1px solid white;
+            width: 100%; /* خط کامل از چپ تا راست */
+            border: 1px solid white; /* رنگ خط سفید */
+            margin: 5px 0; /* فاصله از بالا و پایین */
         }
 
         #task-container p {
-            margin-top: 5px;
+            margin-top: 5px; /* فاصله از خط */
             font-size: 18px; /* اندازه متن Telegram */
+            color: white; /* رنگ متن */
         }
 
         #bottom-bar {
-            position: fixed;
+            position: absolute; /* نوار پایین در انتهای صفحه */
             bottom: 0;
             width: 100%;
-            height: 70px;
-            background-color: #1a1a1a;
+            height: 70px; /* ارتفاع نوار */
+            background-color: #1a1a1a; /* رنگ نوار */
             display: flex;
-            justify-content: space-around;
-            align-items: center;
+            justify-content: space-around; /* تقسیم فضا */
+            align-items: center; /* مرکز قرار دادن محتوا */
         }
 
         .icon-container {
-            text-align: center;
-            cursor: pointer;
-            transition: color 0.3s, font-weight 0.3s;
+            text-align: center; /* تراز مرکز برای هر عکس و متن */
+            cursor: pointer; /* تغییر نشانگر ماوس هنگام هاور */
+            transition: color 0.3s, font-weight 0.3s; /* انیمیشن برای تغییر رنگ و وزن */
         }
 
         .icon-container img {
-            width: 20px;
-            height: 20px;
+            width: 20px; /* اندازه تصاویر */
+            height: 20px; /* اندازه تصاویر */
+            transition: transform 0.3s; /* انیمیشن برای تغییر مقیاس */
         }
 
         .icon-container p {
-            margin: 2px 0 0 0;
-            font-size: 14px;
-            font-weight: 300;
-            display: none;
+            margin: 2px 0 0 0; /* فاصله ۲ پیکسل زیر تصاویر */
+            font-size: 14px; /* اندازه متن جدید */
+            font-weight: 300; /* نازک‌تر کردن متن‌ها */
+            display: none; /* پنهان کردن متن به صورت پیش‌فرض */
         }
 
         .active img {
-            transform: scale(1.2);
+            transform: scale(1.2); /* افزایش اندازه تصویر آیکون فعال */
         }
 
         .active p {
-            color: white;
-            font-weight: 700;
-            display: block;
+            color: white; /* رنگ سفید برای متن آیکون فعال */
+            font-weight: 700; /* پهن‌تر کردن متن در حالت فعال */
+            display: block; /* نمایش متن در حالت فعال */
         }
 
         .icon-container:not(.active) img {
-            transform: scale(1);
+            transform: scale(1); /* اندازه اصلی برای آیکون‌های غیر فعال */
         }
 
         #content {
-            flex: 1;
-            display: none;
+            flex: 1; /* محتوا فضای باقیمانده را پر کند */
+            display: none; /* پنهان کردن محتوای صفحه */
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 24px;
-            text-align: center;
+            color: white; /* رنگ متن */
+            font-size: 24px; /* اندازه متن */
+            text-align: center; /* مرکز متن */
         }
     </style>
 </head>
 <body>
     <div id="score-container">
-        <img src="tortles.png" alt="Tortles">
-        <div id="score-content">
-            <div id="task-container">
-                <span>Task</span>
-                <hr>
-                <p>Telegram</p>
-            </div>
-            <span id="userScore">0</span>
+        <img src="tortles.png" alt="Tortles"> <!-- تصویر در بالای صفحه -->
+        <span id="userScore">0</span> <!-- امتیاز -->
+        <div id="task-container">
+            <span>Task</span>
+            <hr>
+            <p>Telegram</p>
         </div>
     </div>
 
@@ -150,13 +141,17 @@
         const icon3 = document.getElementById('icon3');
         const scoreElement = document.getElementById('userScore');
 
+        // دریافت امتیاز از localStorage یا تنظیم آن به 0 اگر موجود نباشد
         let score = parseInt(localStorage.getItem('score')) || 0;
         scoreElement.textContent = score;
 
+        // نمایش محتوای صفحه
         function showContent(contentId) {
+            // پنهان کردن تمامی محتوا
             document.getElementById('homeContent').style.display = 'none';
             document.getElementById('comingSoon').style.display = 'none';
 
+            // نمایش محتوا بر اساس آیکون کلیک شده
             if (contentId === 'home') {
                 document.getElementById('homeContent').style.display = 'block';
             } else {
@@ -164,41 +159,48 @@
             }
         }
 
+        // تابع برای تغییر وضعیت به حالت فعال و تغییر عکس‌ها
         function activateIcon(icon, newImageSrc, contentId) {
+            // غیرفعال کردن تمامی عکس‌ها و تغییر به حالت عادی
             document.querySelectorAll('.icon-container').forEach(el => {
                 el.classList.remove('active');
                 const img = el.querySelector('img');
                 if (el.id === 'icon1') {
-                    img.src = 'image11.png';
+                    img.src = 'image11.png'; // تغییر تصویر Home به image11
                 } else if (el.id === 'icon2') {
-                    img.src = 'image3.png';
+                    img.src = 'image3.png'; // بازگرداندن تصویر به حالت اولیه برای Leaderboard
                 } else if (el.id === 'icon3') {
-                    img.src = 'image2.png';
+                    img.src = 'image2.png'; // بازگرداندن تصویر به حالت اولیه برای Friend
                 }
-                el.querySelector('p').style.display = 'none';
+                el.querySelector('p').style.display = 'none'; // پنهان کردن متن
             });
 
+            // فعال کردن آیکون انتخابی
             icon.classList.add('active');
-            icon.querySelector('img').src = newImageSrc;
-            icon.querySelector('p').style.display = 'block';
+            icon.querySelector('img').src = newImageSrc; // تغییر تصویر آیکون به عکس جدید
+            icon.querySelector('p').style.display = 'block'; // نمایش متن در حالت فعال
+
+            // نمایش محتوای مناسب
             showContent(contentId);
         }
 
+        // رویداد کلیک برای هر آیکون
         icon1.addEventListener('click', () => {
-            activateIcon(icon1, 'image1.png', 'home');
-            scoreElement.textContent = score;
+            activateIcon(icon1, 'image1.png', 'home'); // بازگرداندن تصویر Home به حالت اصلی
+            scoreElement.textContent = score; // نمایش امتیاز
         });
 
         icon2.addEventListener('click', () => {
-            activateIcon(icon2, 'image22.png', 'comingSoon');
-            scoreElement.textContent = score;
+            activateIcon(icon2, 'image22.png', 'comingSoon'); // تغییر تصویر Leaderboard به image22
+            scoreElement.textContent = score; // نمایش امتیاز
         });
 
         icon3.addEventListener('click', () => {
-            activateIcon(icon3, 'image33.png', 'comingSoon');
-            scoreElement.textContent = score;
+            activateIcon(icon3, 'image33.png', 'comingSoon'); // تغییر تصویر Friend به image33
+            scoreElement.textContent = score; // نمایش امتیاز
         });
 
+        // نمایش محتوای اولیه (Home)
         showContent('home');
     </script>
 </body>
