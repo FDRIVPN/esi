@@ -6,104 +6,93 @@
     <title>Coin Game</title>
     <style>
         html, body {
-            background-color: black;
+            background-color: black; /* پس‌زمینه مشکی */
             margin: 0;
             font-family: Arial, sans-serif;
             height: 100%;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            flex-direction: column; /* چیدمان عمودی */
+            justify-content: center; /* مرکز قرار دادن محتوا */
+            align-items: center; /* مرکز قرار دادن محتوا */
         }
         #score-container {
             position: absolute;
-            top: 20%;
+            top: 20%; /* موقعیت نسبت به بالای صفحه */
             left: 50%;
             transform: translate(-50%, -50%);
-            color: white;
-            font-size: 40px; /* تغییر اندازه امتیاز */
+            color: white; /* رنگ امتیاز سفید */
+            font-size: 24px; /* اندازه متن امتیاز */
         }
         #bottom-bar {
-            position: fixed;
+            position: fixed; /* نوار ثابت در پایین صفحه */
             bottom: 0;
             width: 100%;
-            height: 70px;
-            background-color: #1a1a1a;
+            height: 70px; /* ارتفاع 70 پیکسل */
+            background-color: #1a1a1a; /* رنگ تیره */
             display: flex;
-            justify-content: space-around;
-            align-items: center;
+            justify-content: space-around; /* تقسیم فضا به صورت مساوی بین عکس‌ها */
+            align-items: center; /* تنظیم تصاویر در مرکز عمودی */
         }
         .icon-container {
-            text-align: center;
-            cursor: pointer;
-            transition: color 0.3s, font-weight 0.3s;
+            text-align: center; /* تراز مرکز برای هر عکس و متن */
+            cursor: pointer; /* تغییر نشانگر ماوس هنگام هاور */
+            transition: color 0.3s, font-weight 0.3s; /* انیمیشن برای تغییر رنگ و وزن */
         }
         .icon-container img {
-            width: 40px; /* اندازه تصاویر */
-            height: 40px; /* اندازه تصاویر */
-            transition: transform 0.3s;
+            width: 20px; /* اندازه تصاویر */
+            height: 20px; /* اندازه تصاویر */
+            transition: transform 0.3s; /* انیمیشن برای تغییر مقیاس */
         }
         .icon-container p {
-            margin: 2px 0 0 0;
-            font-size: 14px;
-            font-weight: 300;
-            display: none;
+            margin: 2px 0 0 0; /* فاصله ۲ پیکسل زیر تصاویر */
+            font-size: 14px; /* اندازه متن جدید */
+            font-weight: 300; /* نازک‌تر کردن متن‌ها */
+            display: none; /* پنهان کردن متن به صورت پیش‌فرض */
         }
         .active img {
-            transform: scale(1.2);
+            transform: scale(1.2); /* افزایش اندازه تصویر آیکون فعال */
         }
         .active p {
-            color: white;
-            font-weight: 700;
-            display: block;
+            color: white; /* رنگ سفید برای متن آیکون فعال */
+            font-weight: 700; /* پهن‌تر کردن متن در حالت فعال */
+            display: block; /* نمایش متن در حالت فعال */
         }
         .icon-container:not(.active) img {
-            transform: scale(1);
+            transform: scale(1); /* اندازه اصلی برای آیکون‌های غیر فعال */
         }
         #content {
-            flex: 1;
-            display: none;
+            flex: 1; /* محتوا فضای باقیمانده را پر کند */
+            display: none; /* پنهان کردن محتوای صفحه */
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 24px;
-            text-align: center;
+            color: white; /* رنگ متن */
+            font-size: 24px; /* اندازه متن */
+            text-align: center; /* مرکز متن */
         }
-        /* استایل برای پنل مدیریت */
+        /* استایل برای پنل مدیر */
         #adminPanel {
             display: none;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 20px;
-        }
-        #uploadedImage {
-            max-width: 300px;
-            margin-top: 20px;
-        }
-        #addedText {
-            display: none;
-            margin-top: 10px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.8);
             color: white;
-        }
-        hr {
-            width: 100%;
-            border: 1px solid white;
-            margin: 10px 0;
+            padding: 20px;
+            z-index: 100;
         }
     </style>
 </head>
 <body>
-    <div id="score-container">
-        <span id="userScore">0</span> <span>task</span>
-    </div>
-
     <div id="content">
         <div id="homeContent" style="text-align: center;">
-            <img src="tortles.png" alt="Tortles" style="width: 100px; margin-bottom: 10px;">
+            <img src="tortles.png" id="tortlesImage" alt="Tortles" style="margin-bottom: 20px; max-width: 100%;"> <!-- تصویر در بالای صفحه -->
             <div style="display: flex; align-items: center; justify-content: center;">
-                <span id="userScore" style="font-size: 24px;">0</span>
-                <span style="margin-left: 10px;">tortles</span>
+                <span id="userScore" style="margin-right: 10px;">0</span> <!-- امتیاز -->
+                <span style="margin-left: 10px;">Task</span> <!-- متن Task -->
             </div>
+            <hr style="width: 100%; border: 1px solid white;"> <!-- خط افقی -->
+            <div id="addedText" style="display: none; margin-top: 10px;"></div>
         </div>
         <div id="comingSoon" style="display: none;">Coming Soon...</div>
     </div>
@@ -123,14 +112,14 @@
         </div>
     </div>
 
-    <!-- پنل مدیریت -->
     <div id="adminPanel">
-        <h2 style="color: white;">پنل مدیریت</h2>
+        <h2>پنل مدیریت</h2>
         <input type="file" id="imageUpload" accept="image/*">
-        <button id="uploadImageButton">بارگذاری تصویر</button>
+        <input type="number" id="imageWidth" placeholder="عرض تصویر (پیکسل)" />
+        <input type="number" id="imageHeight" placeholder="ارتفاع تصویر (پیکسل)" />
+        <button id="uploadButton">بارگذاری تصویر</button>
         <button id="addTextButton">اضافه کردن متن</button>
         <div id="uploadedImage"></div>
-        <div id="addedText"></div>
     </div>
 
     <script>
@@ -145,20 +134,13 @@
         let score = parseInt(localStorage.getItem('score')) || 0;
         scoreElement.textContent = score;
 
-        // بررسی کد مدیر
-        function checkAdminCode() {
-            const adminCode = prompt("لطفاً کد مدیر را وارد کنید:");
-            if (adminCode === '123') {
-                localStorage.setItem('isAdmin', 'true');
-                adminPanel.style.display = 'flex'; // نمایش پنل مدیریت
-            }
-        }
-
         // نمایش محتوای صفحه
         function showContent(contentId) {
+            // پنهان کردن تمامی محتوا
             document.getElementById('homeContent').style.display = 'none';
             document.getElementById('comingSoon').style.display = 'none';
 
+            // نمایش محتوا بر اساس آیکون کلیک شده
             if (contentId === 'home') {
                 document.getElementById('homeContent').style.display = 'block';
             } else {
@@ -168,84 +150,192 @@
 
         // تابع برای تغییر وضعیت به حالت فعال و تغییر عکس‌ها
         function activateIcon(icon, newImageSrc, contentId) {
+            // غیرفعال کردن تمامی عکس‌ها و تغییر به حالت عادی
             document.querySelectorAll('.icon-container').forEach(el => {
                 el.classList.remove('active');
-                el.querySelector('p').style.fontWeight = '400';
+                el.querySelector('p').style.fontWeight = '400'; // برگرداندن متن به حالت عادی
                 const img = el.querySelector('img');
                 if (el.id === 'icon1') {
-                    img.src = 'image1.png'; // تصویر Home
+                    img.src = 'image1.png'; // تغییر تصویر Home به image1
                 } else if (el.id === 'icon2') {
-                    img.src = 'image3.png'; // تصویر Leaderboard
+                    img.src = 'image3.png'; // بازگرداندن تصویر به حالت اولیه برای Leaderboard
                 } else if (el.id === 'icon3') {
-                    img.src = 'image2.png'; // تصویر Friend
+                    img.src = 'image2.png'; // بازگرداندن تصویر به حالت اولیه برای Friend
                 }
-                el.querySelector('p').style.display = 'none';
+                el.querySelector('p').style.display = 'none'; // پنهان کردن متن
             });
 
+            // فعال کردن آیکون انتخابی
             icon.classList.add('active');
-            icon.querySelector('p').style.fontWeight = '700';
-            icon.querySelector('img').src = newImageSrc;
-            icon.querySelector('p').style.display = 'block';
+            icon.querySelector('p').style.fontWeight = '700'; // پهن‌تر کردن متن در حالت فعال
+            icon.querySelector('img').src = newImageSrc; // تغییر تصویر آیکون به عکس جدید
+            icon.querySelector('p').style.display = 'block'; // نمایش متن در حالت فعال
 
+            // نمایش محتوای مناسب
             showContent(contentId);
         }
 
         // رویداد کلیک برای هر آیکون
         icon1.addEventListener('click', () => {
-            activateIcon(icon1, 'image1_active.png', 'home');
-            scoreElement.textContent = score; // نمایش امتیاز
+            activateIcon(icon1, 'image1.png', 'home'); // بازگرداندن تصویر Home به حالت اصلی
+            scoreElement.textContent = score; // نمایش ام
+            color: white;
+            padding: 20px;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div id="content">
+        <div id="homeContent" style="text-align: center;">
+            <img src="tortles.png" id="tortlesImage" alt="Tortles" style="margin-bottom: 20px; max-width: 100%;"> <!-- تصویر در بالای صفحه -->
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <span id="userScore" style="margin-right: 10px;">0</span> <!-- امتیاز -->
+                <span style="margin-left: 10px;">Task</span> <!-- متن Task -->
+            </div>
+            <hr style="width: 100%; border: 1px solid white;"> <!-- خط افقی -->
+            <div id="addedText" style="display: none; margin-top: 10px;"></div>
+        </div>
+        <div id="comingSoon" style="display: none;">Coming Soon...</div>
+    </div>
+
+    <div id="bottom-bar">
+        <div class="icon-container active" id="icon1">
+            <img src="image1.png" alt="Home" id="icon1Img">
+            <p>Home</p>
+        </div>
+        <div class="icon-container" id="icon2">
+            <img src="image3.png" alt="Leaderboard" id="icon2Img">
+            <p>Leaderboard</p>
+        </div>
+        <div class="icon-container" id="icon3">
+            <img src="image2.png" alt="Friend" id="icon3Img">
+            <p>Friend</p>
+        </div>
+    </div>
+
+    <div id="adminPanel">
+        <h2>پنل مدیریت</h2>
+        <input type="file" id="imageUpload" accept="image/*">
+        <input type="number" id="imageWidth" placeholder="عرض تصویر (پیکسل)" />
+        <input type="number" id="imageHeight" placeholder="ارتفاع تصویر (پیکسل)" />
+        <button id="uploadButton">بارگذاری تصویر</button>
+        <button id="addTextButton">اضافه کردن متن</button>
+        <div id="uploadedImage"></div>
+    </div>
+
+    <script>
+        const icon1 = document.getElementById('icon1');
+        const icon2 = document.getElementById('icon2');
+        const icon3 = document.getElementById('icon3');
+        const scoreElement = document.getElementById('userScore');
+        const adminPanel = document.getElementById('adminPanel');
+        const addedText = document.getElementById('addedText');
+
+        // دریافت امتیاز از localStorage یا تنظیم آن به 0 اگر موجود نباشد
+        let score = parseInt(localStorage.getItem('score')) || 0;
+        scoreElement.textContent = score;
+
+        // بررسی ورود ادمین
+        const adminCode = localStorage.getItem('adminCode');
+        if (adminCode) {
+            adminPanel.style.display = 'block'; // نمایش پنل مدیریت
+        } else {
+            const userInput = prompt('لطفا کد ادمین را وارد کنید:');
+            if (userInput === '123') {
+                localStorage.setItem('adminCode', '123'); // ذخیره کد ادمین
+                adminPanel.style.display = 'block'; // نمایش پنل مدیریت
+            } else {
+                alert('کد ادمین نادرست است.');
+            }
+        }
+
+        // نمایش محتوای صفحه
+        function showContent(contentId) {
+            // پنهان کردن تمامی محتوا
+            document.getElementById('homeContent').style.display = 'none';
+            document.getElementById('comingSoon').style.display = 'none';
+
+            // نمایش محتوا بر اساس آیکون کلیک شده
+            if (contentId === 'home') {
+                document.getElementById('homeContent').style.display = 'block';
+            } else {
+                document.getElementById('comingSoon').style.display = 'block';
+            }
+        }
+
+        // تابع برای تغییر وضعیت به حالت فعال و تغییر عکس‌ها
+        function activateIcon(icon, newImageSrc, contentId) {
+            // غیرفعال کردن تمامی عکس‌ها و تغییر به حالت عادی
+            document.querySelectorAll('.icon-container').forEach(el => {
+                el.classList.remove('active');
+                el.querySelector('p').style.fontWeight = '400'; // برگرداندن متن به حالت عادی
+                const img = el.querySelector('img');
+                if (el.id === 'icon1') {
+                    img.src = 'image1.png'; // تغییر تصویر Home به image1
+                } else if (el.id === 'icon2') {
+                    img.src = 'image3.png'; // بازگرداندن تصویر به حالت اولیه برای Leaderboard
+                } else if (el.id === 'icon3') {
+                    img.src = 'image2.png'; // بازگرداندن تصویر به حالت اولیه برای Friend
+                }
+                el.querySelector('p').style.display = 'none'; // پنهان کردن متن
+            });
+
+            // فعال کردن آیکون انتخابی
+            icon.classList.add('active');
+            icon.querySelector('p').style.fontWeight = '700'; // پهن‌تر کردن متن در حالت فعال
+            icon.querySelector('img').src = newImageSrc; // تغییر تصویر آیکون به عکس جدید
+            icon.querySelector('p').style.display = 'block'; // نمایش متن در حالت فعال
+
+            // نمایش محتوای مناسب
+            showContent(contentId);
+        }
+
+        // رویداد کلیک برای هر آیکون
+        icon1.addEventListener('click', () => {
+            activateIcon(icon1, 'image1.png', 'home');
+            scoreElement.textContent = score;
         });
 
         icon2.addEventListener('click', () => {
-            activateIcon(icon2, 'image2_active.png', 'comingSoon');
-            scoreElement.textContent = score; // نمایش امتیاز
+            activateIcon(icon2, 'image3.png', 'leaderboard');
         });
 
         icon3.addEventListener('click', () => {
-            activateIcon(icon3, 'image3_active.png', 'comingSoon');
-            scoreElement.textContent = score; // نمایش امتیاز
+            activateIcon(icon3, 'image2.png', 'friend');
         });
 
-        // رویداد بارگذاری تصویر
-        document.getElementById('uploadImageButton').addEventListener('click', () => {
-            const fileInput = document.getElementById('imageUpload');
-            if (fileInput.files.length > 0) {
-                const file = fileInput.files[0];
+        // بارگذاری تصویر
+        const uploadButton = document.getElementById('uploadButton');
+        uploadButton.addEventListener('click', () => {
+            const file = document.getElementById('imageUpload').files[0];
+            const width = document.getElementById('imageWidth').value || '100'; // مقدار پیش‌فرض 100
+            const height = document.getElementById('imageHeight').value || '100'; // مقدار پیش‌فرض 100
+
+            if (file) {
                 const reader = new FileReader();
                 reader.onload = function (e) {
                     const img = document.createElement('img');
                     img.src = e.target.result;
-                    img.id = 'uploadedImage';
-                    img.style.maxWidth = '300px';
-                    document.getElementById('uploadedImage').innerHTML = '';
+                    img.style.width = width + 'px';
+                    img.style.height = height + 'px';
+                    document.getElementById('uploadedImage').innerHTML = ''; // خالی کردن محتوای قبلی
                     document.getElementById('uploadedImage').appendChild(img);
                 };
                 reader.readAsDataURL(file);
             }
         });
 
-        // رویداد اضافه کردن متن
-        document.getElementById('addTextButton').addEventListener('click', () => {
-            const text = prompt("متن مورد نظر را وارد کنید:");
+        // اضافه کردن متن
+        const addTextButton = document.getElementById('addTextButton');
+        addTextButton.addEventListener('click', () => {
+            const text = prompt('متن مورد نظر را وارد کنید:');
             if (text) {
-                addedText.textContent = text;
-                addedText.style.display = 'block';
+                addedText.style.display = 'block'; // نمایش متن اضافه شده
+                addedText.textContent = text; // تنظیم متن اضافه شده
             }
-        });
-
-        // بررسی ورود به سیستم مدیر
-        if (localStorage.getItem('isAdmin') === 'true') {
-            adminPanel.style.display = 'flex';
-        } else {
-            checkAdminCode();
-        }
-
-        // ذخیره امتیاز در localStorage
-        window.addEventListener('beforeunload', () => {
-            localStorage.setItem('score', score);
         });
     </script>
 </body>
 </html>
 
-                   
