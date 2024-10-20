@@ -107,6 +107,35 @@
             font-size: 24px; /* اندازه متن */
             text-align: center; /* مرکز متن */
         }
+
+        #comingSoon {
+            display: none; /* پنهان کردن محتوای Coming Soon به صورت پیش‌فرض */
+        }
+
+        /* استایل برای گزینه‌های مدیریت */
+        #adminOptions {
+            display: none; /* پنهان کردن گزینه‌ها به صورت پیش‌فرض */
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+        }
+
+        #uploadSection {
+            display: none; /* پنهان کردن بخش آپلود به صورت پیش‌فرض */
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #uploadSection input {
+            margin-top: 10px;
+        }
+
+        #addedText {
+            margin-top: 20px; /* فاصله از بالای متن اضافه شده */
+            color: white; /* رنگ متن */
+        }
     </style>
 </head>
 <body>
@@ -118,6 +147,24 @@
             <hr> <!-- خط کامل از چپ به راست -->
             <p>Telegram</p>
         </div>
+    </div>
+
+    <div id="adminOptions">
+        <button id="addTextButton">افزودن متن</button>
+        <button id="uploadImageButton">آپلود تصویر</button>
+    </div>
+
+    <div id="uploadSection">
+        <input type="file" id="imageUpload" accept="image/*" />
+        <button id="submitImageButton">ارسال تصویر</button>
+    </div>
+
+    <div id="content">
+        <div id="homeContent" style="text-align: center;">
+            <p>Welcome to the Home Page!</p>
+        </div>
+        <div id="comingSoon" style="text-align: center;">Coming Soon...</div> <!-- محتوای Coming Soon -->
+        <div id="addedText" style="text-align: center; display:none;"></div> <!-- متن اضافه شده -->
     </div>
 
     <div id="bottom-bar">
@@ -134,22 +181,35 @@
             <p>Friend</p>
         </div>
     </div>
-
     <script>
         const icon1 = document.getElementById('icon1');
         const icon2 = document.getElementById('icon2');
         const icon3 = document.getElementById('icon3');
         const scoreElement = document.getElementById('userScore');
+        const adminOptions = document.getElementById('adminOptions');
+        const uploadSection = document.getElementById('uploadSection');
+        const addedText = document.getElementById('addedText');
 
         // دریافت امتیاز از localStorage یا تنظیم آن به 0 اگر موجود نباشد
         let score = parseInt(localStorage.getItem('score')) || 0;
         scoreElement.textContent = score;
+
+        // بررسی کد ورود برای مدیر
+        function checkAdminCode() {
+            const adminCode = prompt("لطفاً کد مدیر را وارد کنید:");
+            if (adminCode === '123') {
+                adminOptions.style.display = 'flex'; // نمایش گزینه‌های مدیر
+            } else {
+                alert("شما دسترسی به این قسمت را ندارید.");
+            }
+        }
 
         // نمایش محتوای صفحه
         function showContent(contentId) {
             // پنهان کردن تمامی محتوا
             document.getElementById('homeContent').style.display = 'none';
             document.getElementById('comingSoon').style.display = 'none';
+            addedText.style.display = 'none';
 
             // نمایش محتوا بر اساس آیکون کلیک شده
             if (contentId === 'home') {
@@ -166,42 +226,57 @@
                 el.classList.remove('active');
                 const img = el.querySelector('img');
                 if (el.id === 'icon1') {
-                    img.src = 'image11.png'; // تغییر تصویر Home به image11
+                    img.src = 'image1.png'; // تصویر Home
                 } else if (el.id === 'icon2') {
-                    img.src = 'image3.png'; // بازگرداندن تصویر به حالت اولیه برای Leaderboard
+                    img.src = 'image3.png'; // تصویر Leaderboard
                 } else if (el.id === 'icon3') {
-                    img.src = 'image2.png'; // بازگرداندن تصویر به حالت اولیه برای Friend
+                    img.src = 'image2.png'; // تصویر Friend
                 }
-                el.querySelector('p').style.display = 'none'; // پنهان کردن متن
             });
 
-            // فعال کردن آیکون انتخابی
+            // فعال کردن آیکون انتخاب شده
             icon.classList.add('active');
-            icon.querySelector('img').src = newImageSrc; // تغییر تصویر آیکون به عکس جدید
-            icon.querySelector('p').style.display = 'block'; // نمایش متن در حالت فعال
-
-            // نمایش محتوای مناسب
-            showContent(contentId);
+            const iconImage = icon.querySelector('img');
+            iconImage.src = newImageSrc; // تغییر تصویر آیکون فعال
+            showContent(contentId); // نمایش محتوای مربوطه
         }
 
-        // رویداد کلیک برای هر آیکون
-        icon1.addEventListener('click', () => {
-            activateIcon(icon1, 'image1.png', 'home'); // بازگرداندن تصویر Home به حالت اصلی
-            scoreElement.textContent = score; // نمایش امتیاز
-        });
+        // افزودن رویداد کلیک به آیکون‌ها
+        icon1.addEventListener('click', () => activateIcon(icon1, 'image1_active.png', 'home'));
+        icon2.addEventListener('click', () => activateIcon(icon2, 'image3_active.png', 'leaderboard'));
+        icon3.addEventListener('click', () => activateIcon(icon3, 'image2_active.png', 'friend'));
 
-        icon2.addEventListener('click', () => {
-            activateIcon(icon2, 'image22.png', 'comingSoon'); // تغییر تصویر Leaderboard به image22
-            scoreElement.textContent = score; // نمایش امتیاز
-        });
+        // نمایش گزینه‌های مدیر در بار پایین
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAdminCode(); // بررسی کد مدیر در بارگذاری صفحه
 
-        icon3.addEventListener('click', () => {
-            activateIcon(icon3, 'image33.png', 'comingSoon'); // تغییر تصویر Friend به image33
-            scoreElement.textContent = score; // نمایش امتیاز
-        });
+            document.getElementById('addTextButton').addEventListener('click', () => {
+                const text = prompt("متن جدید را وارد کنید:");
+                if (text) {
+                    addedText.textContent = text;
+                    addedText.style.display = 'block'; // نمایش متن جدید
+                }
+            });
 
-        // نمایش محتوای اولیه (Home)
-        showContent('home');
+            document.getElementById('uploadImageButton').addEventListener('click', () => {
+                uploadSection.style.display = 'flex'; // نمایش بخش آپلود
+            });
+
+            document.getElementById('submitImageButton').addEventListener('click', () => {
+                const file = document.getElementById('imageUpload').files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const img = document.createElement('img');
+                        img.src = event.target.result;
+                        img.style.maxWidth = '100%'; // حداکثر عرض ۱۰۰٪
+                        img.style.maxHeight = '300px'; // حداکثر ارتفاع ۳۰۰ پیکسل
+                        document.getElementById('homeContent').appendChild(img); // افزودن تصویر به محتوای اصلی
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
     </script>
 </body>
 </html>
