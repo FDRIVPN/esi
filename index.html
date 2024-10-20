@@ -12,15 +12,16 @@
             height: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start; /* تغییر مرکزیت محتوا به بالا */
+            justify-content: flex-start;
             align-items: center;
+            overflow-y: auto; /* امکان اسکرول کردن به پایین */
         }
 
         #score-container {
-            position: relative; /* تغییر موقعیت به نسبی */
+            position: relative;
             top: 20px;
             color: white;
-            font-size: 48px;
+            font-size: 32px; /* کوچک‌تر کردن متن امتیاز */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -35,7 +36,30 @@
         }
 
         #score-content img {
+            width: 150px; /* بزرگ‌تر کردن تصویر تورتلس */
+            height: 150px;
             margin-right: 10px;
+        }
+
+        #task-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start; /* متن Task و امتیاز به سمت چپ */
+        }
+
+        #task-container span {
+            font-size: 32px; /* اندازه متن امتیاز و Task برابر */
+        }
+
+        #task-container hr {
+            width: 100%; /* خط زیر Task */
+            margin-top: 5px;
+            border: 1px solid white;
+        }
+
+        #task-container p {
+            margin-top: 5px;
+            font-size: 18px; /* اندازه متن Telegram */
         }
 
         #bottom-bar {
@@ -94,10 +118,14 @@
 </head>
 <body>
     <div id="score-container">
-        <img src="tortles.png" alt="Tortles" style="width: 50px; height: 50px;">
+        <img src="tortles.png" alt="Tortles">
         <div id="score-content">
+            <div id="task-container">
+                <span>Task</span>
+                <hr>
+                <p>Telegram</p>
+            </div>
             <span id="userScore">0</span>
-            <span style="margin-left: 10px;">tortles</span>
         </div>
     </div>
 
@@ -108,7 +136,7 @@
         </div>
         <div class="icon-container" id="icon2">
             <img src="image3.png" alt="Leaderboard" id="icon2Img">
-            <p>Lig</p>
+            <p>Leaderboard</p>
         </div>
         <div class="icon-container" id="icon3">
             <img src="image2.png" alt="Friend" id="icon3Img">
@@ -122,7 +150,6 @@
         const icon3 = document.getElementById('icon3');
         const scoreElement = document.getElementById('userScore');
 
-        // دریافت امتیاز از localStorage یا تنظیم آن به 0 اگر موجود نباشد
         let score = parseInt(localStorage.getItem('score')) || 0;
         scoreElement.textContent = score;
 
