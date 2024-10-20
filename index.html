@@ -12,55 +12,99 @@
             height: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
+            overflow-y: auto; /* امکان اسکرول کردن به پایین */
         }
+
         #score-container {
-            position: absolute;
-            top: 20%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            position: relative;
+            top: 20px;
             color: white;
-            font-size: 36px; /* Smaller size for score */
+            font-size: 32px; /* کوچک‌تر کردن متن امتیاز */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
         }
+
+        #score-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        #score-content img {
+            width: 150px; /* بزرگ‌تر کردن تصویر تورتلس */
+            height: 150px;
+            margin-right: 10px;
+        }
+
+        #task-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start; /* متن Task و امتیاز به سمت چپ */
+        }
+
+        #task-container span {
+            font-size: 32px; /* اندازه متن امتیاز و Task برابر */
+        }
+
+        #task-container hr {
+            width: 100%; /* خط زیر Task */
+            margin-top: 5px;
+            border: 1px solid white;
+        }
+
+        #task-container p {
+            margin-top: 5px;
+            font-size: 18px; /* اندازه متن Telegram */
+        }
+
         #bottom-bar {
             position: fixed;
-            bottom: 10%; /* Adjusted for aesthetic */
+            bottom: 0;
             width: 100%;
             height: 70px;
             background-color: #1a1a1a;
             display: flex;
             justify-content: space-around;
             align-items: center;
-            border-top: 3px solid white; /* Full-width line at the top */
         }
+
         .icon-container {
             text-align: center;
             cursor: pointer;
             transition: color 0.3s, font-weight 0.3s;
         }
+
         .icon-container img {
-            width: 100px; /* Adjusted size */
-            height: 100px; /* Adjusted size */
-            transition: transform 0.3s;
+            width: 20px;
+            height: 20px;
         }
+
         .icon-container p {
-            margin: 10px 0 0 0; /* Adjusted spacing */
-            font-size: 40px; /* Adjusted text size */
+            margin: 2px 0 0 0;
+            font-size: 14px;
             font-weight: 300;
             display: none;
         }
+
         .active img {
             transform: scale(1.2);
         }
+
         .active p {
             color: white;
             font-weight: 700;
             display: block;
         }
+
         .icon-container:not(.active) img {
             transform: scale(1);
         }
+
         #content {
             flex: 1;
             display: none;
@@ -70,34 +114,19 @@
             font-size: 24px;
             text-align: center;
         }
-        #admin-panel {
-            display: none; /* Hidden by default */
-            position: fixed;
-            top: 10%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.8);
-            padding: 20px;
-            border-radius: 8px;
-        }
-        #admin-panel input {
-            width: 200px;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
     </style>
 </head>
 <body>
-    <div id="content">
-        <div id="homeContent" style="text-align: center;">
-            <img src="tortles.png" alt="Tortles" style="width: 200px; margin-bottom: 20px;"> <!-- Enlarged image -->
-            <div style="display: flex; align-items: center; justify-content: center;">
-                <span id="userScore" style="margin-right: 10px;">0</span>
-                <span style="margin-left: 10px;">Task</span> <!-- Adjusted text -->
+    <div id="score-container">
+        <img src="tortles.png" alt="Tortles">
+        <div id="score-content">
+            <div id="task-container">
+                <span>Task</span>
+                <hr>
+                <p>Telegram</p>
             </div>
-            <hr style="width: 100%; border-color: white;"> <!-- Full-width line -->
+            <span id="userScore">0</span>
         </div>
-        <div id="comingSoon" style="display: none;">Coming Soon...</div>
     </div>
 
     <div id="bottom-bar">
@@ -106,8 +135,8 @@
             <p>Home</p>
         </div>
         <div class="icon-container" id="icon2">
-            <img src="image3.png" alt="Leaderboard" id="icon2Img"> <!-- Changed text -->
-            <p>Leaderboard</p> <!-- Changed text -->
+            <img src="image3.png" alt="Leaderboard" id="icon2Img">
+            <p>Leaderboard</p>
         </div>
         <div class="icon-container" id="icon3">
             <img src="image2.png" alt="Friend" id="icon3Img">
@@ -115,22 +144,11 @@
         </div>
     </div>
 
-    <div id="admin-panel">
-        <input type="password" id="adminCode" placeholder="Enter admin code" />
-        <button id="submitAdminCode">Submit</button>
-        <button id="uploadImage">Upload Image</button>
-        <button id="addText">Add Text</button>
-    </div>
-
     <script>
         const icon1 = document.getElementById('icon1');
         const icon2 = document.getElementById('icon2');
         const icon3 = document.getElementById('icon3');
         const scoreElement = document.getElementById('userScore');
-        const adminPanel = document.getElementById('admin-panel');
-        const adminCodeInput = document.getElementById('adminCode');
-        const submitAdminCode = document.getElementById('submitAdminCode');
-        let isAdmin = false;
 
         let score = parseInt(localStorage.getItem('score')) || 0;
         scoreElement.textContent = score;
@@ -149,17 +167,20 @@
         function activateIcon(icon, newImageSrc, contentId) {
             document.querySelectorAll('.icon-container').forEach(el => {
                 el.classList.remove('active');
-                el.querySelector('p').style.fontWeight = '400';
                 const img = el.querySelector('img');
-                img.src = img.getAttribute('data-default-src');
+                if (el.id === 'icon1') {
+                    img.src = 'image11.png';
+                } else if (el.id === 'icon2') {
+                    img.src = 'image3.png';
+                } else if (el.id === 'icon3') {
+                    img.src = 'image2.png';
+                }
                 el.querySelector('p').style.display = 'none';
             });
 
             icon.classList.add('active');
-            icon.querySelector('p').style.fontWeight = '700';
             icon.querySelector('img').src = newImageSrc;
             icon.querySelector('p').style.display = 'block';
-
             showContent(contentId);
         }
 
@@ -178,23 +199,7 @@
             scoreElement.textContent = score;
         });
 
-        submitAdminCode.addEventListener('click', () => {
-            if (adminCodeInput.value === '123' && !isAdmin) {
-                isAdmin = true;
-                adminPanel.style.display = 'none';
-                alert('You are now an admin!');
-            } else {
-                alert('Invalid code or you are already an admin!');
-            }
-        });
-
-        // Initial display
         showContent('home');
-
-        // Show admin panel on load for testing; remove in production
-        if (!isAdmin) {
-            adminPanel.style.display = 'block';
-        }
     </script>
 </body>
 </html>
