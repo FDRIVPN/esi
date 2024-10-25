@@ -20,7 +20,7 @@
             position: relative;
             top: 20px;
             color: white;
-            font-size: 48px;
+            font-size: 36px; /* کاهش اندازه متن */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -29,7 +29,7 @@
 
         .decorative-oval {
             position: relative;
-            width: 200px; /* عرض بیضی */
+            width: 300px; /* افزایش طول بیضی */
             height: 30px; /* ارتفاع بیضی */
             background-color: white; /* رنگ سفید */
             border-radius: 15px; /* گرد کردن گوشه‌ها */
@@ -41,6 +41,7 @@
             align-items: center;
             justify-content: center;
             margin-top: 10px;
+            font-size: 24px; /* کاهش اندازه متن امتیاز */
         }
 
         #score-content img {
@@ -116,7 +117,6 @@
         </div>
     </div>
 
-    <!-- حلقه برای اضافه کردن ۱۰ بیضی -->
     <div id="ovals-container">
         <!-- بیضی‌ها در اینجا اضافه می‌شوند -->
     </div>
@@ -152,16 +152,19 @@
         let score = parseInt(localStorage.getItem('score')) || 0;
         scoreElement.textContent = score;
 
-        // اضافه کردن ۱۰ بیضی به صفحه
-        for (let i = 0; i < 10; i++) {
-            const oval = document.createElement('div');
-            oval.classList.add('decorative-oval');
-            ovalsContainer.appendChild(oval);
+        function createOvals() {
+            // اضافه کردن ۱۰ بیضی به صفحه
+            for (let i = 0; i < 10; i++) {
+                const oval = document.createElement('div');
+                oval.classList.add('decorative-oval');
+                ovalsContainer.appendChild(oval);
+            }
         }
 
         function showContent(contentId) {
             document.getElementById('homeContent').style.display = 'none';
             document.getElementById('comingSoon').style.display = 'none';
+            ovalsContainer.innerHTML = ''; // پاک کردن بیضی‌ها
 
             const selectedContent = document.getElementById(contentId);
             selectedContent.style.display = 'block';
@@ -173,6 +176,7 @@
 
             if (contentId === 'homeContent') {
                 scoreContainer.style.display = 'flex';
+                createOvals(); // ایجاد بیضی‌ها فقط در صفحه Home
             } else {
                 scoreContainer.style.display = 'none';
             }
