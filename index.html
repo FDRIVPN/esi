@@ -20,7 +20,7 @@
             position: relative;
             top: 20px;
             color: white;
-            font-size: 36px; /* اندازه متن */
+            font-size: 36px; /* کاهش اندازه متن */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -38,9 +38,6 @@
 
         #ovals-container {
             margin-top: 100px; /* فاصله از متن امتیاز */
-            display: flex;
-            flex-direction: column; /* قرار دادن بیضی‌ها به صورت ستونی */
-            align-items: center; /* وسط چین کردن بیضی‌ها */
         }
 
         #showMore {
@@ -70,51 +67,6 @@
         #comingSoon {
             display: none;
         }
-
-        #bottom-bar {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            height: 70px;
-            background-color: #1a1a1a;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-        }
-
-        .icon-container {
-            text-align: center;
-            cursor: pointer;
-            transition: color 0.3s, font-weight 0.3s;
-            outline: none; /* حذف نوار آبی */
-            -webkit-tap-highlight-color: transparent; /* حذف نوار آبی در موبایل */
-        }
-
-        .icon-container img {
-            width: 20px;
-            height: 20px;
-        }
-
-        .icon-container p {
-            margin: 2px 0 0 0;
-            font-size: 14px;
-            font-weight: 300;
-            display: none;
-        }
-
-        .active img {
-            transform: scale(1.2);
-        }
-
-        .active p {
-            color: white;
-            font-weight: 700;
-            display: block;
-        }
-
-        .icon-container:not(.active) img {
-            transform: scale(1);
-        }
     </style>
 </head>
 <body>
@@ -130,66 +82,72 @@
         <!-- بیضی‌ها در اینجا اضافه می‌شوند -->
     </div>
 
-    <div id="showMore" onclick="toggleOvals()">
-        Show More
-        <span class="arrow">▼</span>
+    <div id="showMore">
+        Show More <span class="arrow">▼</span>
     </div>
 
     <div id="content">
-        <div id="homeContent">Home Content Here</div>
+        <div id="homeContent"></div>
         <div id="comingSoon">Coming Soon...</div>
     </div>
 
     <div id="bottom-bar">
         <div class="icon-container active" id="icon1" tabindex="0">
-            <img src="image1.png" alt="Home" id="icon1Img"> <!-- تصویر فعال -->
+            <img src="image1.png" alt="Home" id="icon1Img">
             <p>Home</p>
         </div>
         <div class="icon-container" id="icon2" tabindex="0">
-            <img src="image3.png" alt="Leaderboard" id="icon2Img"> <!-- تصویر فعال -->
+            <img src="image3.png" alt="Leaderboard" id="icon2Img">
             <p>Leaderboard</p>
         </div>
         <div class="icon-container" id="icon3" tabindex="0">
-            <img src="image2.png" alt="Friend" id="icon3Img"> <!-- تصویر فعال -->
+            <img src="image2.png" alt="Friend" id="icon3Img">
             <p>Friend</p>
         </div>
     </div>
 
     <script>
+        const icon1 = document.getElementById('icon1');
+        const icon2 = document.getElementById('icon2');
+        const icon3 = document.getElementById('icon3');
         const scoreElement = document.getElementById('userScore');
         const scoreContainer = document.getElementById('score-container');
+        const ovalsContainer = document.getElementById('ovals-container');
+        const showMore = document.getElementById('showMore');
+
         let score = parseInt(localStorage.getItem('score')) || 0;
         scoreElement.textContent = score;
 
-        function createOvals(count) {
-            const ovalsContainer = document.getElementById('ovals-container');
-            ovalsContainer.innerHTML = ''; // پاکسازی بیضی‌ها
-            for (let i = 0; i < count; i++) {
+        let showAll = false; // وضعیت نشان دادن همه بیضی‌ها
+
+        function createOvals() {
+            // اضافه کردن بیضی‌ها
+            for (let i = 0; i < 10; i++) {
                 const oval = document.createElement('div');
-                oval.className = 'decorative-oval';
+                oval.classList.add('decorative-oval');
+                oval.style.display = i < 5 ? 'block' : 'none'; // نمایش فقط ۵ بیضی اولیه
                 ovalsContainer.appendChild(oval);
             }
         }
 
-        let showAll = false; // کنترل نمایش بیضی‌ها
-
-        function toggleOvals() {
-            if (showAll) {
-                createOvals(5); // نشان دادن ۵ بیضی
-                document.getElementById('showMore').innerHTML = 'Show More <span class="arrow">▼</span>';
-            } else {
-                createOvals(10); // نشان دادن ۱۰ بیضی
-                document.getElementById('showMore').innerHTML = 'Show Less <span class="arrow">▲</span>';
-            }
-            showAll = !showAll; // تغییر وضعیت
+        function updateShowMore() {
+            showMore.style.display = 'block'; // نمایش متن "Show More"
+            showMore.textContent = showAll ? 'Show Less ▲' : 'Show More ▼'; // تغییر متن بر اساس وضعیت
         }
 
-        createOvals(5); // ایجاد بیضی‌های اولیه
-        document.getElementById('showMore').style.display = 'block'; // نمایش متن "Show More"
+        function toggleOvals() {
+            showAll = !showAll; // معکوس کردن وضعیت
+            const ovals = ovalsContainer.querySelectorAll('.decorative-oval');
+            ovals.forEach((oval, index) => {
+                oval.style.display = showAll || index < 5 ? 'block' : 'none'; // تغییر نمایش بیضی‌ها
+            });
+            updateShowMore(); // بروزرسانی متن "Show More"
+        }
 
         function showContent(contentId) {
             document.getElementById('homeContent').style.display = 'none';
             document.getElementById('comingSoon').style.display = 'none';
+            ovalsContainer.innerHTML = ''; // پاک کردن بیضی‌ها
 
             const selectedContent = document.getElementById(contentId);
             selectedContent.style.display = 'block';
@@ -199,56 +157,34 @@
                 selectedContent.style.opacity = 1;
             }, 10);
 
-            // نمایش یا پنهان‌سازی امتیاز و تصویر
             if (contentId === 'homeContent') {
                 scoreContainer.style.display = 'flex';
+                createOvals(); // ایجاد بیضی‌ها فقط در صفحه Home
+                updateShowMore(); // بروزرسانی وضعیت "Show More"
             } else {
                 scoreContainer.style.display = 'none';
+                showMore.style.display = 'none'; // مخفی کردن "Show More" در سایر صفحات
             }
         }
-
-        function activateIcon(icon, newImageSrc, contentId) {
-            const previouslyActive = document.querySelector('.icon-container.active');
-
-            if (previouslyActive) {
-                previouslyActive.classList.remove('active');
-                const prevImg = previouslyActive.querySelector('img');
-                if (previouslyActive.id === 'icon1') {
-                    prevImg.src = 'image11.png'; // تصویر غیرفعال
-                } else if (previouslyActive.id === 'icon2') {
-                    prevImg.src = 'image33.png'; // تصویر غیرفعال
-                } else if (previouslyActive.id === 'icon3') {
-                    prevImg.src = 'image22.png'; // تصویر غیرفعال
-                }
-                previouslyActive.querySelector('p').style.display = 'none';
-            }
-
-            icon.classList.add('active');
-            icon.querySelector('img').src = newImageSrc;
-            icon.querySelector('p').style.display = 'block';
-            showContent(contentId);
-        }
-
-        const icon1 = document.getElementById('icon1');
-        const icon2 = document.getElementById('icon2');
-        const icon3 = document.getElementById('icon3');
 
         icon1.addEventListener('click', () => {
-            activateIcon(icon1, 'image1.png', 'homeContent'); // تصویر فعال
+            activateIcon(icon1, 'image11.png', 'homeContent');
             scoreElement.textContent = score;
         });
 
         icon2.addEventListener('click', () => {
-            activateIcon(icon2, 'image3.png', 'comingSoon'); // تصویر فعال
+            activateIcon(icon2, 'image22.png', 'comingSoon');
             scoreElement.textContent = score;
         });
 
         icon3.addEventListener('click', () => {
-            activateIcon(icon3, 'image2.png', 'comingSoon'); // تصویر فعال
+            activateIcon(icon3, 'image33.png', 'comingSoon');
             scoreElement.textContent = score;
         });
 
-        showContent('homeContent'); // نمایش محتوای خانه به طور پیش‌فرض
+        showMore.addEventListener('click', toggleOvals); // افزودن رویداد برای کلیک بر روی "Show More"
+
+        showContent('homeContent');
     </script>
 </body>
 </html>
