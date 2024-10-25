@@ -141,7 +141,7 @@
 
     <div id="bottom-bar">
         <div class="icon-container active" id="icon1" tabindex="0">
-            <img src="image1.png" alt="Home" id="icon1Img">
+            <img src="image11.png" alt="Home" id="icon1Img"> <!-- تغییر تصویر به image11 -->
             <p>Home</p>
         </div>
         <div class="icon-container" id="icon2" tabindex="0">
@@ -220,7 +220,7 @@
                 el.classList.remove('active');
                 const img = el.querySelector('img');
                 if (el.id === 'icon1') {
-                    img.src = 'image1.png';
+                    img.src = 'image1.png'; // تغییر به تصویر اولیه
                 } else if (el.id === 'icon2') {
                     img.src = 'image3.png';
                 } else if (el.id === 'icon3') {
@@ -230,13 +230,13 @@
             });
 
             icon.classList.add('active');
-            icon.querySelector('img').src = newImageSrc;
+            icon.querySelector('img').src = newImageSrc; // تغییر به تصویر جدید
             icon.querySelector('p').style.display = 'block';
             showContent(contentId);
         }
 
         icon1.addEventListener('click', () => {
-            activateIcon(icon1, 'image11.png', 'homeContent');
+            activateIcon(icon1, 'image11.png', 'homeContent'); // تصویر icon1 به image11 تغییر کرد
             scoreElement.textContent = score;
         });
 
@@ -250,11 +250,4 @@
             scoreElement.textContent = score;
         });
 
-        showMore.addEventListener('click', toggleOvals); // افزودن رویداد برای کلیک بر روی "Show More"
-
-                       showContent('homeContent');
-    </script>
-</body>
-</html>
-
-   
+        showMore.addEventListener('click', toggleOvals); // افزودن رویداد برای کلیک
