@@ -29,68 +29,29 @@
 
         .decorative-oval {
             position: relative;
-            width: 300px; /* افزایش طول بیضی */
+            width: 300px; /* طول بیضی */
             height: 30px; /* ارتفاع بیضی */
             background-color: white; /* رنگ سفید */
             border-radius: 15px; /* گرد کردن گوشه‌ها */
             margin-top: 10px; /* فاصله بین بیضی‌ها */
         }
 
-        #score-content {
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        #ovals-container {
+            margin-top: 100px; /* فاصله از متن امتیاز */
+        }
+
+        #showMore {
             margin-top: 10px;
-            font-size: 24px; /* کاهش اندازه متن امتیاز */
-        }
-
-        #score-content img {
-            margin-right: 10px;
-        }
-
-        #bottom-bar {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            height: 70px;
-            background-color: #1a1a1a;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-        }
-
-        .icon-container {
-            text-align: center;
-            cursor: pointer;
-            transition: color 0.3s, font-weight 0.3s;
-            outline: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .icon-container img {
-            width: 20px;
-            height: 20px;
-        }
-
-        .icon-container p {
-            margin: 2px 0 0 0;
-            font-size: 14px;
-            font-weight: 300;
-            display: none;
-        }
-
-        .active img {
-            transform: scale(1.2);
-        }
-
-        .active p {
             color: white;
-            font-weight: 700;
-            display: block;
+            cursor: pointer;
+            font-size: 20px; /* اندازه متن "Show More" */
+            display: none; /* مخفی بودن اولیه */
         }
 
-        .icon-container:not(.active) img {
-            transform: scale(1);
+        .arrow {
+            display: inline-block;
+            margin-left: 5px;
+            transform: rotate(180deg); /* چرخاندن فلش به سمت پایین */
         }
 
         #content {
@@ -121,6 +82,10 @@
         <!-- بیضی‌ها در اینجا اضافه می‌شوند -->
     </div>
 
+    <div id="showMore">
+        Show More <span class="arrow">▼</span>
+    </div>
+
     <div id="content">
         <div id="homeContent"></div>
         <div id="comingSoon">Coming Soon...</div>
@@ -148,17 +113,35 @@
         const scoreElement = document.getElementById('userScore');
         const scoreContainer = document.getElementById('score-container');
         const ovalsContainer = document.getElementById('ovals-container');
+        const showMore = document.getElementById('showMore');
 
         let score = parseInt(localStorage.getItem('score')) || 0;
         scoreElement.textContent = score;
 
+        let showAll = false; // وضعیت نشان دادن همه بیضی‌ها
+
         function createOvals() {
-            // اضافه کردن ۱۰ بیضی به صفحه
+            // اضافه کردن بیضی‌ها
             for (let i = 0; i < 10; i++) {
                 const oval = document.createElement('div');
                 oval.classList.add('decorative-oval');
+                oval.style.display = i < 5 ? 'block' : 'none'; // نمایش فقط ۵ بیضی اولیه
                 ovalsContainer.appendChild(oval);
             }
+        }
+
+        function updateShowMore() {
+            showMore.style.display = 'block'; // نمایش متن "Show More"
+            showMore.textContent = showAll ? 'Show Less ▲' : 'Show More ▼'; // تغییر متن بر اساس وضعیت
+        }
+
+        function toggleOvals() {
+            showAll = !showAll; // معکوس کردن وضعیت
+            const ovals = ovalsContainer.querySelectorAll('.decorative-oval');
+            ovals.forEach((oval, index) => {
+                oval.style.display = showAll || index < 5 ? 'block' : 'none'; // تغییر نمایش بیضی‌ها
+            });
+            updateShowMore(); // بروزرسانی متن "Show More"
         }
 
         function showContent(contentId) {
@@ -177,29 +160,11 @@
             if (contentId === 'homeContent') {
                 scoreContainer.style.display = 'flex';
                 createOvals(); // ایجاد بیضی‌ها فقط در صفحه Home
+                updateShowMore(); // بروزرسانی وضعیت "Show More"
             } else {
                 scoreContainer.style.display = 'none';
+                showMore.style.display = 'none'; // مخفی کردن "Show More" در سایر صفحات
             }
-        }
-
-        function activateIcon(icon, newImageSrc, contentId) {
-            document.querySelectorAll('.icon-container').forEach(el => {
-                el.classList.remove('active');
-                const img = el.querySelector('img');
-                if (el.id === 'icon1') {
-                    img.src = 'image1.png';
-                } else if (el.id === 'icon2') {
-                    img.src = 'image3.png';
-                } else if (el.id === 'icon3') {
-                    img.src = 'image2.png';
-                }
-                el.querySelector('p').style.display = 'none';
-            });
-
-            icon.classList.add('active');
-            icon.querySelector('img').src = newImageSrc;
-            icon.querySelector('p').style.display = 'block';
-            showContent(contentId);
         }
 
         icon1.addEventListener('click', () => {
@@ -216,6 +181,8 @@
             activateIcon(icon3, 'image33.png', 'comingSoon');
             scoreElement.textContent = score;
         });
+
+        showMore.addEventListener('click', toggleOvals); // افزودن رویداد برای کلیک بر روی "Show More"
 
         showContent('homeContent');
     </script>
