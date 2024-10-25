@@ -38,6 +38,9 @@
 
         #ovals-container {
             margin-top: 100px; /* فاصله از متن امتیاز */
+            display: flex;
+            flex-direction: column; /* قرار دادن بیضی‌ها به صورت ستونی */
+            align-items: center; /* وسط چین کردن بیضی‌ها */
         }
 
         #showMore {
@@ -66,6 +69,51 @@
 
         #comingSoon {
             display: none;
+        }
+
+        #bottom-bar {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 70px;
+            background-color: #1a1a1a;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .icon-container {
+            text-align: center;
+            cursor: pointer;
+            transition: color 0.3s, font-weight 0.3s;
+            outline: none; /* حذف نوار آبی */
+            -webkit-tap-highlight-color: transparent; /* حذف نوار آبی در موبایل */
+        }
+
+        .icon-container img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .icon-container p {
+            margin: 2px 0 0 0;
+            font-size: 14px;
+            font-weight: 300;
+            display: none;
+        }
+
+        .active img {
+            transform: scale(1.2);
+        }
+
+        .active p {
+            color: white;
+            font-weight: 700;
+            display: block;
+        }
+
+        .icon-container:not(.active) img {
+            transform: scale(1);
         }
     </style>
 </head>
@@ -167,6 +215,26 @@
             }
         }
 
+        function activateIcon(icon, newImageSrc, contentId) {
+            document.querySelectorAll('.icon-container').forEach(el => {
+                el.classList.remove('active');
+                const img = el.querySelector('img');
+                if (el.id === 'icon1') {
+                    img.src = 'image1.png';
+                } else if (el.id === 'icon2') {
+                    img.src = 'image3.png';
+                } else if (el.id === 'icon3') {
+                    img.src = 'image2.png';
+                }
+                el.querySelector('p').style.display = 'none';
+            });
+
+            icon.classList.add('active');
+            icon.querySelector('img').src = newImageSrc;
+            icon.querySelector('p').style.display = 'block';
+            showContent(contentId);
+        }
+
         icon1.addEventListener('click', () => {
             activateIcon(icon1, 'image11.png', 'homeContent');
             scoreElement.textContent = score;
@@ -184,7 +252,9 @@
 
         showMore.addEventListener('click', toggleOvals); // افزودن رویداد برای کلیک بر روی "Show More"
 
-        showContent('homeContent');
+                       showContent('homeContent');
     </script>
 </body>
 </html>
+
+   
