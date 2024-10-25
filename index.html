@@ -27,13 +27,13 @@
             flex-direction: column;
         }
 
-        #decorative-oval {
+        .decorative-oval {
             position: relative;
-            top: 30px; /* فاصله ۳۰ پیکسل پایین‌تر از امتیاز کاربر */
-            width: 150px; /* عرض بیضی */
-            height: 60px; /* ارتفاع بیضی */
+            width: 200px; /* عرض بیضی */
+            height: 30px; /* ارتفاع بیضی */
             background-color: white; /* رنگ سفید */
-            border-radius: 30px; /* گرد کردن گوشه‌ها */
+            border-radius: 15px; /* گرد کردن گوشه‌ها */
+            margin-top: 10px; /* فاصله بین بیضی‌ها */
         }
 
         #score-content {
@@ -116,8 +116,10 @@
         </div>
     </div>
 
-    <!-- بیضی دکوری جدید -->
-    <div id="decorative-oval"></div>
+    <!-- حلقه برای اضافه کردن ۱۰ بیضی -->
+    <div id="ovals-container">
+        <!-- بیضی‌ها در اینجا اضافه می‌شوند -->
+    </div>
 
     <div id="content">
         <div id="homeContent"></div>
@@ -145,9 +147,17 @@
         const icon3 = document.getElementById('icon3');
         const scoreElement = document.getElementById('userScore');
         const scoreContainer = document.getElementById('score-container');
+        const ovalsContainer = document.getElementById('ovals-container');
 
         let score = parseInt(localStorage.getItem('score')) || 0;
         scoreElement.textContent = score;
+
+        // اضافه کردن ۱۰ بیضی به صفحه
+        for (let i = 0; i < 10; i++) {
+            const oval = document.createElement('div');
+            oval.classList.add('decorative-oval');
+            ovalsContainer.appendChild(oval);
+        }
 
         function showContent(contentId) {
             document.getElementById('homeContent').style.display = 'none';
