@@ -133,6 +133,7 @@
         const icon2 = document.getElementById('icon2');
         const icon3 = document.getElementById('icon3');
         const scoreElement = document.getElementById('userScore');
+        const scoreContainer = document.getElementById('score-container');
 
         // دریافت امتیاز از localStorage یا تنظیم آن به 0 اگر موجود نباشد
         let score = parseInt(localStorage.getItem('score')) || 0;
@@ -149,6 +150,13 @@
                 selectedContent.style.transition = 'opacity 0.5s';
                 selectedContent.style.opacity = 1;
             }, 10);
+
+            // نمایش یا پنهان‌سازی امتیاز و تصویر
+            if (contentId === 'homeContent') {
+                scoreContainer.style.display = 'flex';
+            } else {
+                scoreContainer.style.display = 'none';
+            }
         }
 
         function activateIcon(icon, newImageSrc, contentId) {
