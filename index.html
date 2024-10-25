@@ -54,6 +54,7 @@
             cursor: pointer;
             transition: color 0.3s, font-weight 0.3s;
             outline: none; /* حذف نوار آبی */
+            -webkit-tap-highlight-color: transparent; /* حذف نوار آبی در موبایل */
         }
 
         .icon-container img {
@@ -92,7 +93,7 @@
             text-align: center;
         }
 
-        #homeContent, #comingSoon {
+        #comingSoon {
             display: none;
         }
 
@@ -108,7 +109,7 @@
     </div>
 
     <div id="content">
-        <div id="homeContent">Welcome to the Home Page!</div>
+        <div id="homeContent"></div>
         <div id="comingSoon">Coming Soon...</div>
     </div>
 
@@ -118,8 +119,8 @@
             <p>Home</p>
         </div>
         <div class="icon-container" id="icon2" tabindex="0">
-            <img src="image3.png" alt="Lig" id="icon2Img">
-            <p>Lig</p>
+            <img src="image3.png" alt="Leaderboard" id="icon2Img">
+            <p>Leaderboard</p>
         </div>
         <div class="icon-container" id="icon3" tabindex="0">
             <img src="image2.png" alt="Friend" id="icon3Img">
