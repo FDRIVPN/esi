@@ -142,15 +142,15 @@
 
     <div id="bottom-bar">
         <div class="icon-container active" id="icon1" tabindex="0">
-            <img src="image11.png" alt="Home" id="icon1Img"> <!-- تصویر اصلی -->
+            <img src="image1.png" alt="Home" id="icon1Img"> <!-- تصویر فعال -->
             <p>Home</p>
         </div>
         <div class="icon-container" id="icon2" tabindex="0">
-            <img src="image3.png" alt="Leaderboard" id="icon2Img"> <!-- تصویر اصلی -->
+            <img src="image3.png" alt="Leaderboard" id="icon2Img"> <!-- تصویر فعال -->
             <p>Leaderboard</p>
         </div>
         <div class="icon-container" id="icon3" tabindex="0">
-            <img src="image22.png" alt="Friend" id="icon3Img"> <!-- تصویر جدید -->
+            <img src="image2.png" alt="Friend" id="icon3Img"> <!-- تصویر فعال -->
             <p>Friend</p>
         </div>
     </div>
@@ -191,12 +191,13 @@
             document.querySelectorAll('.icon-container').forEach(el => {
                 el.classList.remove('active');
                 const img = el.querySelector('img');
+                // تنظیم تصاویر بر اساس حالت فعال و غیر فعال
                 if (el.id === 'icon1') {
-                    img.src = 'image11.png'; // تصویر اصلی
+                    img.src = el.classList.contains('active') ? 'image1.png' : 'image11.png'; // تغییر تصویر
                 } else if (el.id === 'icon2') {
-                    img.src = 'image3.png'; // تصویر اصلی
+                    img.src = el.classList.contains('active') ? 'image3.png' : 'image33.png'; // تغییر تصویر
                 } else if (el.id === 'icon3') {
-                    img.src = 'image22.png'; // تصویر جدید
+                    img.src = el.classList.contains('active') ? 'image2.png' : 'image22.png'; // تغییر تصویر
                 }
                 el.querySelector('p').style.display = 'none';
             });
@@ -212,17 +213,17 @@
         const icon3 = document.getElementById('icon3');
 
         icon1.addEventListener('click', () => {
-            activateIcon(icon1, 'image11.png', 'homeContent');
+            activateIcon(icon1, 'image1.png', 'homeContent'); // تصویر فعال
             scoreElement.textContent = score;
         });
 
         icon2.addEventListener('click', () => {
-            activateIcon(icon2, 'image22.png', 'comingSoon'); // تغییر به تصویر جدید
+            activateIcon(icon2, 'image3.png', 'comingSoon'); // تصویر فعال
             scoreElement.textContent = score;
         });
 
         icon3.addEventListener('click', () => {
-            activateIcon(icon3, 'image33.png', 'comingSoon'); // تغییر به تصویر جدید
+            activateIcon(icon3, 'image2.png', 'comingSoon'); // تصویر فعال
             scoreElement.textContent = score;
         });
 
