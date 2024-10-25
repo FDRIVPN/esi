@@ -20,7 +20,7 @@
             position: relative;
             top: 20px;
             color: white;
-            font-size: 36px; /* کاهش اندازه متن */
+            font-size: 36px; /* اندازه متن */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -136,7 +136,7 @@
     </div>
 
     <div id="content">
-        <div id="homeContent"></div>
+        <div id="homeContent">Home Content Here</div>
         <div id="comingSoon">Coming Soon...</div>
     </div>
 
@@ -187,20 +187,41 @@
         createOvals(5); // ایجاد بیضی‌های اولیه
         document.getElementById('showMore').style.display = 'block'; // نمایش متن "Show More"
 
+        function showContent(contentId) {
+            document.getElementById('homeContent').style.display = 'none';
+            document.getElementById('comingSoon').style.display = 'none';
+
+            const selectedContent = document.getElementById(contentId);
+            selectedContent.style.display = 'block';
+            selectedContent.style.opacity = 0;
+            setTimeout(() => {
+                selectedContent.style.transition = 'opacity 0.5s';
+                selectedContent.style.opacity = 1;
+            }, 10);
+
+            // نمایش یا پنهان‌سازی امتیاز و تصویر
+            if (contentId === 'homeContent') {
+                scoreContainer.style.display = 'flex';
+            } else {
+                scoreContainer.style.display = 'none';
+            }
+        }
+
         function activateIcon(icon, newImageSrc, contentId) {
-            document.querySelectorAll('.icon-container').forEach(el => {
-                el.classList.remove('active');
-                const img = el.querySelector('img');
-                // تنظیم تصاویر بر اساس حالت فعال و غیر فعال
-                if (el.id === 'icon1') {
-                    img.src = el.classList.contains('active') ? 'image1.png' : 'image11.png'; // تغییر تصویر
-                } else if (el.id === 'icon2') {
-                    img.src = el.classList.contains('active') ? 'image3.png' : 'image33.png'; // تغییر تصویر
-                } else if (el.id === 'icon3') {
-                    img.src = el.classList.contains('active') ? 'image2.png' : 'image22.png'; // تغییر تصویر
+            const previouslyActive = document.querySelector('.icon-container.active');
+
+            if (previouslyActive) {
+                previouslyActive.classList.remove('active');
+                const prevImg = previouslyActive.querySelector('img');
+                if (previouslyActive.id === 'icon1') {
+                    prevImg.src = 'image11.png'; // تصویر غیرفعال
+                } else if (previouslyActive.id === 'icon2') {
+                    prevImg.src = 'image33.png'; // تصویر غیرفعال
+                } else if (previouslyActive.id === 'icon3') {
+                    prevImg.src = 'image22.png'; // تصویر غیرفعال
                 }
-                el.querySelector('p').style.display = 'none';
-            });
+                previouslyActive.querySelector('p').style.display = 'none';
+            }
 
             icon.classList.add('active');
             icon.querySelector('img').src = newImageSrc;
@@ -227,7 +248,7 @@
             scoreElement.textContent = score;
         });
 
-        showContent('homeContent');
+        showContent('homeContent'); // نمایش محتوای خانه به طور پیش‌فرض
     </script>
 </body>
 </html>
