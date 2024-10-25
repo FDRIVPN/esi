@@ -142,15 +142,15 @@
 
     <div id="bottom-bar">
         <div class="icon-container active" id="icon1" tabindex="0">
-            <img src="image11.png" alt="Home" id="icon1Img"> <!-- تغییر به تصویر جدید -->
+            <img src="image11.png" alt="Home" id="icon1Img"> <!-- تصویر اصلی -->
             <p>Home</p>
         </div>
         <div class="icon-container" id="icon2" tabindex="0">
-            <img src="image3.png" alt="Leaderboard" id="icon2Img"> <!-- تغییر به تصویر جدید -->
+            <img src="image3.png" alt="Leaderboard" id="icon2Img"> <!-- تصویر اصلی -->
             <p>Leaderboard</p>
         </div>
         <div class="icon-container" id="icon3" tabindex="0">
-            <img src="image2.png" alt="Friend" id="icon3Img"> <!-- تغییر به تصویر جدید -->
+            <img src="image22.png" alt="Friend" id="icon3Img"> <!-- تصویر جدید -->
             <p>Friend</p>
         </div>
     </div>
@@ -192,11 +192,11 @@
                 el.classList.remove('active');
                 const img = el.querySelector('img');
                 if (el.id === 'icon1') {
-                    img.src = 'image11.png'; // برگرداندن به تصویر اصلی
+                    img.src = 'image11.png'; // تصویر اصلی
                 } else if (el.id === 'icon2') {
-                    img.src = 'image22.png'; // برگرداندن به تصویر اصلی
+                    img.src = 'image3.png'; // تصویر اصلی
                 } else if (el.id === 'icon3') {
-                    img.src = 'image33.png'; // برگرداندن به تصویر اصلی
+                    img.src = 'image22.png'; // تصویر جدید
                 }
                 el.querySelector('p').style.display = 'none';
             });
@@ -212,17 +212,17 @@
         const icon3 = document.getElementById('icon3');
 
         icon1.addEventListener('click', () => {
-            activateIcon(icon1, 'image1.png', 'homeContent');
+            activateIcon(icon1, 'image11.png', 'homeContent');
             scoreElement.textContent = score;
         });
 
         icon2.addEventListener('click', () => {
-            activateIcon(icon2, 'image3.png', 'comingSoon');
+            activateIcon(icon2, 'image22.png', 'comingSoon'); // تغییر به تصویر جدید
             scoreElement.textContent = score;
         });
 
         icon3.addEventListener('click', () => {
-            activateIcon(icon3, 'image2.png', 'comingSoon');
+            activateIcon(icon3, 'image33.png', 'comingSoon'); // تغییر به تصویر جدید
             scoreElement.textContent = score;
         });
 
