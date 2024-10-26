@@ -73,23 +73,39 @@
             bottom: 0;
             width: 100%;
             height: 70px;
-            background-color: #1a1a1a; /* رنگ تیره */
+            background-color: #1a1a1a;
             display: flex;
-            justify-content: space-between; /* فاصله بین آیکون‌ها */
-            padding: 0 25px; /* فاصله از دیوار */
-            box-sizing: border-box; /* شامل کردن padding در اندازه کلی */
+            justify-content: center;
+            padding: 0 25px;
+            box-sizing: border-box;
         }
 
         .icon-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            flex: 1; /* توزیع مساوی فضا */
+            margin: 0 15px;
         }
 
         .icon-container img {
-            width: 30px; /* اندازه آیکون */
-            height: 30px; /* اندازه آیکون */
+            width: 25px;
+            height: 25px;
+            transition: transform 0.3s; /* افزودن انیمیشن برای بزرگ شدن */
+        }
+
+        .active img {
+            width: 35px; /* اندازه بزرگ‌تر */
+            height: 35px; /* اندازه بزرگ‌تر */
+        }
+
+        .icon-label {
+            color: white;
+            font-size: 14px;
+            display: none; /* نمایش به صورت پیش‌فرض غیرفعال */
+        }
+
+        .icon-container.active .icon-label {
+            display: block; /* نمایش متن برای آیکون فعال */
         }
     </style>
 </head>
@@ -102,26 +118,28 @@
         </div>
     </div>
 
-    <div id="ovals-container"></div>
+    <div id="ovals-container">
+        <!-- بیضی‌ها در اینجا اضافه می‌شوند -->
+    </div>
 
     <div id="showMore">
         Show More <span class="arrow">▼</span>
     </div>
 
     <div id="content">
-        <div id="homeContent">Home Content Here</div>
         <div id="comingSoon">Coming Soon...</div>
     </div>
 
     <div id="bottom-bar">
-        <div class="icon-container" style="margin-left: 25px;">
-            <img src="image1.png" alt="Left Icon"> <!-- تصویر اول در سمت چپ -->
+        <div class="icon-container" id="icon1" tabindex="0">
+            <img src="image1.png" alt="Left Icon">
+            <span class="icon-label">Home</span>
         </div>
-        <div class="icon-container" style="margin-left: 25px;">
-            <img src="image3.png" alt="Center Icon"> <!-- تصویر سوم در مرکز -->
+        <div class="icon-container">
+            <img src="image3.png" alt="Center Icon">
         </div>
-        <div class="icon-container" style="margin-left: 25px;">
-            <img src="image2.png" alt="Right Icon"> <!-- تصویر دوم در سمت راست -->
+        <div class="icon-container">
+            <img src="image2.png" alt="Right Icon">
         </div>
     </div>
 
@@ -129,6 +147,7 @@
         const scoreElement = document.getElementById('userScore');
         const ovalsContainer = document.getElementById('ovals-container');
         const showMore = document.getElementById('showMore');
+        const icon1 = document.getElementById('icon1');
 
         let score = parseInt(localStorage.getItem('score')) || 0;
         scoreElement.textContent = score;
@@ -146,7 +165,7 @@
 
         function updateShowMore() {
             showMore.style.display = 'block';
-            showMore.textContent = showAll ? 'Show Less ▲' : 'Show More ▼';
+            showMore.innerHTML = showAll ? 'Show Less <span class="arrow">▲</span>' : 'Show More <span class="arrow">▼</span>';
         }
 
         function toggleOvals() {
@@ -158,8 +177,26 @@
             updateShowMore();
         }
 
+        function activateIcon(icon) {
+            const previouslyActive = document.querySelector('.icon-container.active');
+            if (previouslyActive) {
+                previouslyActive.classList.remove('active');
+                previouslyActive.querySelector('img').src = 'image1.png'; // تصویر غیرفعال
+                previouslyActive.querySelector('.icon-label').style.display = 'none'; // مخفی کردن برچسب
+            }
+
+            icon.classList.add('active');
+            icon.querySelector('img').src = 'image11.png'; // تصویر فعال
+            icon.querySelector('.icon-label').style.display = 'block'; // نمایش برچسب
+        }
+
+        icon1.addEventListener('click', () => {
+            activateIcon(icon1);
+        });
+
         showMore.addEventListener('click', toggleOvals);
         createOvals();
+        updateShowMore(); // بروزرسانی وضعیت نمایش "Show More"
     </script>
 </body>
 </html>
