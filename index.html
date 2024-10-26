@@ -75,17 +75,18 @@
             height: 70px;
             background-color: #1a1a1a;
             display: flex;
-            justify-content: space-between; /* فاصله مناسب */
-            padding: 0 15px; /* padding از دیوار */
+            justify-content: space-between;
+            padding: 0 15px;
             box-sizing: border-box;
+            align-items: flex-end; /* تراز کردن آیکون‌ها در انتهای نوار */
         }
 
         .icon-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            flex: 1; /* تقسیم فضای مساوی بین آیکون‌ها */
-            position: relative; /* برای استفاده از position: absolute */
+            flex: 1;
+            margin-top: 35px; /* فاصله از پایین */
         }
 
         .icon-container img {
@@ -95,18 +96,18 @@
         }
 
         .active img {
-            width: 35px; /* اندازه بزرگ‌تر */
-            height: 35px; /* اندازه بزرگ‌تر */
+            width: 35px;
+            height: 35px;
         }
 
         .icon-label {
             color: white;
             font-size: 14px;
-            display: none; /* نمایش به صورت پیش‌فرض غیرفعال */
+            display: none;
         }
 
         .icon-container.active .icon-label {
-            display: block; /* نمایش متن برای آیکون فعال */
+            display: block;
         }
     </style>
 </head>
@@ -197,8 +198,9 @@
 
         showMore.addEventListener('click', toggleOvals);
         createOvals();
-        updateShowMore(); // بروزرسانی وضعیت نمایش "Show More"
+        updateShowMore();
     </script>
 </body>
 </html>
+
 
