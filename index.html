@@ -138,11 +138,11 @@
             <span class="icon-label">Home</span>
         </div>
         <div class="icon-container" id="icon2">
-            <img src="image22.png" alt="Leaderboard">
+            <img src="image3.png" alt="Leaderboard">
             <span class="icon-label">Leaderboard</span>
         </div>
         <div class="icon-container" id="icon3">
-            <img src="image33.png" alt="Friends">
+            <img src="image2.png" alt="Friends">
             <span class="icon-label">Friends</span>
         </div>
     </div>
@@ -159,6 +159,12 @@
         scoreElement.textContent = score;
 
         let showAll = false;
+
+        const previousImages = {
+            icon1: 'image11.png',
+            icon2: 'image3.png',
+            icon3: 'image2.png'
+        };
 
         function createOvals() {
             for (let i = 0; i < 10; i++) {
@@ -187,6 +193,7 @@
             const previouslyActive = document.querySelector('.icon-container.active');
             if (previouslyActive) {
                 previouslyActive.classList.remove('active');
+                previouslyActive.querySelector('img').src = previousImages[previouslyActive.id]; // برگرداندن تصویر قبلی
                 previouslyActive.querySelector('.icon-label').style.display = 'none'; // مخفی کردن برچسب
             }
 
@@ -197,9 +204,9 @@
             if (icon === icon1) {
                 icon.querySelector('img').src = 'image1.png'; // تصویر فعال برای آیکون اول
             } else if (icon === icon2) {
-                icon.querySelector('img').src = 'image22.png'; // تصویر فعال برای آیکون دوم
+                icon.querySelector('img').src = 'image33.png'; // تصویر فعال برای آیکون دوم
             } else if (icon === icon3) {
-                icon.querySelector('img').src = 'image33.png'; // تصویر فعال برای آیکون سوم
+                icon.querySelector('img').src = 'image22.png'; // تصویر فعال برای آیکون سوم
             }
         }
 
