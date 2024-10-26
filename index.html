@@ -138,11 +138,11 @@
             <span class="icon-label">Home</span>
         </div>
         <div class="icon-container" id="icon2">
-            <img src="image3.png" alt="Leaderboard">
+            <img src="image22.png" alt="Leaderboard">
             <span class="icon-label">Leaderboard</span>
         </div>
         <div class="icon-container" id="icon3">
-            <img src="image2.png" alt="Friends">
+            <img src="image33.png" alt="Friends">
             <span class="icon-label">Friends</span>
         </div>
     </div>
@@ -187,24 +187,20 @@
             const previouslyActive = document.querySelector('.icon-container.active');
             if (previouslyActive) {
                 previouslyActive.classList.remove('active');
-                // اگر آیکون اول غیرفعال شود
-                if (previouslyActive === icon1) {
-                    previouslyActive.querySelector('img').src = 'image11.png'; // تصویر غیرفعال
-                } else {
-                    previouslyActive.querySelector('img').src = 'image1.png'; // تصویر غیرفعال
-                }
                 previouslyActive.querySelector('.icon-label').style.display = 'none'; // مخفی کردن برچسب
             }
 
             icon.classList.add('active');
+            icon.querySelector('.icon-label').style.display = 'block'; // نمایش برچسب
+
+            // تغییر تصاویر
             if (icon === icon1) {
                 icon.querySelector('img').src = 'image1.png'; // تصویر فعال برای آیکون اول
             } else if (icon === icon2) {
-                icon.querySelector('img').src = 'image33.png'; // تصویر فعال برای آیکون دوم
+                icon.querySelector('img').src = 'image22.png'; // تصویر فعال برای آیکون دوم
             } else if (icon === icon3) {
-                icon.querySelector('img').src = 'image22.png'; // تصویر فعال برای آیکون سوم
+                icon.querySelector('img').src = 'image33.png'; // تصویر فعال برای آیکون سوم
             }
-            icon.querySelector('.icon-label').style.display = 'block'; // نمایش برچسب
         }
 
         // اضافه کردن رویدادهای کلیک به آیکون‌ها
