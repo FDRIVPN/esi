@@ -138,10 +138,12 @@
             <span class="icon-label">Home</span>
         </div>
         <div class="icon-container" id="icon2">
-            <img src="image3.png" alt="Center Icon">
+            <img src="image3.png" alt="Leaderboard">
+            <span class="icon-label">Leaderboard</span>
         </div>
         <div class="icon-container" id="icon3">
-            <img src="image2.png" alt="Right Icon">
+            <img src="image2.png" alt="Friends">
+            <span class="icon-label">Friends</span>
         </div>
     </div>
 
@@ -150,6 +152,8 @@
         const ovalsContainer = document.getElementById('ovals-container');
         const showMore = document.getElementById('showMore');
         const icon1 = document.getElementById('icon1');
+        const icon2 = document.getElementById('icon2');
+        const icon3 = document.getElementById('icon3');
 
         let score = parseInt(localStorage.getItem('score')) || 0;
         scoreElement.textContent = score;
@@ -195,14 +199,25 @@
             icon.classList.add('active');
             if (icon === icon1) {
                 icon.querySelector('img').src = 'image1.png'; // تصویر فعال برای آیکون اول
-            } else {
-                icon.querySelector('img').src = 'image11.png'; // تصویر فعال برای بقیه آیکون‌ها
+            } else if (icon === icon2) {
+                icon.querySelector('img').src = 'image33.png'; // تصویر فعال برای آیکون دوم
+            } else if (icon === icon3) {
+                icon.querySelector('img').src = 'image22.png'; // تصویر فعال برای آیکون سوم
             }
             icon.querySelector('.icon-label').style.display = 'block'; // نمایش برچسب
         }
 
+        // اضافه کردن رویدادهای کلیک به آیکون‌ها
         icon1.addEventListener('click', () => {
             activateIcon(icon1);
+        });
+
+        icon2.addEventListener('click', () => {
+            activateIcon(icon2);
+        });
+
+        icon3.addEventListener('click', () => {
+            activateIcon(icon3);
         });
 
         showMore.addEventListener('click', toggleOvals);
