@@ -134,7 +134,7 @@
 
     <div id="bottom-bar">
         <div class="icon-container active" id="icon1" tabindex="0">
-            <img src="image11.png" alt="Left Icon">
+            <img src="image1.png" alt="Left Icon">
             <span class="icon-label">Home</span>
         </div>
         <div class="icon-container" id="icon2">
@@ -183,12 +183,21 @@
             const previouslyActive = document.querySelector('.icon-container.active');
             if (previouslyActive) {
                 previouslyActive.classList.remove('active');
-                previouslyActive.querySelector('img').src = 'image1.png'; // تصویر غیرفعال
+                // اگر آیکون اول غیرفعال شود
+                if (previouslyActive === icon1) {
+                    previouslyActive.querySelector('img').src = 'image11.png'; // تصویر غیرفعال
+                } else {
+                    previouslyActive.querySelector('img').src = 'image1.png'; // تصویر غیرفعال
+                }
                 previouslyActive.querySelector('.icon-label').style.display = 'none'; // مخفی کردن برچسب
             }
 
             icon.classList.add('active');
-            icon.querySelector('img').src = 'image11.png'; // تصویر فعال
+            if (icon === icon1) {
+                icon.querySelector('img').src = 'image1.png'; // تصویر فعال برای آیکون اول
+            } else {
+                icon.querySelector('img').src = 'image11.png'; // تصویر فعال برای بقیه آیکون‌ها
+            }
             icon.querySelector('.icon-label').style.display = 'block'; // نمایش برچسب
         }
 
