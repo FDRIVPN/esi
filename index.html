@@ -75,15 +75,16 @@
             height: 70px;
             background-color: #1a1a1a; /* رنگ تیره */
             display: flex;
-            justify-content: center;
-            align-items: center;
+            justify-content: space-between; /* فاصله بین آیکون‌ها */
+            padding: 0 25px; /* فاصله از دیوار */
+            box-sizing: border-box; /* شامل کردن padding در اندازه کلی */
         }
 
         .icon-container {
-            margin: 0 10px; /* فاصله بین آیکون‌ها */
             display: flex;
             flex-direction: column;
             align-items: center;
+            flex: 1; /* توزیع مساوی فضا */
         }
 
         .icon-container img {
@@ -113,14 +114,14 @@
     </div>
 
     <div id="bottom-bar">
-        <div class="icon-container">
-            <img src="image2.png" alt="Left Icon">
+        <div class="icon-container" style="margin-left: 25px;">
+            <img src="image1.png" alt="Left Icon"> <!-- تصویر اول در سمت چپ -->
         </div>
-        <div class="icon-container">
-            <img src="image3.png" alt="Center Icon">
+        <div class="icon-container" style="margin-left: 25px;">
+            <img src="image3.png" alt="Center Icon"> <!-- تصویر سوم در مرکز -->
         </div>
-        <div class="icon-container">
-            <img src="image1.png" alt="Right Icon">
+        <div class="icon-container" style="margin-left: 25px;">
+            <img src="image2.png" alt="Right Icon"> <!-- تصویر دوم در سمت راست -->
         </div>
     </div>
 
@@ -162,5 +163,4 @@
     </script>
 </body>
 </html>
-
 
