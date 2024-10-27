@@ -249,30 +249,34 @@
             const previouslyActive = document.querySelector('.icon-container.active');
             if (previouslyActive) {
                 previouslyActive.classList.remove('active');
+
+                // غیرفعال کردن آیکون قبلی
                 const previousIconId = previouslyActive.id;
-
-                // بارگذاری تصویر غیر فعال با تأخیر
-                setTimeout(() => {
-                    previouslyActive.querySelector('img').src = previousImages[previousIconId];
-                    previouslyActive.querySelector('img').style.transform = 'scale(0.7)';
-                }, 200); // تأخیر 200 میلی‌ثانیه
-
-                // تنظیم نمایش برچسب آیکون
+                const previousImage = previouslyActive.querySelector('img');
                 const label = previouslyActive.querySelector('.icon-label');
+
                 label.style.opacity = '0'; 
                 label.style.visibility = 'hidden'; 
                 label.style.transform = 'translateY(10px)'; 
+
+                // بارگذاری تصویر غیر فعال با تأخیر
+                setTimeout(() => {
+                    previousImage.src = previousImages[previousIconId];
+                    previousImage.style.transform = 'scale(0.7)';
+                }, 200); // تأخیر 200 میلی‌ثانیه
                 
                 setTimeout(() => {
-                    previouslyActive.querySelector('img').style.transform = 'scale(1)'; 
+                    previousImage.style.transform = 'scale(1)'; 
                 }, 300); 
             }
 
             icon.classList.add('active');
 
             // بارگذاری تصویر فعال
-            icon.querySelector('img').src = activeImages[icon.id];
-            icon.querySelector('img').style.transform = 'scale(1.4)';
+            const activeImage = icon.querySelector('img');
+            activeImage.src = activeImages[icon.id];
+            activeImage.style.transform = 'scale(1.4)';
+
             const label = icon.querySelector('.icon-label');
             label.style.visibility = 'visible'; 
             label.style.opacity = '1'; 
