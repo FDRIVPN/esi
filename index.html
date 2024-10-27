@@ -72,20 +72,18 @@
             position: fixed;
             bottom: 0; /* نوار به پایین صفحه چسبیده است */
             width: 100%;
-            height: 70px;
+            height: 70px; /* ارتفاع نوار */
             background-color: #1a1a1a;
             display: flex;
-            justify-content: center; /* تراز کردن آیکون‌ها در مرکز */
-            padding: 0 15px;
-            box-sizing: border-box;
-            align-items: flex-end; /* تراز کردن آیکون‌ها در انتهای نوار */
+            justify-content: space-around; /* تقسیم مساوی بین آیکون‌ها */
+            align-items: center; /* تراز کردن آیکون‌ها در وسط عمودی نوار */
+            padding-bottom: 10px; /* فاصله از پایین نوار */
         }
 
         .icon-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin: 0 15px; /* فاصله افقی بین آیکون‌ها */
             transition: transform 0.3s; /* انیمیشن تغییر اندازه */
         }
 
@@ -195,7 +193,7 @@
                 previouslyActive.querySelector('img').src = previousImages[previouslyActive.id]; // برگرداندن تصویر قبلی
 
                 // انیمیشن کوچک شدن
-                previouslyActive.querySelector('img').style.transform = 'scale(1)';
+                previouslyActive.querySelector('img').style.transform = 'scale(0.7)';
                 setTimeout(() => {
                     previouslyActive.querySelector('img').style.transform = 'scale(1)'; // به حالت اولیه برمی‌گردد
                     previouslyActive.querySelector('.icon-label').style.display = 'none'; // مخفی کردن برچسب
