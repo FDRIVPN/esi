@@ -102,15 +102,17 @@
             font-size: 16px; /* اندازه بزرگتر */
             width: 100px; /* عرض متن */
             opacity: 0; /* نامرئی بودن متن */
-            transition: opacity 0.3s, transform 0.3s; /* انیمیشن تغییر اندازه و نامرئی شدن */
+            transition: opacity 0.3s, transform 0.3s, color 0.3s; /* انیمیشن تغییر اندازه و نامرئی شدن */
             transform: translateY(10px); /* جابجایی متن به پایین */
-            margin-top: 2px; /* فاصله 2 پیکسل از آیکون */
+            margin-top: 4px; /* فاصله 4 پیکسل از آیکون */
+            color: transparent; /* رنگ اولیه متن نامرئی */
         }
 
         .icon-container.active .icon-label {
             visibility: visible; /* نمایش متن */
             opacity: 1; /* نمایان کردن متن */
             transform: translateY(0); /* به حالت اولیه برمی‌گردد */
+            color: white; /* رنگ متن */
         }
     </style>
 </head>
@@ -209,7 +211,6 @@
             }
 
             icon.classList.add('active');
-            icon.querySelector('.icon-label').style.display = 'block'; // نمایش برچسب
 
             // تغییر تصاویر بر اساس ایکون فعال
             if (icon === icon1) {
