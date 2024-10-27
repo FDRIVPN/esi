@@ -87,11 +87,11 @@
         }
 
         .icon-container img {
-            width: 25px;
-            height: 25px;
+            width: 21px; /* اندازه آیکون‌های غیر فعال */
+            height: 21px;
             transition: transform 0.3s; 
-            margin-bottom: 0; /* مقدار قبلی را به 0 تغییر دهید */
-            padding-bottom: 4px; /* به آیکون 4 پیکسل فضای پایین اضافه کنید */
+            margin-bottom: 0; 
+            padding-bottom: 4px; 
         }
 
         .icon-label {
@@ -110,7 +110,9 @@
             color: white; 
         }
 
-        .active img {
+        .icon-container.active img {
+            width: 25px; /* اندازه آیکون‌های فعال */
+            height: 25px;
             transform: scale(1.4); /* بزرگ شدن ایکون فعال */
         }
     </style>
