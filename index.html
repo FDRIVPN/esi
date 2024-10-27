@@ -75,7 +75,7 @@
             height: 70px;
             background-color: #1a1a1a;
             display: flex;
-            justify-content: space-between;
+            justify-content: center; /* تراز کردن آیکون‌ها در مرکز */
             padding: 0 15px;
             box-sizing: border-box;
             align-items: flex-end; /* تراز کردن آیکون‌ها در انتهای نوار */
@@ -85,19 +85,18 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            flex: 1;
-            margin-top: 35px; /* فاصله 35 پیکسل از زمین */
+            margin: 0 15px; /* فاصله افقی بین آیکون‌ها */
+            transition: transform 0.3s; /* انیمیشن تغییر اندازه */
         }
 
         .icon-container img {
             width: 25px;
             height: 25px;
-            transition: transform 0.3s;
+            transition: transform 0.3s; /* انیمیشن تغییر اندازه */
         }
 
         .active img {
-            width: 35px;
-            height: 35px;
+            transform: scale(1.4); /* بزرگ شدن ایکون فعال */
         }
 
         .icon-label {
@@ -194,7 +193,13 @@
             if (previouslyActive) {
                 previouslyActive.classList.remove('active');
                 previouslyActive.querySelector('img').src = previousImages[previouslyActive.id]; // برگرداندن تصویر قبلی
-                previouslyActive.querySelector('.icon-label').style.display = 'none'; // مخفی کردن برچسب
+
+                // انیمیشن کوچک شدن
+                previouslyActive.querySelector('img').style.transform = 'scale(1)';
+                setTimeout(() => {
+                    previouslyActive.querySelector('img').style.transform = 'scale(1)'; // به حالت اولیه برمی‌گردد
+                    previouslyActive.querySelector('.icon-label').style.display = 'none'; // مخفی کردن برچسب
+                }, 300); // زمان انیمیشن
             }
 
             icon.classList.add('active');
@@ -208,6 +213,9 @@
             } else if (icon === icon3) {
                 icon.querySelector('img').src = 'image33.png'; // تصویر فعال برای آیکون سوم
             }
+
+            // انیمیشن بزرگ شدن
+            icon.querySelector('img').style.transform = 'scale(1.4)';
         }
 
         // اضافه کردن رویدادهای کلیک به آیکون‌ها
@@ -229,4 +237,3 @@
     </script>
 </body>
 </html>
-
