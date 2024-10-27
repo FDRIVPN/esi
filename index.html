@@ -70,49 +70,47 @@
 
         #bottom-bar {
             position: fixed;
-            bottom: 0; /* نوار به پایین صفحه چسبیده است */
+            bottom: 0; 
             width: 100%;
-            height: 70px; /* ارتفاع نوار */
+            height: 70px; 
             background-color: #1a1a1a;
             display: flex;
-            justify-content: space-around; /* تقسیم مساوی بین آیکون‌ها */
-            align-items: center; /* تراز کردن آیکون‌ها در وسط عمودی نوار */
-            padding-bottom: 10px; /* فاصله از پایین نوار */
+            justify-content: space-around; 
+            align-items: center; 
+            padding-bottom: 10px; 
         }
 
         .icon-container {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: transform 0.3s; /* انیمیشن تغییر اندازه */
+            flex-direction: column; /* ترتیب عمودی */
+            align-items: center; /* تراز کردن عناصر به مرکز */
         }
 
         .icon-container img {
             width: 25px;
             height: 25px;
-            transition: transform 0.3s; /* انیمیشن تغییر اندازه */
+            transition: transform 0.3s; 
+            margin-bottom: 4px; /* فاصله بین آیکون و متن */
+        }
+
+        .icon-label {
+            visibility: hidden; 
+            font-size: 16px; 
+            opacity: 0; 
+            transition: opacity 0.3s, transform 0.3s, color 0.3s; 
+            transform: translateY(10px); /* جابجایی متن به پایین */
+            color: transparent; 
+        }
+
+        .icon-container.active .icon-label {
+            visibility: visible; 
+            opacity: 1; 
+            transform: translateY(0); /* به حالت اولیه برمی‌گردد */
+            color: white; 
         }
 
         .active img {
             transform: scale(1.4); /* بزرگ شدن ایکون فعال */
-        }
-
-        .icon-label {
-            visibility: hidden; /* نامرئی بودن متن در ابتدا */
-            font-size: 16px; /* اندازه بزرگتر */
-            width: 100px; /* عرض متن */
-            opacity: 0; /* نامرئی بودن متن */
-            transition: opacity 0.3s, transform 0.3s, color 0.3s; /* انیمیشن تغییر اندازه و نامرئی شدن */
-            transform: translateY(10px); /* جابجایی متن به پایین */
-            margin-top: 4px; /* فاصله 4 پیکسل از آیکون */
-            color: transparent; /* رنگ اولیه متن نامرئی */
-        }
-
-        .icon-container.active .icon-label {
-            visibility: visible; /* نمایش متن */
-            opacity: 1; /* نمایان کردن متن */
-            transform: translateY(0); /* به حالت اولیه برمی‌گردد */
-            color: white; /* رنگ متن */
         }
     </style>
 </head>
@@ -166,7 +164,7 @@
         let showAll = false;
 
         const previousImages = {
-            icon1: 'image11.png', // تصویر جدید برای غیر فعال شدن ایکون اول
+            icon1: 'image11.png', 
             icon2: 'image3.png',
             icon3: 'image2.png'
         };
@@ -198,37 +196,33 @@
             const previouslyActive = document.querySelector('.icon-container.active');
             if (previouslyActive) {
                 previouslyActive.classList.remove('active');
-                previouslyActive.querySelector('img').src = previousImages[previouslyActive.id]; // برگرداندن تصویر قبلی
+                previouslyActive.querySelector('img').src = previousImages[previouslyActive.id];
 
-                // انیمیشن کوچک شدن
                 previouslyActive.querySelector('img').style.transform = 'scale(0.7)';
-                previouslyActive.querySelector('.icon-label').style.opacity = '0'; // نامرئی کردن متن
-                previouslyActive.querySelector('.icon-label').style.visibility = 'hidden'; // مخفی کردن برچسب
-                previouslyActive.querySelector('.icon-label').style.transform = 'translateY(10px)'; // جابجایی متن به پایین
+                previouslyActive.querySelector('.icon-label').style.opacity = '0'; 
+                previouslyActive.querySelector('.icon-label').style.visibility = 'hidden'; 
+                previouslyActive.querySelector('.icon-label').style.transform = 'translateY(10px)'; 
                 setTimeout(() => {
-                    previouslyActive.querySelector('img').style.transform = 'scale(1)'; // به حالت اولیه برمی‌گردد
-                }, 300); // زمان انیمیشن
+                    previouslyActive.querySelector('img').style.transform = 'scale(1)'; 
+                }, 300); 
             }
 
             icon.classList.add('active');
 
-            // تغییر تصاویر بر اساس ایکون فعال
             if (icon === icon1) {
-                icon.querySelector('img').src = 'image1.png'; // تصویر فعال برای آیکون اول
+                icon.querySelector('img').src = 'image1.png'; 
             } else if (icon === icon2) {
-                icon.querySelector('img').src = 'image22.png'; // تصویر فعال برای آیکون دوم
+                icon.querySelector('img').src = 'image22.png'; 
             } else if (icon === icon3) {
-                icon.querySelector('img').src = 'image33.png'; // تصویر فعال برای آیکون سوم
+                icon.querySelector('img').src = 'image33.png'; 
             }
 
-            // انیمیشن بزرگ شدن
             icon.querySelector('img').style.transform = 'scale(1.4)';
-            icon.querySelector('.icon-label').style.visibility = 'visible'; // نمایش متن
-            icon.querySelector('.icon-label').style.opacity = '1'; // نمایان کردن متن
-            icon.querySelector('.icon-label').style.transform = 'translateY(0)'; // به حالت اولیه برمی‌گردد
+            icon.querySelector('.icon-label').style.visibility = 'visible'; 
+            icon.querySelector('.icon-label').style.opacity = '1'; 
+            icon.querySelector('.icon-label').style.transform = 'translateY(0)'; 
         }
 
-        // اضافه کردن رویدادهای کلیک به آیکون‌ها
         icon1.addEventListener('click', () => {
             activateIcon(icon1);
         });
