@@ -1,42 +1,294 @@
-const previousImages = {
-    icon1: 'image11.png', 
-    icon2: 'image3.png',
-    icon3: 'image2.png'
-};
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coin Game</title>
+    <style>
+        /* استایل برای صفحه بارگذاری */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000; /* بالاتر از سایر عناصر */
+        }
 
-const activeImages = {
-    icon1: 'image1.png', 
-    icon2: 'image22.png', 
-    icon3: 'image33.png'
-};
+        .loading-circle {
+            border: 8px solid transparent;
+            border-top: 8px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
 
-function activateIcon(icon) {
-    const previouslyActive = document.querySelector('.icon-container.active');
-    if (previouslyActive) {
-        previouslyActive.classList.remove('active');
-        const previousIconId = previouslyActive.id;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
 
-        // بارگذاری تصویر غیر فعال
-        previouslyActive.querySelector('img').src = previousImages[previousIconId];
-        previouslyActive.querySelector('img').style.transform = 'scale(0.7)';
-        
-        // تنظیم نمایش برچسب آیکون
-        const label = previouslyActive.querySelector('.icon-label');
-        label.style.opacity = '0'; 
-        label.style.visibility = 'hidden'; 
-        label.style.transform = 'translateY(10px)'; 
-        
+        .loading-text {
+            margin-top: 8px;
+            color: white;
+            font-size: 20px;
+        }
+
+        /* استایل های اصلی */
+        html, body {
+            background-color: black;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        #score-container {
+            position: relative;
+            top: 20px;
+            color: white;
+            font-size: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .decorative-oval {
+            position: relative;
+            width: 300px;
+            height: 30px;
+            background-color: white;
+            border-radius: 15px;
+            margin-top: 10px;
+        }
+
+        #ovals-container {
+            margin-top: 100px;
+        }
+
+        #showMore {
+            margin-top: 10px;
+            color: white;
+            cursor: pointer;
+            font-size: 20px;
+            display: none;
+        }
+
+        .arrow {
+            display: inline-block;
+            margin-left: 5px;
+            transform: rotate(180deg);
+        }
+
+        #content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        #comingSoon {
+            display: none;
+        }
+
+        #bottom-bar {
+            position: fixed;
+            bottom: 0; 
+            width: 100%;
+            height: 70px; 
+            background-color: #1a1a1a;
+            display: flex;
+            justify-content: space-around; 
+            align-items: center; 
+            padding-bottom: 10px; 
+        }
+
+        .icon-container {
+            display: flex;
+            flex-direction: column; /* ترتیب عمودی */
+            align-items: center; /* تراز کردن عناصر به مرکز */
+        }
+
+        .icon-container img {
+            width: 21px; /* اندازه آیکون‌های غیر فعال */
+            height: 21px;
+            transition: transform 0.3s; 
+            margin-bottom: 0; 
+            padding-bottom: 4px; 
+        }
+
+        .icon-label {
+            visibility: hidden; 
+            font-size: 16px; 
+            opacity: 0; 
+            transition: opacity 0.3s, transform 0.3s, color 0.3s; 
+            transform: translateY(10px); /* جابجایی متن به پایین */
+            color: transparent; 
+        }
+
+        .icon-container.active .icon-label {
+            visibility: visible; 
+            opacity: 1; 
+            transform: translateY(0); /* به حالت اولیه برمی‌گردد */
+            color: white; 
+        }
+
+        .icon-container.active img {
+            width: 25px; /* اندازه آیکون‌های فعال */
+            height: 25px;
+            transform: scale(1.4); /* بزرگ شدن ایکون فعال */
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-screen">
+        <div class="loading-circle"></div>
+        <div class="loading-text">Loading...</div>
+    </div>
+
+    <div id="score-container" style="display:none;">
+        <img src="tortles.png" alt="Tortles" style="width: 50px; height: 50px;">
+        <div id="score-content">
+            <span id="userScore">0</span>
+            <span style="margin-left: 10px;">tortles</span>
+        </div>
+    </div>
+
+    <div id="ovals-container" style="display:none;">
+        <!-- بیضی‌ها در اینجا اضافه می‌شوند -->
+    </div>
+
+    <div id="showMore" style="display:none;">
+        Show More <span class="arrow">▼</span>
+    </div>
+
+    <div id="content" style="display:none;">
+        <div id="comingSoon">Coming Soon...</div>
+    </div>
+
+    <div id="bottom-bar" style="display:none;">
+        <div class="icon-container active" id="icon1" tabindex="0">
+            <img src="image1.png" alt="Left Icon">
+            <span class="icon-label">Home</span>
+        </div>
+        <div class="icon-container" id="icon2">
+            <img src="image3.png" alt="Leaderboard">
+            <span class="icon-label">Leaderboard</span>
+        </div>
+        <div class="icon-container" id="icon3">
+            <img src="image2.png" alt="Friends">
+            <span class="icon-label">Friends</span>
+        </div>
+    </div>
+
+    <script>
+        const scoreElement = document.getElementById('userScore');
+        const ovalsContainer = document.getElementById('ovals-container');
+        const showMore = document.getElementById('showMore');
+        const icon1 = document.getElementById('icon1');
+        const icon2 = document.getElementById('icon2');
+        const icon3 = document.getElementById('icon3');
+
+        // آدرس‌های تصاویر
+        const previousImages = {
+            icon1: 'image11.png', 
+            icon2: 'image3.png',
+            icon3: 'image2.png'
+        };
+
+        const activeImages = {
+            icon1: 'image1.png', 
+            icon2: 'image22.png', 
+            icon3: 'image33.png'
+        };
+
+        let score = parseInt(localStorage.getItem('score')) || 0;
+        scoreElement.textContent = score;
+
+        let showAll = false;
+
+        function createOvals() {
+            for (let i = 0; i < 10; i++) {
+                const oval = document.createElement('div');
+                oval.classList.add('decorative-oval');
+                oval.style.display = i < 5 ? 'block' : 'none';
+                ovalsContainer.appendChild(oval);
+            }
+        }
+
+        function updateShowMore() {
+            showMore.style.display = 'block';
+            showMore.innerHTML = showAll ? 'Show Less <span class="arrow">▲</span>' : 'Show More <span class="arrow">▼</span>';
+        }
+
+        function toggleOvals() {
+            showAll = !showAll;
+            const ovals = ovalsContainer.querySelectorAll('.decorative-oval');
+            ovals.forEach((oval, index) => {
+                oval.style.display = showAll || index < 5 ? 'block' : 'none';
+            });
+            updateShowMore();
+        }
+
+        function activateIcon(icon) {
+            const previouslyActive = document.querySelector('.icon-container.active');
+            if (previouslyActive) {
+                previouslyActive.classList.remove('active');
+                const previousIconId = previouslyActive.id;
+
+                // بارگذاری تصویر غیر فعال
+                previouslyActive.querySelector('img').src = previousImages[previousIconId];
+                previouslyActive.querySelector('img').style.transform = 'scale(0.7)';
+                
+                // تنظیم نمایش برچسب آیکون
+                const label = previouslyActive.querySelector('.icon-label');
+                label.style.opacity = '0'; 
+                label.style.visibility = 'hidden'; 
+                label.style.transform = 'translateY(10px)'; 
+                
+                setTimeout(() => {
+                    previouslyActive.querySelector('img').style.transform = 'scale(1)'; 
+                }, 300); 
+            }
+
+            icon.classList.add('active');
+            icon.querySelector('img').src = activeImages[icon.id]; 
+            icon.querySelector('img').style.transform = 'scale(1.4)';
+            icon.querySelector('.icon-label').style.visibility = 'visible'; 
+            icon.querySelector('.icon-label').style.opacity = '1'; 
+            icon.querySelector('.icon-label').style.transform = 'translateY(0)'; 
+        }
+
+        icon1.addEventListener('click', () => activateIcon(icon1));
+        icon2.addEventListener('click', () => activateIcon(icon2));
+        icon3.addEventListener('click', () => activateIcon(icon3));
+
+        showMore.addEventListener('click', toggleOvals);
+        createOvals();
+        updateShowMore();
+
+        // تاخیر برای بارگذاری صفحه اصلی
         setTimeout(() => {
-            previouslyActive.querySelector('img').style.transform = 'scale(1)'; 
-        }, 300); 
-    }
-
-    icon.classList.add('active');
-
-    // بارگذاری تصویر فعال
-    icon.querySelector('img').src = activeImages[icon.id]; 
-    icon.querySelector('img').style.transform = 'scale(1.4)';
-    icon.querySelector('.icon-label').style.visibility = 'visible'; 
-    icon.querySelector('.icon-label').style.opacity = '1'; 
-    icon.querySelector('.icon-label').style.transform = 'translateY(0)'; 
-}
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('score-container').style.display = 'flex';
+            document.getElementById('ovals-container').style.display = 'block';
+            document.getElementById('showMore').style.display = 'block';
+            document.getElementById('content').style.display = 'flex';
+            document.getElementById('bottom-bar').style.display = 'flex';
+        }, 3000); // تغییر این مقدار برای مدت زمان بارگذاری
+    </script>
+</body>
+</html>
