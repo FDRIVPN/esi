@@ -106,14 +106,14 @@
 
         #bottom-bar {
             position: fixed;
-            bottom: 0; 
+            bottom: 10px; /* کمی فاصله از پایین */
             width: 100%;
             height: 70px; 
             background-color: #1a1a1a;
             display: flex;
             justify-content: space-around; 
             align-items: center; 
-            padding-bottom: 10px; 
+            padding: 10px 0; /* padding برای فضای بیشتر */
         }
 
         .icon-container {
@@ -121,19 +121,19 @@
             flex-direction: column; /* ترتیب عمودی */
             align-items: center; /* تراز کردن عناصر به مرکز */
             transition: transform 0.3s; /* اضافه کردن انیمیشن به تغییرات */
+            margin: 0 10px; /* فاصله افقی */
         }
 
         .icon-container img {
-            width: 21px; /* اندازه آیکون‌های غیر فعال */
-            height: 21px;
+            width: 16px; /* اندازه جدید آیکون‌ها */
+            height: 16px;
             transition: transform 0.3s; 
-            margin-bottom: 0; 
-            padding-bottom: 4px; 
+            margin-bottom: 5px; /* فاصله بیشتر بین آیکون و متن */
         }
 
         .icon-label {
             visibility: hidden; 
-            font-size: 16px; 
+            font-size: 14px; /* اندازه جدید متن */
             opacity: 0; 
             transition: opacity 0.3s, transform 0.3s, color 0.3s; 
             transform: translateY(10px); /* جابجایی متن به پایین */
@@ -148,8 +148,8 @@
         }
 
         .icon-container.active img {
-            width: 25px; /* اندازه آیکون‌های فعال */
-            height: 25px;
+            width: 20px; /* اندازه جدید آیکون‌های فعال */
+            height: 20px;
             transform: scale(1.4); /* بزرگ شدن ایکون فعال */
             transition: transform 0.3s; /* اضافه کردن انیمیشن به تغییرات */
         }
@@ -263,11 +263,11 @@
                 setTimeout(() => {
                     previousImage.src = previousImages[previousIconId];
                     previousImage.style.transform = 'scale(0.7)';
-                }, 200); // تأخیر 200 میلی‌ثانیه
+                }, 100); // تأخیر 100 میلی‌ثانیه
                 
                 setTimeout(() => {
                     previousImage.style.transform = 'scale(1)'; 
-                }, 300); 
+                }, 150); 
             }
 
             icon.classList.add('active');
