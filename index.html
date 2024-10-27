@@ -120,6 +120,7 @@
             display: flex;
             flex-direction: column; /* ترتیب عمودی */
             align-items: center; /* تراز کردن عناصر به مرکز */
+            transition: transform 0.3s; /* اضافه کردن انیمیشن به تغییرات */
         }
 
         .icon-container img {
@@ -150,6 +151,7 @@
             width: 25px; /* اندازه آیکون‌های فعال */
             height: 25px;
             transform: scale(1.4); /* بزرگ شدن ایکون فعال */
+            transition: transform 0.3s; /* اضافه کردن انیمیشن به تغییرات */
         }
     </style>
 </head>
@@ -249,10 +251,12 @@
                 previouslyActive.classList.remove('active');
                 const previousIconId = previouslyActive.id;
 
-                // بارگذاری تصویر غیر فعال
-                previouslyActive.querySelector('img').src = previousImages[previousIconId];
-                previouslyActive.querySelector('img').style.transform = 'scale(0.7)';
-                
+                // بارگذاری تصویر غیر فعال با تأخیر
+                setTimeout(() => {
+                    previouslyActive.querySelector('img').src = previousImages[previousIconId];
+                    previouslyActive.querySelector('img').style.transform = 'scale(0.7)';
+                }, 200); // تأخیر 200 میلی‌ثانیه
+
                 // تنظیم نمایش برچسب آیکون
                 const label = previouslyActive.querySelector('.icon-label');
                 label.style.opacity = '0'; 
@@ -265,11 +269,14 @@
             }
 
             icon.classList.add('active');
-            icon.querySelector('img').src = activeImages[icon.id]; 
+
+            // بارگذاری تصویر فعال
+            icon.querySelector('img').src = activeImages[icon.id];
             icon.querySelector('img').style.transform = 'scale(1.4)';
-            icon.querySelector('.icon-label').style.visibility = 'visible'; 
-            icon.querySelector('.icon-label').style.opacity = '1'; 
-            icon.querySelector('.icon-label').style.transform = 'translateY(0)'; 
+            const label = icon.querySelector('.icon-label');
+            label.style.visibility = 'visible'; 
+            label.style.opacity = '1'; 
+            label.style.transform = 'translateY(0)'; 
         }
 
         icon1.addEventListener('click', () => activateIcon(icon1));
