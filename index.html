@@ -161,7 +161,7 @@
         let showAll = false;
 
         const previousImages = {
-            icon1: 'image11.png',
+            icon1: 'image1.png',
             icon2: 'image3.png',
             icon3: 'image2.png'
         };
@@ -200,13 +200,13 @@
             icon.classList.add('active');
             icon.querySelector('.icon-label').style.display = 'block'; // نمایش برچسب
 
-            // تغییر تصاویر
+            // تغییر تصاویر بر اساس ایکون فعال
             if (icon === icon1) {
                 icon.querySelector('img').src = 'image1.png'; // تصویر فعال برای آیکون اول
             } else if (icon === icon2) {
-                icon.querySelector('img').src = 'image33.png'; // تصویر فعال برای آیکون دوم
+                icon.querySelector('img').src = 'image22.png'; // تصویر فعال برای آیکون دوم
             } else if (icon === icon3) {
-                icon.querySelector('img').src = 'image22.png'; // تصویر فعال برای آیکون سوم
+                icon.querySelector('img').src = 'image33.png'; // تصویر فعال برای آیکون سوم
             }
         }
 
