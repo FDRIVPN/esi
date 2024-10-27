@@ -98,16 +98,18 @@
         }
 
         .icon-label {
-            color: white;
-            font-size: 14px;
+            color: black; /* رنگ اولیه */
+            font-size: 16px; /* اندازه بزرگتر */
+            width: 100px; /* عرض متن */
             opacity: 0; /* نامرئی بودن متن در ابتدا */
-            transition: opacity 0.3s, transform 0.3s; /* انیمیشن تغییر اندازه و نامرئی شدن */
-            transform: translateY(-10px); /* جابجایی متن */
+            transition: opacity 0.3s, color 0.3s, transform 0.3s; /* انیمیشن تغییر اندازه و نامرئی شدن */
+            transform: translateY(10px); /* جابجایی متن به پایین */
             margin-top: 2px; /* فاصله 2 پیکسل از آیکون */
         }
 
         .icon-container.active .icon-label {
             opacity: 1; /* نمایش متن */
+            color: white; /* رنگ نهایی */
             transform: translateY(0); /* به حالت اولیه برمی‌گردد */
         }
     </style>
@@ -199,6 +201,7 @@
                 // انیمیشن کوچک شدن
                 previouslyActive.querySelector('img').style.transform = 'scale(0.7)';
                 previouslyActive.querySelector('.icon-label').style.opacity = '0'; // نامرئی کردن متن
+                previouslyActive.querySelector('.icon-label').style.transform = 'translateY(10px)'; // جابجایی متن به پایین
                 setTimeout(() => {
                     previouslyActive.querySelector('img').style.transform = 'scale(1)'; // به حالت اولیه برمی‌گردد
                     previouslyActive.querySelector('.icon-label').style.display = 'none'; // مخفی کردن برچسب
@@ -220,6 +223,7 @@
             // انیمیشن بزرگ شدن
             icon.querySelector('img').style.transform = 'scale(1.4)';
             icon.querySelector('.icon-label').style.opacity = '1'; // نمایش متن
+            icon.querySelector('.icon-label').style.transform = 'translateY(0)'; // به حالت اولیه برمی‌گردد
         }
 
         // اضافه کردن رویدادهای کلیک به آیکون‌ها
@@ -240,4 +244,4 @@
         updateShowMore();
     </script>
 </body>
-</html>
+</html
