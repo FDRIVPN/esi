@@ -114,46 +114,45 @@
             display: flex;
             justify-content: space-around; 
             align-items: center; 
-            padding: 10px 0; /* padding برای فضای بیشتر */
+            padding: 10px 0; 
             z-index: 1000; /* بالاتر از سایر عناصر */
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5); /* اضافه کردن سایه */
         }
 
         .icon-container {
             display: flex;
             flex-direction: column; /* ترتیب عمودی */
             align-items: center; /* تراز کردن عناصر به مرکز */
-            transition: transform 0.3s; /* اضافه کردن انیمیشن به تغییرات */
-            margin: 0 10px; /* فاصله افقی */
+            transition: transform 0.3s, opacity 0.3s; /* انیمیشن برای تغییرات */
+            margin: 0 15px; /* فاصله بیشتر */
+            cursor: pointer; /* نشانگر به صورت دست */
         }
 
         .icon-container img {
-            width: 16px; /* اندازه جدید آیکون‌ها */
-            height: 16px;
-            transition: transform 0.3s; 
+            width: 24px; /* اندازه جدید آیکون‌ها */
+            height: 24px;
+            transition: transform 0.3s, filter 0.3s; 
             margin-bottom: 5px; /* فاصله بیشتر بین آیکون و متن */
+        }
+
+        .icon-container:hover img {
+            transform: scale(1.2); /* بزرگ شدن آیکون در هاور */
+            filter: brightness(1.2); /* روشن‌تر شدن آیکون در هاور */
         }
 
         .icon-label {
             visibility: hidden; 
             font-size: 14px; /* اندازه جدید متن */
             opacity: 0; 
-            transition: opacity 0.3s, transform 0.3s, color 0.3s; 
+            transition: opacity 0.3s, transform 0.3s; 
             transform: translateY(10px); /* جابجایی متن به پایین */
-            color: transparent; 
+            color: white; 
         }
 
         .icon-container.active .icon-label {
             visibility: visible; 
             opacity: 1; 
             transform: translateY(0); /* به حالت اولیه برمی‌گردد */
-            color: white; 
-        }
-
-        .icon-container.active img {
-            width: 20px; /* اندازه جدید آیکون‌های فعال */
-            height: 20px;
-            transform: scale(1.4); /* بزرگ شدن ایکون فعال */
-            transition: transform 0.3s; /* اضافه کردن انیمیشن به تغییرات */
         }
     </style>
 </head>
