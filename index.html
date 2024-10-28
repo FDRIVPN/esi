@@ -112,9 +112,9 @@
             height: 50px; /* ارتفاع نوار به 50 پیکسل */
             background-color: #1a1a1a;
             display: flex;
-            justify-content: center; /* مرکز کردن آیکون‌ها افقی */
+            justify-content: space-between; /* تقسیم فضای بین آیکون‌ها */
             align-items: center; /* مرکز کردن آیکون‌ها عمودی */
-            padding: 5px 0; /* padding برای فضای بیشتر */
+            padding: 0 10px; /* padding برای فضای بیشتر */
             z-index: 1000; /* بالاتر از سایر عناصر */
             box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5); /* اضافه کردن سایه */
         }
@@ -124,9 +124,8 @@
             flex-direction: column; /* ترتیب عمودی */
             align-items: center; /* تراز کردن عناصر به مرکز */
             transition: transform 0.3s, opacity 0.3s; /* انیمیشن برای تغییرات */
-            margin: 0 10px; /* فاصله بیشتر */
+            margin: 0; /* فاصله بیشتر */
             cursor: pointer; /* نشانگر به صورت دست */
-            margin-bottom: 0; /* فاصله از زمین به 0 */
         }
 
         .icon-container img {
@@ -270,12 +269,8 @@
                 // بارگذاری تصویر غیر فعال با تأخیر
                 setTimeout(() => {
                     previousImage.src = previousImages[previousIconId];
-                    previousImage.style.transform = 'scale(0.7)';
-                }, 100); // تأخیر 100 میلی‌ثانیه
-                
-                setTimeout(() => {
                     previousImage.style.transform = 'scale(1)'; 
-                }, 150); 
+                }, 100); // تأخیر 100 میلی‌ثانیه
             }
 
             icon.classList.add('active');
@@ -311,3 +306,4 @@
     </script>
 </body>
 </html>
+
