@@ -130,7 +130,7 @@
         }
 
         .icon-container img {
-            width: 20px; /* اندازه جدید آیکون‌ها به 20 پیکسل تغییر یافته */
+            width: 20px; /* اندازه جدید آیکون‌ها */
             height: 20px; /* اندازه جدید آیکون‌ها */
             transition: transform 0.3s, filter 0.3s; 
             margin-bottom: 5px; /* فاصله بیشتر بین آیکون و متن */
@@ -157,9 +157,9 @@
         }
 
         .icon-container.active img {
-            width: 25px; /* اندازه آیکون فعال به 25 پیکسل تغییر یافته */
-            height: 25px; /* اندازه آیکون فعال */
-            transform: scale(1.4); /* بزرگ شدن آیکون فعال */
+            width: 20px; /* اندازه آیکون فعال به 20 پیکسل */
+            height: 20px; /* اندازه آیکون فعال */
+            transform: scale(1.2); /* کمی بزرگ شدن آیکون فعال */
         }
     </style>
 </head>
@@ -283,7 +283,7 @@
             // بارگذاری تصویر فعال
             const activeImage = icon.querySelector('img');
             activeImage.src = activeImages[icon.id];
-            activeImage.style.transform = 'scale(1.4)';
+            activeImage.style.transform = 'scale(1.2)'; // کمی بزرگ شدن آیکون فعال
 
             const label = icon.querySelector('.icon-label');
             label.style.visibility = 'visible'; 
@@ -311,6 +311,3 @@
     </script>
 </body>
 </html>
-
-
-
