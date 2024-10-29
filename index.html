@@ -217,7 +217,7 @@
         Show More <span class="arrow">▼</span>
     </div>
 
-    <div class="page" id="homePage">
+    <div class="page" id="homePage" style="display: flex;">
         <h1>Home Page</h1>
     </div>
     <div class="page" id="comingSoon1">
@@ -263,7 +263,7 @@
         };
 
         let score = parseInt(localStorage.getItem('score')) || 0;
-        scoreElement.textContent = score;
+        scoreElement.innerText = score;
 
         let showAll = false;
 
@@ -332,6 +332,17 @@
             document.querySelectorAll('.page').forEach(page => {
                 page.style.display = 'none';
             });
+
+            if (pageId === 'homePage') {
+                ovalsContainer.style.display = 'flex'; // نمایش بیضی‌ها
+                document.getElementById('bottom-bar').style.display = 'flex'; // نمایش نوار پایین
+                document.getElementById('score-container').style.display = 'flex'; // نمایش امتیاز
+            } else {
+                ovalsContainer.style.display = 'none'; // پنهان کردن بیضی‌ها
+                document.getElementById('bottom-bar').style.display = 'none'; // پنهان کردن نوار پایین
+                document.getElementById('score-container').style.display = 'none'; // پنهان کردن امتیاز
+            }
+
             document.getElementById(pageId).style.display = 'flex';
         }
 
