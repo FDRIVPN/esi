@@ -71,13 +71,31 @@
             margin: 10px 0; /* فاصله عمودی بین بیضی‌ها */
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start; /* متن در سمت چپ */
+            padding-left: 10px; /* فاصله متن از لبه بیضی */
         }
 
         #ovals-container {
             margin-top: 100px;
             padding: 0 20px; /* فاصله 20 پیکسل از سمت چپ و راست */
             width: calc(100% - 40px); /* عرض کانتینر با احتساب فاصله */
+            display: flex; /* استفاده از flexbox برای بیضی‌ها */
+            flex-direction: column;
+            align-items: flex-start; /* تراز کردن بیضی‌ها به سمت چپ */
+        }
+
+        #go-oval {
+            background-color: black; /* رنگ پس‌زمینه بیضی سیاه */
+            color: white; /* رنگ متن بیضی سیاه */
+            width: 100px; /* عرض بیضی سیاه */
+            height: 30px; /* ارتفاع بیضی سیاه */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px; /* لبه‌های گرد */
+            margin-top: 10px; /* فاصله از بیضی‌های دیگر */
+            position: absolute; /* موقعیت مطلق */
+            right: 20px; /* فاصله از سمت راست */
         }
 
         #showMore {
@@ -186,6 +204,7 @@
         <div class="decorative-oval">Follow X</div>
         <div class="decorative-oval">Join Bot</div>
         <div class="decorative-oval">Friend</div>
+        <div id="go-oval">Go</div> <!-- بیضی سیاه -->
     </div>
 
     <div id="showMore" style="display:none;">
