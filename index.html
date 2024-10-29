@@ -38,7 +38,6 @@
             margin-top: 8px;
             color: white;
             font-size: 20px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
         }
 
         /* استایل های اصلی */
@@ -51,7 +50,6 @@
             flex-direction: column;
             justify-content: flex-start;
             align-items: center;
-            overflow: hidden; /* جلوگیری از نوار اسکرول */
         }
 
         #score-container {
@@ -63,7 +61,6 @@
             align-items: center;
             justify-content: center;
             flex-direction: column;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
         }
 
         #ovals-container {
@@ -72,10 +69,7 @@
             display: flex;
             flex-direction: column;
             align-items: center; /* مرکز کردن بیضی‌ها */
-            justify-content: flex-start; /* مرکز کردن عمودی بیضی‌ها */
-            max-height: calc(100vh - 120px); /* حداکثر ارتفاع برای جلوگیری از زیر نوار پایین */
-            overflow-y: auto; /* اجازه اسکرول داخلی */
-            -webkit-overflow-scrolling: touch; /* فعال‌سازی اسکرول لمسی در موبایل */
+            justify-content: center; /* مرکز کردن عمودی بیضی‌ها */
         }
 
         .decorative-oval {
@@ -89,7 +83,6 @@
             justify-content: space-between; /* توزیع فضا بین متن و بیضی سیاه */
             padding: 0 10px; /* فاصله داخلی */
             box-sizing: border-box; /* شامل padding در عرض */
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7); /* سایه متن */
         }
 
         .go-oval {
@@ -101,7 +94,6 @@
             align-items: center;
             justify-content: center;
             border-radius: 20px; /* لبه‌های گرد */
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7); /* سایه متن بیضی سیاه */
         }
 
         #bottom-bar {
@@ -168,7 +160,6 @@
             flex: 1;
             align-items: center;
             justify-content: center;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* سایه متن صفحات */
         }
 
         /* استایل برای بیضی‌ها */
@@ -236,7 +227,7 @@
         <h1>Coming Soon...</h1>
     </div>
 
-    <div id="bottom-bar">
+    <div id="bottom-bar" style="display:none;">
         <div class="icon-container active" id="icon1" tabindex="0">
             <img src="image1.png" alt="Left Icon">
             <span class="icon-label">Home</span>
@@ -258,11 +249,118 @@
         const icon1 = document.getElementById('icon1');
         const icon2 = document.getElementById('icon2');
         const icon3 = document.getElementById('icon3');
-        const homePage = document.getElementById('homePage');
-        const comingSoon1 = document.getElementById('comingSoon1');
-        const comingSoon2 = document.getElementById('comingSoon2');
 
-        // کدهای جاوا اسکریپت برای تعاملات صفحه
+        const previousImages = {
+            icon1: 'image11.png', 
+            icon2: 'image3.png',
+            icon3: 'image2.png'
+        };
+
+        const activeImages = {
+            icon1: 'image1.png', 
+            icon2: 'image22.png', 
+            icon3: 'image33.png'
+        };
+
+        let score = parseInt(localStorage.getItem('score')) || 0;
+        scoreElement.innerText = score;
+
+        let showAll = false;
+
+        function createOvals() {
+            for (let i = 0; i < 10; i++) {
+                const oval = document.createElement('div');
+                oval.classList.add('decorative-oval');
+                oval.style.display = i < 5 ? 'block' : 'none';
+                ovalsContainer.appendChild(oval);
+            }
+        }
+
+        function updateShowMore() {
+            showMore.style.display = 'block';
+            showMore.innerHTML = showAll ? 'Show Less <span class="arrow">▲</span>' : 'Show More <span class="arrow">▼</span>';
+        }
+
+        function toggleOvals() {
+            showAll = !showAll;
+            const ovals = ovalsContainer.querySelectorAll('.decorative-oval');
+            ovals.forEach((oval, index) => {
+                oval.style.display = showAll || index < 5 ? 'flex' : 'none';
+            });
+            updateShowMore();
+        }
+
+        function activateIcon(icon) {
+            const previouslyActive = document.querySelector('.icon-container.active');
+            if (previouslyActive) {
+                previouslyActive.classList.remove('active');
+
+                const previousIconId = previouslyActive.id;
+                const previousImage = previouslyActive.querySelector('img');
+                const label = previouslyActive.querySelector('.icon-label');
+
+                label.style.opacity = '0'; 
+                label.style.visibility = 'hidden'; 
+                label.style.transform = 'translateY(10px)'; 
+
+                setTimeout(() => {
+                    previousImage.src = previousImages[previousIconId];
+                    previousImage.style.transform = 'scale(1)'; 
+                }, 100); 
+            }
+
+            icon.classList.add('active');
+            const activeImage = icon.querySelector('img');
+            activeImage.src = activeImages[icon.id];
+            activeImage.style.transform = 'scale(1.2)'; 
+
+            const label = icon.querySelector('.icon-label');
+            label.style.visibility = 'visible'; 
+            label.style.opacity = '1'; 
+            label.style.transform = 'translateY(0)'; 
+
+            if (icon.id === 'icon1') {
+                showPage('homePage');
+            } else if (icon.id === 'icon2') {
+                showPage('comingSoon1');
+            } else if (icon.id === 'icon3') {
+                showPage('comingSoon2');
+            }
+        }
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.style.display = 'none';
+            });
+
+            if (pageId === 'homePage') {
+                ovalsContainer.style.display = 'flex'; // نمایش بیضی‌ها
+                document.getElementById('bottom-bar').style.display = 'flex'; // نمایش نوار پایین
+                document.getElementById('score-container').style.display = 'flex'; // نمایش امتیاز
+            } else {
+                ovalsContainer.style.display = 'none'; // پنهان کردن بیضی‌ها
+                document.getElementById('bottom-bar').style.display = 'none'; // پنهان کردن نوار پایین
+                document.getElementById('score-container').style.display = 'none'; // پنهان کردن امتیاز
+            }
+
+            document.getElementById(pageId).style.display = 'flex';
+        }
+
+        icon1.addEventListener('click', () => activateIcon(icon1));
+        icon2.addEventListener('click', () => activateIcon(icon2));
+        icon3.addEventListener('click', () => activateIcon(icon3));
+
+        showMore.addEventListener('click', toggleOvals);
+        createOvals();
+        updateShowMore();
+
+        setTimeout(() => {
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('score-container').style.display = 'flex';
+            document.getElementById('ovals-container').style.display = 'block';
+            document.getElementById('showMore').style.display = 'block';
+            document.getElementById('bottom-bar').style.display = 'flex';
+        }, 3000);
     </script>
 </body>
 </html>
