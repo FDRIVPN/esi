@@ -46,10 +46,13 @@
             margin: 0;
             font-family: Arial, sans-serif;
             height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
+            overflow-y: scroll; /* برای فعال کردن اسکرول */
+            padding-bottom: 70px; /* برای اضافه کردن 70 پیکسل */
+        }
+
+        body {
+            overflow: hidden; /* پنهان کردن نوار اسکرول */
+            height: calc(100% + 70px); /* افزایش ارتفاع */
         }
 
         #score-container {
@@ -322,9 +325,9 @@
             if (icon.id === 'icon1') {
                 showPage('homePage');
             } else if (icon.id === 'icon2') {
-                showPage('comingSoon1'); // برای تست در حال حاضر صفحه در حال ساخت
+                showPage('comingSoon1');
             } else if (icon.id === 'icon3') {
-                showPage('comingSoon2'); // برای تست در حال حاضر صفحه در حال ساخت
+                showPage('comingSoon2');
             }
         }
 
@@ -333,14 +336,14 @@
                 page.style.display = 'none';
             });
 
-            const bottomBarVisiblePages = ['homePage', 'comingSoon1', 'comingSoon2']; // صفحه‌های مجاز برای نمایش نوار پایین
+            const bottomBarVisiblePages = ['homePage', 'comingSoon1', 'comingSoon2'];
 
             if (bottomBarVisiblePages.includes(pageId)) {
-                document.getElementById('bottom-bar').style.display = 'flex'; // نمایش نوار پایین
+                document.getElementById('bottom-bar').style.display = 'flex'; 
                 ovalsContainer.style.display = 'flex'; 
                 document.getElementById('score-container').style.display = 'flex'; 
             } else {
-                document.getElementById('bottom-bar').style.display = 'none'; // پنهان کردن نوار پایین
+                document.getElementById('bottom-bar').style.display = 'none'; 
                 ovalsContainer.style.display = 'none'; 
                 document.getElementById('score-container').style.display = 'none'; 
             }
@@ -361,7 +364,7 @@
             document.getElementById('score-container').style.display = 'flex';
             document.getElementById('ovals-container').style.display = 'block';
             document.getElementById('showMore').style.display = 'block';
-            document.getElementById('bottom-bar').style.display = 'flex'; // نمایش نوار پایین در صفحه اصلی
+            document.getElementById('bottom-bar').style.display = 'flex'; 
         }, 3000);
     </script>
 </body>
