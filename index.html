@@ -63,8 +63,8 @@
             flex-direction: column;
         }
 
-       .decorative-oval {
-            width: calc(100% - 40px); /* 100% عرض صفحه منهای 20px از هر سمت */
+        .decorative-oval {
+            width: calc(100% - 40px); /* 100% عرض صفحه منهای 40px */
             height: 40px; /* ارتفاع بیضی */
             background-color: white;
             border-radius: 20px; /* لبه‌های گرد */
@@ -76,31 +76,21 @@
             position: relative; /* برای استفاده از موقعیت مطلق */
         }
 
-       .go-oval {
-           background-color: black; /* رنگ پس‌زمینه بیضی سیاه */
-           color: white; /* رنگ متن بیضی سیاه */
-           width: 40px; /* عرض بیضی سیاه */
-           height: 40px; /* ارتفاع بیضی سیاه */
-           display: flex;
-           align-items: center;
-           justify-content: center;
-           border-radius: 20px; /* لبه‌های گرد */
-           position: absolute; /* موقعیت مطلق */
-           right: 10px; /* فاصله از سمت راست */
-     }
-
-
-        
-
-
+        .go-oval {
+            background-color: black; /* رنگ پس‌زمینه بیضی سیاه */
+            color: white; /* رنگ متن بیضی سیاه */
+            width: 40px; /* عرض بیضی سیاه */
+            height: 40px; /* ارتفاع بیضی سیاه */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px; /* لبه‌های گرد */
+            position: absolute; /* موقعیت مطلق */
+            right: 10px; /* فاصله از سمت راست */
+        }
 
         #ovals-container {
             margin-top: 100px;
-            padding: 0 20px; /* فاصله 20 پیکسل از سمت چپ و راست */
-            width: calc(100% - 40px); /* عرض کانتینر با احتساب فاصله */
-            display: flex; /* استفاده از flexbox برای بیضی‌ها */
-            flex-direction: column;
-            align-items: flex-start; /* تراز کردن بیضی‌ها به سمت چپ */
         }
 
         #showMore {
@@ -204,11 +194,11 @@
     </div>
 
     <div id="ovals-container" style="display:none;">
-        <div class="decorative-oval">Channel Telegram <div class="go-oval">Go</div></div>
-        <div class="decorative-oval">Join X <div class="go-oval">Go</div></div>
-        <div class="decorative-oval">Follow X <div class="go-oval">Go</div></div>
-        <div class="decorative-oval">Join Bot <div class="go-oval">Go</div></div>
-        <div class="decorative-oval">Friend <div class="go-oval">Go</div></div>
+        <div class="decorative-oval">channel telegram <div class="go-oval">Go</div></div>
+        <div class="decorative-oval">join x <div class="go-oval">Go</div></div>
+        <div class="decorative-oval">follow x <div class="go-oval">Go</div></div>
+        <div class="decorative-oval">join bot <div class="go-oval">Go</div></div>
+        <div class="decorative-oval">friend <div class="go-oval">Go</div></div>
     </div>
 
     <div id="showMore" style="display:none;">
@@ -259,15 +249,6 @@
         scoreElement.textContent = score;
 
         let showAll = false;
-
-        function createOvals() {
-            for (let i = 0; i < 10; i++) {
-                const oval = document.createElement('div');
-                oval.classList.add('decorative-oval');
-                oval.style.display = i < 5 ? 'block' : 'none';
-                ovalsContainer.appendChild(oval);
-            }
-        }
 
         function updateShowMore() {
             showMore.style.display = 'block';
@@ -322,7 +303,6 @@
         icon3.addEventListener('click', () => activateIcon(icon3));
 
         showMore.addEventListener('click', toggleOvals);
-        createOvals();
         updateShowMore();
 
         // تاخیر برای بارگذاری صفحه اصلی
