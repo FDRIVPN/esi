@@ -65,12 +65,11 @@
 
         #ovals-container {
             margin-top: 100px;
-            width: 100%;
-            padding: 0 20px; /* فاصله از لبه‌های صفحه */
+            width: calc(100% - 40px); /* 100% عرض صفحه منهای 40px (20px از هر طرف) */
         }
 
         .decorative-oval {
-            width: calc(100% - 40px); /* 100% عرض صفحه منهای 40px */
+            width: 100%; /* عرض کامل */
             height: 40px; /* ارتفاع بیضی */
             background-color: white;
             border-radius: 20px; /* لبه‌های گرد */
@@ -146,17 +145,6 @@
         .icon-container.active img {
             transform: scale(1.2); 
         }
-
-        @media (max-width: 600px) {
-            .decorative-oval {
-                flex-direction: row; /* بیضی‌ها در حالت افقی */
-                justify-content: space-between;
-            }
-
-            #score-container {
-                font-size: 24px; /* اندازه فونت کوچک‌تر در موبایل */
-            }
-        }
     </style>
 </head>
 <body>
@@ -175,23 +163,23 @@
 
     <div id="ovals-container" style="display:none;">
         <div class="decorative-oval">
-            channel telegram 
+            <span>Channel Telegram</span>
             <div class="go-oval">Go</div>
         </div>
         <div class="decorative-oval">
-            join x 
+            <span>Join X</span>
             <div class="go-oval">Go</div>
         </div>
         <div class="decorative-oval">
-            follow x 
+            <span>Follow X</span>
             <div class="go-oval">Go</div>
         </div>
         <div class="decorative-oval">
-            join bot 
+            <span>Join Bot</span>
             <div class="go-oval">Go</div>
         </div>
         <div class="decorative-oval">
-            friend 
+            <span>Friend</span>
             <div class="go-oval">Go</div>
         </div>
     </div>
