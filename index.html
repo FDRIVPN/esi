@@ -65,35 +65,35 @@
 
         #ovals-container {
             margin-top: 50px;
-            width: calc(100% - 40px); /* 20px فاصله از هر طرف */
+            width: calc(100% - 40px);
             display: flex;
             flex-direction: column;
-            align-items: center; /* مرکز کردن بیضی‌ها */
-            justify-content: center; /* مرکز کردن عمودی بیضی‌ها */
+            align-items: center;
+            justify-content: center;
         }
 
         .decorative-oval {
-            width: 100%; /* عرض کامل */
-            height: 40px; /* ارتفاع بیضی */
+            width: 100%;
+            height: 40px;
             background-color: white;
-            border-radius: 20px; /* لبه‌های گرد */
-            margin: 10px 0; /* فاصله عمودی بین بیضی‌ها */
+            border-radius: 20px;
+            margin: 10px 0;
             display: flex;
             align-items: center;
-            justify-content: space-between; /* توزیع فضا بین متن و بیضی سیاه */
-            padding: 0 10px; /* فاصله داخلی */
-            box-sizing: border-box; /* شامل padding در عرض */
+            justify-content: space-between;
+            padding: 0 10px;
+            box-sizing: border-box;
         }
 
         .go-oval {
-            background-color: black; /* رنگ پس‌زمینه بیضی سیاه */
-            color: white; /* رنگ متن بیضی سیاه */
-            width: 40px; /* عرض بیضی سیاه */
-            height: 40px; /* ارتفاع بیضی سیاه */
+            background-color: black;
+            color: white;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 20px; /* لبه‌های گرد */
+            border-radius: 20px;
         }
 
         #bottom-bar {
@@ -165,13 +165,13 @@
         /* استایل برای بیضی‌ها */
         @media (max-width: 768px) {
             .decorative-oval {
-                width: 280px; /* طول بیضی برای موبایل */
+                width: 280px;
             }
         }
 
         @media (min-width: 769px) {
             .decorative-oval {
-                width: 1300px; /* طول بیضی برای دسکتاپ */
+                width: 1300px;
             }
         }
     </style>
@@ -334,13 +334,13 @@
             });
 
             if (pageId === 'homePage') {
-                ovalsContainer.style.display = 'flex'; // نمایش بیضی‌ها
-                document.getElementById('bottom-bar').style.display = 'flex'; // نمایش نوار پایین
-                document.getElementById('score-container').style.display = 'flex'; // نمایش امتیاز
+                ovalsContainer.style.display = 'flex'; 
+                document.getElementById('bottom-bar').style.display = 'flex'; 
+                document.getElementById('score-container').style.display = 'flex'; 
             } else {
-                ovalsContainer.style.display = 'none'; // پنهان کردن بیضی‌ها
-                document.getElementById('bottom-bar').style.display = 'none'; // پنهان کردن نوار پایین
-                document.getElementById('score-container').style.display = 'none'; // پنهان کردن امتیاز
+                ovalsContainer.style.display = 'none'; 
+                document.getElementById('bottom-bar').style.display = 'none'; 
+                document.getElementById('score-container').style.display = 'none'; 
             }
 
             document.getElementById(pageId).style.display = 'flex';
