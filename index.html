@@ -149,6 +149,30 @@
         .icon-container.active img {
             transform: scale(1.2); 
         }
+
+        /* استایل برای صفحات */
+        .page {
+            display: none;
+            color: white;
+            font-size: 24px;
+            text-align: center;
+            flex: 1;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* استایل برای بیضی‌ها */
+        @media (max-width: 768px) {
+            .decorative-oval {
+                width: 280px; /* طول بیضی برای موبایل */
+            }
+        }
+
+        @media (min-width: 769px) {
+            .decorative-oval {
+                width: 1300px; /* طول بیضی برای دسکتاپ */
+            }
+        }
     </style>
 </head>
 <body>
@@ -192,8 +216,14 @@
         Show More <span class="arrow">▼</span>
     </div>
 
-    <div id="content" style="display:none;">
-        <div id="comingSoon">Coming Soon...</div>
+    <div class="page" id="homePage">
+        <h1>Home Page</h1>
+    </div>
+    <div class="page" id="comingSoon1">
+        <h1>Coming Soon...</h1>
+    </div>
+    <div class="page" id="comingSoon2">
+        <h1>Coming Soon...</h1>
     </div>
 
     <div id="bottom-bar" style="display:none;">
@@ -236,6 +266,15 @@
 
         let showAll = false;
 
+        function createOvals() {
+            for (let i = 0; i < 10; i++) {
+                const oval = document.createElement('div');
+                oval.classList.add('decorative-oval');
+                oval.style.display = i < 5 ? 'block' : 'none';
+                ovalsContainer.appendChild(oval);
+            }
+        }
+
         function updateShowMore() {
             showMore.style.display = 'block';
             showMore.innerHTML = showAll ? 'Show Less <span class="arrow">▲</span>' : 'Show More <span class="arrow">▼</span>';
@@ -270,7 +309,6 @@
             }
 
             icon.classList.add('active');
-
             const activeImage = icon.querySelector('img');
             activeImage.src = activeImages[icon.id];
             activeImage.style.transform = 'scale(1.2)'; 
@@ -279,6 +317,21 @@
             label.style.visibility = 'visible'; 
             label.style.opacity = '1'; 
             label.style.transform = 'translateY(0)'; 
+
+            if (icon.id === 'icon1') {
+                showPage('homePage');
+            } else if (icon.id === 'icon2') {
+                showPage('comingSoon1');
+            } else if (icon.id === 'icon3') {
+                showPage('comingSoon2');
+            }
+        }
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.style.display = 'none';
+            });
+            document.getElementById(pageId).style.display = 'flex';
         }
 
         icon1.addEventListener('click', () => activateIcon(icon1));
@@ -286,13 +339,14 @@
         icon3.addEventListener('click', () => activateIcon(icon3));
 
         showMore.addEventListener('click', toggleOvals);
+        createOvals();
+        updateShowMore();
 
         setTimeout(() => {
             document.getElementById('loading-screen').style.display = 'none';
             document.getElementById('score-container').style.display = 'flex';
             document.getElementById('ovals-container').style.display = 'block';
             document.getElementById('showMore').style.display = 'block';
-            document.getElementById('content').style.display = 'flex';
             document.getElementById('bottom-bar').style.display = 'flex';
         }, 3000);
     </script>
