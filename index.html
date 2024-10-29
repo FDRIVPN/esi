@@ -17,7 +17,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 1000; /* بالاتر از سایر عناصر */
+            z-index: 1000;
         }
 
         .loading-circle {
@@ -63,6 +63,12 @@
             flex-direction: column;
         }
 
+        #ovals-container {
+            margin-top: 100px;
+            width: 100%;
+            padding: 0 20px; /* فاصله از لبه‌های صفحه */
+        }
+
         .decorative-oval {
             width: calc(100% - 40px); /* 100% عرض صفحه منهای 40px */
             height: 40px; /* ارتفاع بیضی */
@@ -71,9 +77,8 @@
             margin: 10px 0; /* فاصله عمودی بین بیضی‌ها */
             display: flex;
             align-items: center;
-            justify-content: flex-start; /* متن در سمت چپ */
-            padding-left: 10px; /* فاصله متن از لبه بیضی */
-            position: relative; /* برای استفاده از موقعیت مطلق */
+            justify-content: space-between; /* توزیع فضا بین متن و بیضی سیاه */
+            padding: 0 10px; /* فاصله داخلی */
         }
 
         .go-oval {
@@ -85,97 +90,61 @@
             align-items: center;
             justify-content: center;
             border-radius: 20px; /* لبه‌های گرد */
-            position: absolute; /* موقعیت مطلق */
-            right: 10px; /* فاصله از سمت راست */
-        }
-
-        #ovals-container {
-            margin-top: 100px;
-        }
-
-        #showMore {
-            margin-top: 10px;
-            color: white;
-            cursor: pointer;
-            font-size: 20px;
-            display: none;
-        }
-
-        .arrow {
-            display: inline-block;
-            margin-left: 5px;
-            transform: rotate(180deg);
-        }
-
-        #content {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-            text-align: center;
-        }
-
-        #comingSoon {
-            display: none;
         }
 
         #bottom-bar {
             position: fixed;
-            bottom: 0; /* به پایین صفحه می‌چسبد */
-            left: 0; /* به سمت چپ می‌چسبد */
+            bottom: 0;
+            left: 0;
             width: 100%;
-            height: 50px; /* ارتفاع نوار به 50 پیکسل */
+            height: 50px; 
             background-color: #1a1a1a;
             display: flex;
-            justify-content: space-around; /* تقسیم فضای بین آیکون‌ها */
-            align-items: center; /* مرکز کردن آیکون‌ها عمودی */
-            padding: 0 10px; /* padding برای فضای بیشتر */
-            z-index: 1000; /* بالاتر از سایر عناصر */
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5); /* اضافه کردن سایه */
+            justify-content: space-around; 
+            align-items: center; 
+            padding: 0 10px; 
+            z-index: 1000; 
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5); 
         }
 
         .icon-container {
             display: flex;
-            flex-direction: column; /* ترتیب عمودی */
-            align-items: center; /* تراز کردن عناصر به مرکز */
-            transition: transform 0.3s, opacity 0.3s; /* انیمیشن برای تغییرات */
-            cursor: pointer; /* نشانگر به صورت دست */
-            padding: 0 4px; /* فاصله بین آیکون‌ها به 2 پیکسل کاهش یافته است */
+            flex-direction: column; 
+            align-items: center; 
+            transition: transform 0.3s, opacity 0.3s; 
+            cursor: pointer; 
+            padding: 0 4px; 
         }
 
         .icon-container img {
-            width: 20px; /* اندازه جدید آیکون‌ها */
-            height: 20px; /* اندازه جدید آیکون‌ها */
+            width: 20px; 
+            height: 20px; 
             transition: transform 0.3s, filter 0.3s; 
-            margin-bottom: 5px; /* فاصله بیشتر بین آیکون و متن */
+            margin-bottom: 5px; 
         }
 
         .icon-container:hover img {
-            transform: scale(1.2); /* بزرگ شدن آیکون در هاور */
-            filter: brightness(1.2); /* روشن‌تر شدن آیکون در هاور */
+            transform: scale(1.2); 
+            filter: brightness(1.2); 
         }
 
         .icon-label {
             visibility: hidden; 
-            font-size: 14px; /* اندازه جدید متن */
+            font-size: 14px; 
             opacity: 0; 
             transition: opacity 0.3s, transform 0.3s; 
-            transform: translateY(10px); /* جابجایی متن به پایین */
+            transform: translateY(10px); 
             color: white; 
         }
 
         .icon-container.active .icon-label {
             visibility: visible; 
             opacity: 1; 
-            transform: translateY(0); /* به حالت اولیه برمی‌گردد */
+            transform: translateY(0); 
         }
 
         .icon-container.active img {
-            width: 20px; /* اندازه آیکون فعال به 20 پیکسل */
-            height: 20px; /* اندازه آیکون فعال */
-            transform: scale(1.2); /* کمی بزرگ شدن آیکون فعال */
+            transform: scale(1.2); 
         }
     </style>
 </head>
@@ -194,11 +163,26 @@
     </div>
 
     <div id="ovals-container" style="display:none;">
-        <div class="decorative-oval">channel telegram <div class="go-oval">Go</div></div>
-        <div class="decorative-oval">join x <div class="go-oval">Go</div></div>
-        <div class="decorative-oval">follow x <div class="go-oval">Go</div></div>
-        <div class="decorative-oval">join bot <div class="go-oval">Go</div></div>
-        <div class="decorative-oval">friend <div class="go-oval">Go</div></div>
+        <div class="decorative-oval">
+            channel telegram 
+            <div class="go-oval">Go</div>
+        </div>
+        <div class="decorative-oval">
+            join x 
+            <div class="go-oval">Go</div>
+        </div>
+        <div class="decorative-oval">
+            follow x 
+            <div class="go-oval">Go</div>
+        </div>
+        <div class="decorative-oval">
+            join bot 
+            <div class="go-oval">Go</div>
+        </div>
+        <div class="decorative-oval">
+            friend 
+            <div class="go-oval">Go</div>
+        </div>
     </div>
 
     <div id="showMore" style="display:none;">
@@ -232,7 +216,6 @@
         const icon2 = document.getElementById('icon2');
         const icon3 = document.getElementById('icon3');
 
-        // آدرس‌های تصاویر
         const previousImages = {
             icon1: 'image11.png', 
             icon2: 'image3.png',
@@ -259,7 +242,7 @@
             showAll = !showAll;
             const ovals = ovalsContainer.querySelectorAll('.decorative-oval');
             ovals.forEach((oval, index) => {
-                oval.style.display = showAll || index < 5 ? 'block' : 'none';
+                oval.style.display = showAll || index < 5 ? 'flex' : 'none';
             });
             updateShowMore();
         }
@@ -269,7 +252,6 @@
             if (previouslyActive) {
                 previouslyActive.classList.remove('active');
 
-                // غیرفعال کردن آیکون قبلی
                 const previousIconId = previouslyActive.id;
                 const previousImage = previouslyActive.querySelector('img');
                 const label = previouslyActive.querySelector('.icon-label');
@@ -278,19 +260,17 @@
                 label.style.visibility = 'hidden'; 
                 label.style.transform = 'translateY(10px)'; 
 
-                // بارگذاری تصویر غیر فعال با تأخیر
                 setTimeout(() => {
                     previousImage.src = previousImages[previousIconId];
                     previousImage.style.transform = 'scale(1)'; 
-                }, 100); // تأخیر 100 میلی‌ثانیه
+                }, 100);
             }
 
             icon.classList.add('active');
 
-            // بارگذاری تصویر فعال
             const activeImage = icon.querySelector('img');
             activeImage.src = activeImages[icon.id];
-            activeImage.style.transform = 'scale(1.2)'; // کمی بزرگ شدن آیکون فعال
+            activeImage.style.transform = 'scale(1.2)'; 
 
             const label = icon.querySelector('.icon-label');
             label.style.visibility = 'visible'; 
@@ -303,9 +283,7 @@
         icon3.addEventListener('click', () => activateIcon(icon3));
 
         showMore.addEventListener('click', toggleOvals);
-        updateShowMore();
 
-        // تاخیر برای بارگذاری صفحه اصلی
         setTimeout(() => {
             document.getElementById('loading-screen').style.display = 'none';
             document.getElementById('score-container').style.display = 'flex';
@@ -313,7 +291,7 @@
             document.getElementById('showMore').style.display = 'block';
             document.getElementById('content').style.display = 'flex';
             document.getElementById('bottom-bar').style.display = 'flex';
-        }, 3000); // تغییر این مقدار برای مدت زمان بارگذاری
+        }, 3000);
     </script>
 </body>
 </html>
