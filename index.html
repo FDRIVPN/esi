@@ -146,6 +146,17 @@
         .icon-container.active img {
             transform: scale(1.2); 
         }
+
+        @media (max-width: 600px) {
+            .decorative-oval {
+                flex-direction: row; /* بیضی‌ها در حالت افقی */
+                justify-content: space-between;
+            }
+
+            #score-container {
+                font-size: 24px; /* اندازه فونت کوچک‌تر در موبایل */
+            }
+        }
     </style>
 </head>
 <body>
@@ -263,7 +274,7 @@
                 setTimeout(() => {
                     previousImage.src = previousImages[previousIconId];
                     previousImage.style.transform = 'scale(1)'; 
-                }, 100);
+                }, 100); 
             }
 
             icon.classList.add('active');
