@@ -46,7 +46,7 @@
             margin: 0;
             font-family: Arial, sans-serif;
             height: 100%;
-            overflow-y: scroll; /* برای فعال کردن اسکرول */
+            overflow-y: scroll;
             padding-bottom: 70px; /* برای اضافه کردن 70 پیکسل */
         }
 
@@ -163,6 +163,13 @@
             flex: 1;
             align-items: center;
             justify-content: center;
+            background-color: black; /* رنگ پس‌زمینه */
+            height: 100vh; /* ارتفاع 100% صفحه */
+        }
+
+        /* پنهان کردن صفحه Home */
+        #homePage {
+            display: none; /* پنهان کردن صفحه Home */
         }
 
         /* استایل برای بیضی‌ها */
@@ -220,14 +227,14 @@
         Show More <span class="arrow">▼</span>
     </div>
 
-    <div class="page" id="homePage" style="display: flex;">
-        <h1>Home Page</h1>
+    <div class="page" id="firstPage" style="display: none;">
+        <div class="header-text">این صفحه مربوط به آیکون اول است.</div>
     </div>
     <div class="page" id="comingSoon1">
-        <h1>Coming Soon...</h1>
+        <div class="header-text">این صفحه مربوط به آیکون دوم است.</div>
     </div>
     <div class="page" id="comingSoon2">
-        <h1>Coming Soon...</h1>
+        <div class="header-text">این صفحه مربوط به آیکون سوم است.</div>
     </div>
 
     <div id="bottom-bar">
@@ -269,6 +276,9 @@
         scoreElement.innerText = score;
 
         let showAll = false;
+        let clickedIcon1 = false; // وضعیت برای آیکون 1
+        let clickedIcon2 = false; // وضعیت برای آیکون 2
+        let clickedIcon3 = false; // وضعیت برای آیکون 3
 
         function createOvals() {
             for (let i = 0; i < 10; i++) {
@@ -294,6 +304,16 @@
         }
 
         function activateIcon(icon) {
+            if ((icon.id === 'icon1' && clickedIcon1) || 
+                (icon.id === 'icon2' && clickedIcon2) || 
+                (icon.id === 'icon3' && clickedIcon3)) {
+                return; // اگر دوباره روی آیکون کلیک شده، هیچ واکنشی نداشته باشد
+            }
+
+            if (icon.id === 'icon1') clickedIcon1 = true;
+            if (icon.id === 'icon2') clickedIcon2 = true;
+            if (icon.id === 'icon3') clickedIcon3 = true;
+
             const previouslyActive = document.querySelector('.icon-container.active');
             if (previouslyActive) {
                 previouslyActive.classList.remove('active');
@@ -323,7 +343,7 @@
             label.style.transform = 'translateY(0)'; 
 
             if (icon.id === 'icon1') {
-                showPage('homePage');
+                showPage('firstPage'); // صفحه مربوط به آیکون اول
             } else if (icon.id === 'icon2') {
                 showPage('comingSoon1');
             } else if (icon.id === 'icon3') {
@@ -336,16 +356,12 @@
                 page.style.display = 'none';
             });
 
-            const bottomBarVisiblePages = ['homePage', 'comingSoon1', 'comingSoon2'];
-
-            if (bottomBarVisiblePages.includes(pageId)) {
+            if (pageId !== 'homePage') {
                 document.getElementById('bottom-bar').style.display = 'flex'; 
                 ovalsContainer.style.display = 'flex'; 
                 document.getElementById('score-container').style.display = 'flex'; 
             } else {
-                document.getElementById('bottom-bar').style.display = 'none'; 
-                ovalsContainer.style.display = 'none'; 
-                document.getElementById('score-container').style.display = 'none'; 
+                // هیچ عملی انجام ندهید
             }
 
             document.getElementById(pageId).style.display = 'flex';
