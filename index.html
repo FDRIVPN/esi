@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coin Game</title>
     <style>
-        /* استایل برای صفحه بارگذاری */
+        /* Loading screen styles */
         #loading-screen {
             position: fixed;
             top: 0;
@@ -34,25 +34,14 @@
             100% { transform: rotate(360deg); }
         }
 
-        .loading-text {
-            margin-top: 8px;
-            color: white;
-            font-size: 20px;
-        }
-
-        /* استایل های اصلی */
+        /* Main styles */
         html, body {
             background-color: black;
             margin: 0;
             font-family: Arial, sans-serif;
             height: 100%;
             overflow-y: scroll;
-            padding-bottom: 70px; /* برای اضافه کردن 70 پیکسل */
-        }
-
-        body {
-            overflow: hidden; /* پنهان کردن نوار اسکرول */
-            height: calc(100% + 70px); /* افزایش ارتفاع */
+            padding-bottom: 70px; /* For additional padding */
         }
 
         #score-container {
@@ -66,37 +55,26 @@
             flex-direction: column;
         }
 
-        #ovals-container {
+        #rectangles-container {
             margin-top: 50px;
-            width: calc(100% - 40px);
+            width: calc(100% - 40px); /* 20px padding from each side */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
         }
 
-        .decorative-oval {
-            width: 100%;
-            height: 40px;
-            background-color: white;
-            border-radius: 20px;
-            margin: 10px 0;
+        .rectangle {
+            width: calc(100% - 40px); /* 20px padding from each side */
+            height: 40px; /* Rectangle height */
+            background-color: white; /* White color */
+            margin: 5px 0; /* 10px space between rectangles */
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 0 10px;
+            justify-content: flex-start; /* Align to the left */
+            padding: 0 10px; /* Internal padding */
             box-sizing: border-box;
-        }
-
-        .go-oval {
-            background-color: black;
-            color: white;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 20px;
+            border-radius: 0; /* No corners */
         }
 
         #bottom-bar {
@@ -106,7 +84,7 @@
             width: 100%;
             height: 50px; 
             background-color: #1a1a1a;
-            display: none; /* مخفی به طور پیش‌فرض */
+            display: none; /* Hidden by default */
             justify-content: space-around; 
             align-items: center; 
             padding: 0 10px; 
@@ -118,21 +96,12 @@
             display: flex;
             flex-direction: column; 
             align-items: center; 
-            transition: transform 0.3s, opacity 0.3s; 
             cursor: pointer; 
-            padding: 0 4px; 
         }
 
         .icon-container img {
             width: 20px; 
             height: 20px; 
-            transition: transform 0.3s, filter 0.3s; 
-            margin-bottom: 5px; 
-        }
-
-        .icon-container:hover img {
-            transform: scale(1.2); 
-            filter: brightness(1.2); 
         }
 
         .icon-label {
@@ -154,7 +123,7 @@
             transform: scale(1.2); 
         }
 
-        /* استایل برای صفحات */
+        /* Page styles */
         .page {
             display: none;
             color: white;
@@ -163,26 +132,8 @@
             flex: 1;
             align-items: center;
             justify-content: center;
-            background-color: black; /* رنگ پس‌زمینه */
-            height: 100vh; /* ارتفاع 100% صفحه */
-        }
-
-        /* پنهان کردن صفحه Home */
-        #homePage {
-            display: none; /* پنهان کردن صفحه Home */
-        }
-
-        /* استایل برای بیضی‌ها */
-        @media (max-width: 768px) {
-            .decorative-oval {
-                width: 280px;
-            }
-        }
-
-        @media (min-width: 769px) {
-            .decorative-oval {
-                width: 1300px;
-            }
+            background-color: black; /* Background color */
+            height: 100vh; /* Full height */
         }
     </style>
 </head>
@@ -200,186 +151,40 @@
         </div>
     </div>
 
-    <div id="ovals-container" style="display:none;">
-        <div class="decorative-oval">
-            <span>Channel Telegram</span>
-            <div class="go-oval">Go</div>
-        </div>
-        <div class="decorative-oval">
-            <span>Join X</span>
-            <div class="go-oval">Go</div>
-        </div>
-        <div class="decorative-oval">
-            <span>Follow X</span>
-            <div class="go-oval">Go</div>
-        </div>
-        <div class="decorative-oval">
-            <span>Join Bot</span>
-            <div class="go-oval">Go</div>
-        </div>
-        <div class="decorative-oval">
-            <span>Friend</span>
-            <div class="go-oval">Go</div>
-        </div>
-    </div>
-
-    <div id="showMore" style="display:none;">
-        Show More <span class="arrow">▼</span>
-    </div>
-
-    <div class="page" id="firstPage" style="display: none;">
-        <div class="header-text">این صفحه مربوط به آیکون اول است.</div>
-    </div>
-    <div class="page" id="comingSoon1">
-        <div class="header-text">این صفحه مربوط به آیکون دوم است.</div>
-    </div>
-    <div class="page" id="comingSoon2">
-        <div class="header-text">این صفحه مربوط به آیکون سوم است.</div>
+    <!-- Rectangles -->
+    <div id="rectangles-container" style="display:none;">
+        <div class="rectangle"><span>Follow us on Instagram</span></div>
+        <div class="rectangle"><span>Join our Telegram Channel</span></div>
+        <div class="rectangle"><span>Follow us on Twitter</span></div>
+        <div class="rectangle"><span>Join our Facebook Group</span></div>
+        <div class="rectangle"><span>Follow us on LinkedIn</span></div>
     </div>
 
     <div id="bottom-bar">
         <div class="icon-container active" id="icon1" tabindex="0">
-            <img src="image1.png" alt="Left Icon">
+            <img src="image1.png" alt="Home Icon">
             <span class="icon-label">Home</span>
         </div>
         <div class="icon-container" id="icon2">
-            <img src="image3.png" alt="Leaderboard">
+            <img src="image3.png" alt="Leaderboard Icon">
             <span class="icon-label">Leaderboard</span>
         </div>
         <div class="icon-container" id="icon3">
-            <img src="image2.png" alt="Friends">
+            <img src="image2.png" alt="Friends Icon">
             <span class="icon-label">Friends</span>
         </div>
     </div>
 
     <script>
         const scoreElement = document.getElementById('userScore');
-        const ovalsContainer = document.getElementById('ovals-container');
-        const showMore = document.getElementById('showMore');
-        const icon1 = document.getElementById('icon1');
-        const icon2 = document.getElementById('icon2');
-        const icon3 = document.getElementById('icon3');
-
-        const previousImages = {
-            icon1: 'image11.png', 
-            icon2: 'image3.png',
-            icon3: 'image2.png'
-        };
-
-        const activeImages = {
-            icon1: 'image1.png', 
-            icon2: 'image22.png', 
-            icon3: 'image33.png'
-        };
 
         let score = parseInt(localStorage.getItem('score')) || 0;
         scoreElement.innerText = score;
 
-        let showAll = false;
-        let clickedIcon1 = false; // وضعیت برای آیکون 1
-        let clickedIcon2 = false; // وضعیت برای آیکون 2
-        let clickedIcon3 = false; // وضعیت برای آیکون 3
-
-        function createOvals() {
-            for (let i = 0; i < 10; i++) {
-                const oval = document.createElement('div');
-                oval.classList.add('decorative-oval');
-                oval.style.display = i < 5 ? 'block' : 'none';
-                ovalsContainer.appendChild(oval);
-            }
-        }
-
-        function updateShowMore() {
-            showMore.style.display = 'block';
-            showMore.innerHTML = showAll ? 'Show Less <span class="arrow">▲</span>' : 'Show More <span class="arrow">▼</span>';
-        }
-
-        function toggleOvals() {
-            showAll = !showAll;
-            const ovals = ovalsContainer.querySelectorAll('.decorative-oval');
-            ovals.forEach((oval, index) => {
-                oval.style.display = showAll || index < 5 ? 'flex' : 'none';
-            });
-            updateShowMore();
-        }
-
-        function activateIcon(icon) {
-            if ((icon.id === 'icon1' && clickedIcon1) || 
-                (icon.id === 'icon2' && clickedIcon2) || 
-                (icon.id === 'icon3' && clickedIcon3)) {
-                return; // اگر دوباره روی آیکون کلیک شده، هیچ واکنشی نداشته باشد
-            }
-
-            if (icon.id === 'icon1') clickedIcon1 = true;
-            if (icon.id === 'icon2') clickedIcon2 = true;
-            if (icon.id === 'icon3') clickedIcon3 = true;
-
-            const previouslyActive = document.querySelector('.icon-container.active');
-            if (previouslyActive) {
-                previouslyActive.classList.remove('active');
-
-                const previousIconId = previouslyActive.id;
-                const previousImage = previouslyActive.querySelector('img');
-                const label = previouslyActive.querySelector('.icon-label');
-
-                label.style.opacity = '0'; 
-                label.style.visibility = 'hidden'; 
-                label.style.transform = 'translateY(10px)'; 
-
-                setTimeout(() => {
-                    previousImage.src = previousImages[previousIconId];
-                    previousImage.style.transform = 'scale(1)'; 
-                }, 100); 
-            }
-
-            icon.classList.add('active');
-            const activeImage = icon.querySelector('img');
-            activeImage.src = activeImages[icon.id];
-            activeImage.style.transform = 'scale(1.2)'; 
-
-            const label = icon.querySelector('.icon-label');
-            label.style.visibility = 'visible'; 
-            label.style.opacity = '1'; 
-            label.style.transform = 'translateY(0)'; 
-
-            if (icon.id === 'icon1') {
-                showPage('firstPage'); // صفحه مربوط به آیکون اول
-            } else if (icon.id === 'icon2') {
-                showPage('comingSoon1');
-            } else if (icon.id === 'icon3') {
-                showPage('comingSoon2');
-            }
-        }
-
-        function showPage(pageId) {
-            document.querySelectorAll('.page').forEach(page => {
-                page.style.display = 'none';
-            });
-
-            if (pageId !== 'homePage') {
-                document.getElementById('bottom-bar').style.display = 'flex'; 
-                ovalsContainer.style.display = 'flex'; 
-                document.getElementById('score-container').style.display = 'flex'; 
-            } else {
-                // هیچ عملی انجام ندهید
-            }
-
-            document.getElementById(pageId).style.display = 'flex';
-        }
-
-        icon1.addEventListener('click', () => activateIcon(icon1));
-        icon2.addEventListener('click', () => activateIcon(icon2));
-        icon3.addEventListener('click', () => activateIcon(icon3));
-
-        showMore.addEventListener('click', toggleOvals);
-        createOvals();
-        updateShowMore();
-
         setTimeout(() => {
             document.getElementById('loading-screen').style.display = 'none';
             document.getElementById('score-container').style.display = 'flex';
-            document.getElementById('ovals-container').style.display = 'block';
-            document.getElementById('showMore').style.display = 'block';
+            document.getElementById('rectangles-container').style.display = 'block'; // Show rectangles
             document.getElementById('bottom-bar').style.display = 'flex'; 
         }, 3000);
     </script>
