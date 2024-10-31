@@ -46,8 +46,7 @@
             margin: 0;
             font-family: Arial, sans-serif;
             height: 100%;
-            overflow-y: scroll;
-            padding-bottom: 70px; /* برای اضافه کردن 70 پیکسل */
+            overflow: hidden; /* غیرفعال کردن اسکرول */
         }
 
         #score-container {
@@ -78,7 +77,7 @@
             margin: 10px 0;
             display: flex;
             align-items: center;
-            justify-content: space-between; /* تنظیم متن به سمت چپ */
+            justify-content: space-between;
             padding: 0 10px;
             box-sizing: border-box;
         }
@@ -271,9 +270,6 @@
         scoreElement.innerText = score;
 
         let showAll = false;
-        let clickedIcon1 = false;
-        let clickedIcon2 = false;
-        let clickedIcon3 = false;
 
         function createOvals() {
             for (let i = 0; i < 10; i++) {
@@ -299,50 +295,15 @@
         }
 
         function activateIcon(icon) {
-            if ((icon.id === 'icon1' && clickedIcon1) || 
-                (icon.id === 'icon2' && clickedIcon2) || 
-                (icon.id === 'icon3' && clickedIcon3)) {
-                return;
-            }
-
-            if (icon.id === 'icon1') clickedIcon1 = true;
-            if (icon.id === 'icon2') clickedIcon2 = true;
-            if (icon.id === 'icon3') clickedIcon3 = true;
-
-            const previouslyActive = document.querySelector('.icon-container.active');
-            if (previouslyActive) {
-                previouslyActive.classList.remove('active');
-
-                const previousIconId = previouslyActive.id;
-                const previousImage = previouslyActive.querySelector('img');
-                const label = previouslyActive.querySelector('.icon-label');
-
-                label.style.opacity = '0'; 
-                label.style.visibility = 'hidden'; 
-                label.style.transform = 'translateY(10px)'; 
-
-                setTimeout(() => {
-                    previousImage.src = previousImages[previousIconId];
-                    previousImage.style.transform = 'scale(1)'; 
-                }, 100); 
-            }
-
-            icon.classList.add('active');
-            const activeImage = icon.querySelector('img');
-            activeImage.src = activeImages[icon.id];
-            activeImage.style.transform = 'scale(1.2)'; 
-
-            const label = icon.querySelector('.icon-label');
-            label.style.visibility = 'visible'; 
-            label.style.opacity = '1'; 
-            label.style.transform = 'translateY(0)'; 
-
             if (icon.id === 'icon1') {
                 showPage('firstPage');
-            } else if (icon.id === 'icon2') {
-                showPage('comingSoon1');
-            } else if (icon.id === 'icon3') {
-                showPage('comingSoon2');
+            } else {
+                // فقط تغییر تصویر برای آیکون 2 و 3
+                const activeImage = icon.querySelector('img');
+                activeImage.src = activeImages[icon.id];
+                setTimeout(() => {
+                    activeImage.src = previousImages[icon.id];
+                }, 1000); // تصویر بعد از 1 ثانیه برمی‌گردد
             }
         }
 
@@ -352,11 +313,8 @@
             });
 
             if (pageId !== 'homePage') {
-                document.getElementById('bottom-bar').style.display = 'flex'; 
                 ovalsContainer.style.display = 'flex'; 
                 document.getElementById('score-container').style.display = 'flex'; 
-            } else {
-                // هیچ عملی انجام ندهید
             }
 
             document.getElementById(pageId).style.display = 'flex';
