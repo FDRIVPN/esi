@@ -62,22 +62,22 @@
 
         #ovals-container {
             margin-top: 50px;
-            width: calc(100% - 40px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            width: 100%; /* عرض کامل */
+            display: flex; /* نمایش به صورت افقی */
+            flex-direction: row; /* نمایش افقی */
+            justify-content: space-around; /* فاصله مساوی بین بیضی‌ها */
+            align-items: center; /* تراز عمودی */
         }
 
         .decorative-oval {
-            width: 80%; /* عرض بیضی‌ها */
+            width: 150px; /* عرض بیضی‌ها */
             background-color: white;
-            border-radius: 0 0 20px 20px; /* گوشه‌های پایینی گرد */
-            margin: 10px 0;
+            border-radius: 20px; /* گرد بودن */
+            margin: 10px; /* فاصله بین بیضی‌ها */
             display: flex;
             justify-content: space-between; /* فاصله مساوی */
             align-items: center;
-            padding: 10px; /* padding اضافی */
+            padding: 10px; /* padding داخلی */
             box-sizing: border-box;
         }
 
@@ -93,8 +93,8 @@
         }
 
         #bottom-bar {
-            display: flex; /* نمایش به صورت فلیکس */
-            justify-content: space-between; /* فاصله مساوی بین آیکون‌ها */
+            display: flex; /* نمایش به صورت افقی */
+            justify-content: space-around; /* فاصله مساوی بین آیکون‌ها */
             padding: 0 20px; /* padding اضافی */
             position: fixed;
             bottom: 0;
@@ -112,6 +112,7 @@
             flex-direction: column;
             align-items: center;
             transition: transform 0.3s;
+            justify-content: center; /* تراز عمودی */
         }
 
         .icon-container img {
@@ -164,13 +165,13 @@
         /* استایل برای بیضی‌ها */
         @media (max-width: 768px) {
             .decorative-oval {
-                width: 280px;
+                width: 120px; /* عرض کمتر برای موبایل */
             }
         }
 
         @media (min-width: 769px) {
             .decorative-oval {
-                width: 1300px;
+                width: 150px; /* عرض بیشتر برای دسکتاپ */
             }
         }
     </style>
