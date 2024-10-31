@@ -94,6 +94,7 @@
         }
 
         #bottom-bar {
+            display: none; /* پنهان کردن نوار پایینی به طور پیش‌فرض */
             position: fixed;
             bottom: 0;
             left: 0;
@@ -110,42 +111,38 @@
 
         .icon-container {
             display: flex;
-            flex-direction: column; 
-            align-items: center; 
-            transition: transform 0.3s, opacity 0.3s; 
-            cursor: pointer; 
-            padding: 0 4px; 
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s;
         }
 
         .icon-container img {
             width: 20px; 
             height: 20px; 
-            transition: transform 0.3s, filter 0.3s; 
+            transition: width 0.3s, height 0.3s; /* انیمیشن تغییر اندازه */
             margin-bottom: 5px; 
         }
 
-        .icon-container:hover img {
-            transform: scale(1.2); 
-            filter: brightness(1.2); 
+        .icon-container.active img {
+            width: 24px; /* اندازه بزرگ شده */
+            height: 24px; /* اندازه بزرگ شده */
         }
 
         .icon-label {
             visibility: hidden; 
-            font-size: 14px; 
             opacity: 0; 
             transition: opacity 0.3s, transform 0.3s; 
-            transform: translateY(10px); 
-            color: white; 
+            transform: translateY(10px); /* انیمیشن بالا آمدن */
+            font-size: 14px; 
+            color: transparent; /* رنگ اولیه بدون رنگ */
+            margin-top: 4px; /* فاصله ۴ پیکسل زیر ایکون */
         }
 
         .icon-container.active .icon-label {
             visibility: visible; 
             opacity: 1; 
-            transform: translateY(0); 
-        }
-
-        .icon-container.active img {
-            transform: scale(1.2); 
+            transform: translateY(0); /* حرکت به حالت اولیه */
+            color: white; /* رنگ نهایی */
         }
 
         /* استایل برای صفحات */
@@ -232,8 +229,8 @@
     </div>
 
     <div id="bottom-bar">
-        <div class="icon-container active" id="icon1" tabindex="0">
-            <img src="image1.png" alt="Left Icon">
+        <div class="icon-container active" id="icon1" tabindex="0" aria-label="Home" role="button">
+            <img src="image1.png" alt="Home Icon">
             <span class="icon-label">Home</span>
         </div>
         <div class="icon-container" id="icon2">
@@ -255,13 +252,13 @@
         const icon3 = document.getElementById('icon3');
 
         const previousImages = {
-            icon1: 'image11.png', 
+            icon1: 'image1.png', // آیکون فعال
             icon2: 'image3.png',
             icon3: 'image2.png'
         };
 
         const activeImages = {
-            icon1: 'image1.png', 
+            icon1: 'image11.png', // آیکون غیر فعال
             icon2: 'image22.png', 
             icon3: 'image33.png'
         };
@@ -296,7 +293,12 @@
 
         function activateIcon(icon) {
             if (icon.id === 'icon1') {
-                showPage('firstPage');
+                // آیکون 1 را به‌صورت پیش‌فرض فعال کن
+                const activeImage = icon.querySelector('img');
+                activeImage.src = previousImages[icon.id];
+                const iconLabel = icon.querySelector('.icon-label');
+                iconLabel.style.visibility = 'visible'; // نمایش متن
+                iconLabel.style.opacity = '1'; // نمایان کردن متن
             } else {
                 // فقط تغییر تصویر برای آیکون 2 و 3
                 const activeImage = icon.querySelector('img');
@@ -335,6 +337,9 @@
             document.getElementById('showMore').style.display = 'block';
             document.getElementById('bottom-bar').style.display = 'flex'; 
         }, 3000);
+
+        // فعال کردن پیش‌فرض آیکون ۱
+        activateIcon(icon1);
     </script>
 </body>
 </html>
