@@ -84,7 +84,7 @@
             width: 100%;
             height: 50px; 
             background-color: #1a1a1a;
-            display: none; /* Hidden by default */
+            display: flex; /* Make it a flex container */
             justify-content: space-around; 
             align-items: center; 
             padding: 0 10px; 
@@ -96,12 +96,21 @@
             display: flex;
             flex-direction: column; 
             align-items: center; 
+            transition: transform 0.3s, opacity 0.3s; 
             cursor: pointer; 
+            padding: 0 4px; 
         }
 
         .icon-container img {
             width: 20px; 
             height: 20px; 
+            transition: transform 0.3s, filter 0.3s; 
+            margin-bottom: 5px; 
+        }
+
+        .icon-container:hover img {
+            transform: scale(1.2); 
+            filter: brightness(1.2); 
         }
 
         .icon-label {
