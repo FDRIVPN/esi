@@ -47,7 +47,7 @@
             font-family: Arial, sans-serif;
             height: 100%;
             overflow-y: scroll;
-            padding-bottom: 70px; /* برای اضافه کردن 70 پیکسل */
+            padding-bottom: 70px;
         }
 
         body {
@@ -56,10 +56,10 @@
         }
 
         #score-container {
-            position: absolute; /* تغییر به absolute */
+            position: absolute;
             top: 20px;
-            left: 50%; /* مرکز افقی صفحه */
-            transform: translateX(-50%); /* تنظیم مرکز با استفاده از translate */
+            left: 50%;
+            transform: translateX(-50%);
             color: white;
             font-size: 36px;
             display: flex;
@@ -72,13 +72,13 @@
             margin-top: 50px;
             width: 100%;
             display: flex;
-            justify-content: center; /* بیضی‌ها را در مرکز افقی قرار می‌دهد */
             flex-direction: column;
-            align-items: center; /* تنظیم بیضی‌ها در مرکز */
+            align-items: center;
+            justify-content: center;
         }
 
         .decorative-oval {
-            width: 100%;
+            width: 80%;
             height: 40px;
             background-color: white;
             border-radius: 20px;
@@ -88,23 +88,33 @@
             justify-content: space-between;
             padding: 0 10px;
             box-sizing: border-box;
-            transition: transform 0.3s;
+            transition: all 0.3s ease;
         }
 
-        /* استایل برای نوار پایینی */
+        .go-oval {
+            background-color: black;
+            color: white;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+        }
+
         #bottom-bar {
             position: fixed;
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 50px;
+            height: 70px; 
             background-color: #1a1a1a;
-            display: none; /* مخفی به طور پیش‌فرض */
+            display: flex;
             justify-content: space-around;
             align-items: center;
             padding: 0 10px;
-            z-index: 1000;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5);
+            z-index: 1000; 
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5); 
         }
 
         .icon-container {
@@ -117,8 +127,8 @@
         }
 
         .icon-container img {
-            width: 20px;
-            height: 20px;
+            width: 25px; 
+            height: 25px;
             transition: transform 0.3s, filter 0.3s;
             margin-bottom: 5px;
         }
@@ -147,7 +157,6 @@
             transform: scale(1.2);
         }
 
-        /* استایل برای صفحات */
         .page {
             display: none;
             color: white;
@@ -160,14 +169,29 @@
             height: 100vh;
         }
 
-        /* پنهان کردن صفحه Home */
-        #homePage {
+        #showMore {
             display: none;
+            cursor: pointer;
+            color: white;
+            font-size: 16px;
+            text-align: center;
         }
 
+        @media (max-width: 768px) {
+            .decorative-oval {
+                width: 90%; /* درصدی برای موبایل */
+            }
+        }
+
+        @media (min-width: 769px) {
+            .decorative-oval {
+                width: 70%; /* درصدی برای دسکتاپ */
+            }
+        }
     </style>
 </head>
 <body>
+
     <div id="loading-screen">
         <div class="loading-circle"></div>
         <div class="loading-text">Loading...</div>
@@ -235,99 +259,47 @@
 
     <script>
         const scoreElement = document.getElementById('userScore');
-        const ovalsContainer = document.getElementById('ovals-container');
-        const showMore = document.getElementById('showMore');
         const icon1 = document.getElementById('icon1');
         const icon2 = document.getElementById('icon2');
         const icon3 = document.getElementById('icon3');
+        const loadingScreen = document.getElementById('loading-screen');
+        const scoreContainer = document.getElementById('score-container');
+        const pages = document.querySelectorAll('.page');
+        const showMoreBtn = document.getElementById('showMore');
 
-        const previousImages = {
-            icon1: 'image11.png', 
-            icon2: 'image3.png',
-            icon3: 'image2.png'
+        window.onload = () => {
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+                scoreContainer.style.display = 'flex';
+                scoreElement.textContent = 1000; // تغییر به مقدار مورد نظر
+                document.getElementById('ovals-container').style.display = 'flex';
+            }, 2000); // 2 ثانیه پس از بارگذاری صفحه
         };
 
-        const activeImages = {
-            icon1: 'image1.png', 
-            icon2: 'image22.png', 
-            icon3: 'image33.png'
-        };
-
-        let score = parseInt(localStorage.getItem('score')) || 0;
-        scoreElement.innerText = score;
-
-        let showAll = false;
-        let clickedIcon1 = false; 
-        let clickedIcon2 = false; 
-        let clickedIcon3 = false;
-
-        function createOvals() {
-            for (let i = 0; i < 10; i++) {
-                const oval = document.createElement('div');
-                oval.classList.add('decorative-oval');
-                oval.style.display = i < 5 ? 'block' : 'none';
-                ovalsContainer.appendChild(oval);
-            }
-        }
-
-        function updateShowMore() {
-            showMore.style.display = 'block';
-            showMore.innerHTML = showAll ? 'Show Less <span class="arrow">▲</span>' : 'Show More <span class="arrow">▼</span>';
-        }
-
-        window.onload = function () {
-            setTimeout(function () {
-                document.getElementById('loading-screen').style.display = 'none';
-                document.getElementById('score-container').style.display = 'block';
-                document.getElementById('ovals-container').style.display = 'block';
-                createOvals();
-            }, 2000);
-        };
-
-        window.addEventListener('resize', function () {
-            adjustOvalSize();
+        icon1.addEventListener('click', () => {
+            pages.forEach(page => page.style.display = 'none');
+            document.getElementById('firstPage').style.display = 'flex';
         });
 
-        icon1.addEventListener('click', function () {
-            document.getElementById('firstPage').style.display = 'block';
-            document.getElementById('comingSoon1').style.display = 'none';
-            document.getElementById('comingSoon2').style.display = 'none';
+        icon2.addEventListener('click', () => {
+            pages.forEach(page => page.style.display = 'none');
+            document.getElementById('comingSoon1').style.display = 'flex';
         });
 
-        icon2.addEventListener('click', function () {
-            document.getElementById('firstPage').style.display = 'none';
-            document.getElementById('comingSoon1').style.display = 'block';
-            document.getElementById('comingSoon2').style.display = 'none';
+        icon3.addEventListener('click', () => {
+            pages.forEach(page => page.style.display = 'none');
+            document.getElementById('comingSoon2').style.display = 'flex';
         });
 
-        icon3.addEventListener('click', function () {
-            document.getElementById('firstPage').style.display = 'none';
-            document.getElementById('comingSoon1').style.display = 'none';
-            document.getElementById('comingSoon2').style.display = 'block';
+        // تنظیم رفتار آیکن‌ها و انیمیشن‌ها
+        document.querySelectorAll('.icon-container').forEach(container => {
+            container.addEventListener('mouseenter', () => container.classList.add('active'));
+            container.addEventListener('mouseleave', () => container.classList.remove('active'));
         });
 
-        function adjustOvalSize() {
-            const ovals = document.querySelectorAll('.decorative-oval');
-            const screenWidth = window.innerWidth;
-            const screenHeight = window.innerHeight;
-
-            if (screenWidth > screenHeight) {
-                ovals.forEach(oval => {
-                    let newWidth = screenWidth * 0.8;
-                    let angle = Math.min(20, screenWidth / 100);
-                    oval.style.width = `${newWidth}px`;
-                    oval.style.transformOrigin = 'center';
-                    oval.style.transform = `rotate(${angle}deg)`;
-                });
-            } else {
-                ovals.forEach(oval => {
-                    oval.style.width = '100%';
-                    oval.style.height = '40px';
-                    oval.style.transform = 'rotate(0deg)';
-                    oval.style.transformOrigin = 'center';
-                });
-            }
-        }
+        // نمایش متن "show more"
+        showMoreBtn.style.display = 'block';
     </script>
+
 </body>
 </html>
