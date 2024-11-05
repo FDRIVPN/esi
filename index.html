@@ -5,6 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coin Game</title>
     <style>
+        /* استایل‌های عمومی */
+        html, body {
+            margin: 0;
+            padding: 0;
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            height: 100%;
+            overflow: hidden;
+        }
+
         /* استایل برای صفحه بارگذاری */
         #loading-screen {
             position: fixed;
@@ -41,15 +52,6 @@
         }
 
         /* استایل های اصلی */
-        html, body {
-            background-color: black;
-            margin: 0;
-            font-family: Arial, sans-serif;
-            height: 100%;
-            overflow-y: scroll;
-            padding-bottom: 70px; /* برای اضافه کردن 70 پیکسل */
-        }
-
         body {
             overflow: hidden; /* پنهان کردن نوار اسکرول */
             height: calc(100% + 70px); /* افزایش ارتفاع */
@@ -73,8 +75,6 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding-left: 20px; /* فاصله دادن به بیضی‌ها */
-            padding-right: 20px; /* فاصله دادن به بیضی‌ها */
         }
 
         .decorative-oval {
@@ -88,21 +88,43 @@
             justify-content: space-between;
             padding: 0 10px;
             box-sizing: border-box;
-            transition: all 0.3s ease-in-out; /* اضافه کردن انیمیشن برای تغییرات */
+            transition: all 0.3s ease; /* برای تغییرات نرم */
         }
 
-        .go-oval {
-            background-color: black;
-            color: white;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 20px;
-            transition: all 0.3s ease-in-out; /* انیمیشن برای تغییر اندازه */
+        /* تغییرات برای صفحه‌های کوچک */
+        @media (max-width: 768px) {
+            .decorative-oval {
+                width: 280px;
+            }
         }
 
+        /* تغییرات برای صفحه‌های بزرگتر (حالت افقی) */
+        @media (min-width: 769px) {
+            .decorative-oval {
+                width: 1300px;
+            }
+        }
+
+        /* برای حالت افقی فقط */
+        @media (min-width: 769px) and (max-width: 1200px) {
+            .decorative-oval {
+                width: 90%; /* تنظیم عرض بیضی‌ها به درصدی از عرض صفحه */
+                height: 30px; /* ارتفاع بیضی‌ها را کمتر کنیم */
+                border-radius: 15px; /* برای اینکه شکل بیضی‌ها ثابت بماند */
+                transform: rotate(15deg); /* چرخش کمی از بیضی‌ها */
+            }
+        }
+
+        /* برای حالت افقی و صفحات بزرگ */
+        @media (min-width: 1200px) {
+            .decorative-oval {
+                width: 80%; /* عرض بزرگتر بیضی‌ها */
+                height: 25px; /* ارتفاع کمتر برای بیضی‌ها */
+                transform: rotate(20deg); /* زاویه بیشتر */
+            }
+        }
+
+        /* استایل برای نوار پایین */
         #bottom-bar {
             position: fixed;
             bottom: 0;
@@ -157,39 +179,6 @@
         .icon-container.active img {
             transform: scale(1.2); 
         }
-
-        /* استایل برای صفحات */
-        .page {
-            display: none;
-            color: white;
-            font-size: 24px;
-            text-align: center;
-            flex: 1;
-            align-items: center;
-            justify-content: center;
-            background-color: black; /* رنگ پس‌زمینه */
-            height: 100vh; /* ارتفاع 100% صفحه */
-        }
-
-        /* پنهان کردن صفحه Home */
-        #homePage {
-            display: none; /* پنهان کردن صفحه Home */
-        }
-
-        /* استایل برای بیضی‌ها */
-        @media (max-width: 768px) {
-            .decorative-oval {
-                width: 280px;
-                transform: rotate(15deg); /* تغییر زاویه برای اندازه‌های کوچک‌تر */
-            }
-        }
-
-        @media (min-width: 769px) {
-            .decorative-oval {
-                width: 1300px;
-                transform: rotate(-15deg); /* تغییر زاویه برای اندازه‌های بزرگ‌تر */
-            }
-        }
     </style>
 </head>
 <body>
@@ -233,27 +222,17 @@
         Show More <span class="arrow">▼</span>
     </div>
 
-    <div class="page" id="firstPage" style="display: none;">
-        <div class="header-text">این صفحه مربوط به آیکون اول است.</div>
-    </div>
-    <div class="page" id="comingSoon1">
-        <div class="header-text">این صفحه مربوط به آیکون دوم است.</div>
-    </div>
-    <div class="page" id="comingSoon2">
-        <div class="header-text">این صفحه مربوط به آیکون سوم است.</div>
-    </div>
-
     <div id="bottom-bar">
         <div class="icon-container active" id="icon1" tabindex="0">
             <img src="image1.png" alt="Left Icon">
-            <span class="icon-label">Friends</span>
+            <span class="icon-label">Home</span>
         </div>
-        <div class="icon-container" id="icon2" tabindex="0">
-            <img src="image22.png" alt="Center Icon">
-            <span class="icon-label">Friends</span>
+        <div class="icon-container" id="icon2">
+            <img src="image3.png" alt="Leaderboard">
+            <span class="icon-label">Leaderboard</span>
         </div>
-        <div class="icon-container" id="icon3" tabindex="0">
-            <img src="image33.png" alt="Right Icon">
+        <div class="icon-container" id="icon3">
+            <img src="image2.png" alt="Friends">
             <span class="icon-label">Friends</span>
         </div>
     </div>
@@ -266,25 +245,10 @@
         const icon2 = document.getElementById('icon2');
         const icon3 = document.getElementById('icon3');
 
-        const previousImages = {
-            icon1: 'image11.png', 
-            icon2: 'image3.png',
-            icon3: 'image2.png'
-        };
-
-        const activeImages = {
-            icon1: 'image1.png', 
-            icon2: 'image22.png', 
-            icon3: 'image33.png'
-        };
-
         let score = parseInt(localStorage.getItem('score')) || 0;
         scoreElement.innerText = score;
 
         let showAll = false;
-        let clickedIcon1 = false;
-        let clickedIcon2 = false;
-        let clickedIcon3 = false;
 
         function createOvals() {
             for (let i = 0; i < 10; i++) {
@@ -295,93 +259,54 @@
             }
         }
 
-        function updateShowMore() {
-            showMore.style.display = 'block';
-            showMore.innerHTML = showAll ? 'Show Less <span class="arrow">▲</span>' : 'Show More <span class="arrow">▼</span>';
-        }
-
-        function toggleOvals() {
+        showMore.addEventListener('click', function () {
             showAll = !showAll;
-            const ovals = ovalsContainer.querySelectorAll('.decorative-oval');
+            const ovals = document.querySelectorAll('.decorative-oval');
             ovals.forEach((oval, index) => {
-                oval.style.display = showAll || index < 5 ? 'flex' : 'none';
+                oval.style.display = showAll || index < 5 ? 'block' : 'none';
             });
-            updateShowMore();
-        }
+            showMore.innerHTML = showAll ? 'Show Less <span class="arrow">▲</span>' : 'Show More <span class="arrow">▼</span>';
+        });
 
-        function activateIcon(icon) {
-            if ((icon.id === 'icon1' && clickedIcon1) || 
-                (icon.id === 'icon2' && clickedIcon2) || 
-                (icon.id === 'icon3' && clickedIcon3)) {
-                return; // اگر دوباره روی آیکون کلیک شده، هیچ واکنشی نداشته باشد
-            }
+        function adjustOvalSize() {
+            const ovals = document.querySelectorAll('.decorative-oval');
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
 
-            if (icon.id === 'icon1') clickedIcon1 = true;
-            if (icon.id === 'icon2') clickedIcon2 = true;
-            if (icon.id === 'icon3') clickedIcon3 = true;
+            // فقط زمانی که صفحه در حالت افقی است تغییرات اعمال شوند
+            if (screenWidth > screenHeight) {
+                ovals.forEach(oval => {
+                    // اندازه بیضی به درصد از عرض صفحه بستگی دارد
+                    let newWidth = screenWidth * 0.8; 
+                    oval.style.width = `${newWidth}px`;
 
-            const previouslyActive = document.querySelector('.icon-container.active');
-            if (previouslyActive) {
-                previouslyActive.classList.remove('active');
-
-                const previousIconId = previouslyActive.id;
-                const previousImage = previouslyActive.querySelector('img');
-                const label = previouslyActive.querySelector('.icon-label');
-
-                label.style.opacity = '0'; 
-                label.style.visibility = 'hidden'; 
-                label.style.transform = 'translateY(10px)'; 
-
-                setTimeout(() => {
-                    previousImage.src = previousImages[previousIconId];
-                    previousImage.style.transform = 'scale(1)'; 
-                }, 100); 
-            }
-
-            icon.classList.add('active');
-            const activeImage = icon.querySelector('img');
-            activeImage.src = activeImages[icon.id];
-            activeImage.style.transform = 'scale(1.2)'; 
-
-            const label = icon.querySelector('.icon-label');
-            label.style.visibility = 'visible'; 
-            label.style.opacity = '1'; 
-            label.style.transform = 'translateY(0)'; 
-
-            showPage(icon.id);
-        }
-
-        function showPage(iconId) {
-            if (iconId === 'icon1') {
-                document.getElementById('firstPage').style.display = 'flex';
-                document.getElementById('comingSoon1').style.display = 'none';
-                document.getElementById('comingSoon2').style.display = 'none';
-            } else if (iconId === 'icon2') {
-                document.getElementById('firstPage').style.display = 'none';
-                document.getElementById('comingSoon1').style.display = 'flex';
-                document.getElementById('comingSoon2').style.display = 'none';
-            } else if (iconId === 'icon3') {
-                document.getElementById('firstPage').style.display = 'none';
-                document.getElementById('comingSoon1').style.display = 'none';
-                document.getElementById('comingSoon2').style.display = 'flex';
+                    // تغییر زاویه به تناسب عرض صفحه
+                    let angle = Math.min(20, screenWidth / 100); // زاویه تغییر می‌کند
+                    oval.style.transform = `rotate(${angle}deg)`;
+                });
+            } else {
+                // اگر صفحه عمودی باشد، هیچ تغییراتی اعمال نشود
+                ovals.forEach(oval => {
+                    oval.style.width = '100%';
+                    oval.style.height = '40px';
+                    oval.style.transform = 'rotate(0deg)';
+                });
             }
         }
 
-        icon1.addEventListener('click', () => activateIcon(icon1));
-        icon2.addEventListener('click', () => activateIcon(icon2));
-        icon3.addEventListener('click', () => activateIcon(icon3));
+        // نمایش صفحه و بیضی‌ها بعد از بارگذاری
+        window.addEventListener('load', function () {
+            setTimeout(() => {
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('score-container').style.display = 'block';
+                document.getElementById('ovals-container').style.display = 'block';
+            }, 2000); // بعد از 2 ثانیه از بارگذاری صفحه
 
-        showMore.addEventListener('click', toggleOvals);
-        createOvals();
-        updateShowMore();
+            adjustOvalSize();
+        });
 
-        setTimeout(() => {
-            document.getElementById('loading-screen').style.display = 'none';
-            document.getElementById('score-container').style.display = 'flex';
-            document.getElementById('ovals-container').style.display = 'block';
-            document.getElementById('showMore').style.display = 'block';
-            document.getElementById('bottom-bar').style.display = 'flex'; 
-        }, 3000);
+        window.addEventListener('resize', adjustOvalSize);
+
     </script>
 </body>
 </html>
