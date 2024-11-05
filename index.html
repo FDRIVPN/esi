@@ -73,6 +73,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            padding-left: 20px; /* فاصله دادن به بیضی‌ها */
+            padding-right: 20px; /* فاصله دادن به بیضی‌ها */
         }
 
         .decorative-oval {
@@ -276,9 +278,9 @@
         scoreElement.innerText = score;
 
         let showAll = false;
-        let clickedIcon1 = false; // وضعیت برای آیکون 1
-        let clickedIcon2 = false; // وضعیت برای آیکون 2
-        let clickedIcon3 = false; // وضعیت برای آیکون 3
+        let clickedIcon1 = false;
+        let clickedIcon2 = false;
+        let clickedIcon3 = false;
 
         function createOvals() {
             for (let i = 0; i < 10; i++) {
@@ -342,29 +344,23 @@
             label.style.opacity = '1'; 
             label.style.transform = 'translateY(0)'; 
 
-            if (icon.id === 'icon1') {
-                showPage('firstPage'); // صفحه مربوط به آیکون اول
-            } else if (icon.id === 'icon2') {
-                showPage('comingSoon1');
-            } else if (icon.id === 'icon3') {
-                showPage('comingSoon2');
-            }
+            showPage(icon.id);
         }
 
-        function showPage(pageId) {
-            document.querySelectorAll('.page').forEach(page => {
-                page.style.display = 'none';
-            });
-
-            if (pageId !== 'homePage') {
-                document.getElementById('bottom-bar').style.display = 'flex'; 
-                ovalsContainer.style.display = 'flex'; 
-                document.getElementById('score-container').style.display = 'flex'; 
-            } else {
-                // هیچ عملی انجام ندهید
+        function showPage(iconId) {
+            if (iconId === 'icon1') {
+                document.getElementById('firstPage').style.display = 'flex';
+                document.getElementById('comingSoon1').style.display = 'none';
+                document.getElementById('comingSoon2').style.display = 'none';
+            } else if (iconId === 'icon2') {
+                document.getElementById('firstPage').style.display = 'none';
+                document.getElementById('comingSoon1').style.display = 'flex';
+                document.getElementById('comingSoon2').style.display = 'none';
+            } else if (iconId === 'icon3') {
+                document.getElementById('firstPage').style.display = 'none';
+                document.getElementById('comingSoon1').style.display = 'none';
+                document.getElementById('comingSoon2').style.display = 'flex';
             }
-
-            document.getElementById(pageId).style.display = 'flex';
         }
 
         icon1.addEventListener('click', () => activateIcon(icon1));
