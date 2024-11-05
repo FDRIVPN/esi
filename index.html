@@ -177,12 +177,14 @@
             text-align: center;
         }
 
+        /* استایل برای موبایل */
         @media (max-width: 768px) {
             .decorative-oval {
                 width: 90%; /* درصدی برای موبایل */
             }
         }
 
+        /* استایل برای صفحات بزرگتر از 768px */
         @media (min-width: 769px) {
             .decorative-oval {
                 width: 70%; /* درصدی برای دسکتاپ */
@@ -271,9 +273,9 @@
             setTimeout(() => {
                 loadingScreen.style.display = 'none';
                 scoreContainer.style.display = 'flex';
-                scoreElement.textContent = 1000; // تغییر به مقدار مورد نظر
+                scoreElement.textContent = 1000;
                 document.getElementById('ovals-container').style.display = 'flex';
-            }, 2000); // 2 ثانیه پس از بارگذاری صفحه
+            }, 2000);
         };
 
         icon1.addEventListener('click', () => {
@@ -291,15 +293,16 @@
             document.getElementById('comingSoon2').style.display = 'flex';
         });
 
-        // تنظیم رفتار آیکن‌ها و انیمیشن‌ها
         document.querySelectorAll('.icon-container').forEach(container => {
             container.addEventListener('mouseenter', () => container.classList.add('active'));
             container.addEventListener('mouseleave', () => container.classList.remove('active'));
         });
 
-        // نمایش متن "show more"
         showMoreBtn.style.display = 'block';
     </script>
+</body>
+</html>
+
 
 </body>
 </html>
