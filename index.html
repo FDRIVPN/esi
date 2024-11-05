@@ -268,31 +268,38 @@
             showMore.innerHTML = showAll ? 'Show Less <span class="arrow">▲</span>' : 'Show More <span class="arrow">▼</span>';
         });
 
-        function adjustOvalSize() {
-            const ovals = document.querySelectorAll('.decorative-oval');
-            const screenWidth = window.innerWidth;
-            const screenHeight = window.innerHeight;
+       function adjustOvalSize() {
+    const ovals = document.querySelectorAll('.decorative-oval');
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
 
-            // فقط زمانی که صفحه در حالت افقی است تغییرات اعمال شوند
-            if (screenWidth > screenHeight) {
-                ovals.forEach(oval => {
-                    // اندازه بیضی به درصد از عرض صفحه بستگی دارد
-                    let newWidth = screenWidth * 0.8; 
-                    oval.style.width = `${newWidth}px`;
+    // فقط زمانی که صفحه در حالت افقی است تغییرات اعمال شوند
+    if (screenWidth > screenHeight) {
+        ovals.forEach(oval => {
+            // اندازه بیضی به درصد از عرض صفحه بستگی دارد
+            let newWidth = screenWidth * 0.8; // بیضی ها به اندازه 80% از عرض صفحه
 
-                    // تغییر زاویه به تناسب عرض صفحه
-                    let angle = Math.min(20, screenWidth / 100); // زاویه تغییر می‌کند
-                    oval.style.transform = `rotate(${angle}deg)`;
-                });
-            } else {
-                // اگر صفحه عمودی باشد، هیچ تغییراتی اعمال نشود
-                ovals.forEach(oval => {
-                    oval.style.width = '100%';
-                    oval.style.height = '40px';
-                    oval.style.transform = 'rotate(0deg)';
-                });
-            }
-        }
+            // تغییر زاویه به تناسب عرض صفحه
+            let angle = Math.min(20, screenWidth / 100); // زاویه تغییر می‌کند
+            oval.style.width = `${newWidth}px`;
+
+            // تنظیم مرکز چرخش بیضی‌ها
+            oval.style.transformOrigin = 'center'; // تنظیم مرکز چرخش روی مرکز بیضی
+
+            // تغییر زاویه بدون جابجایی موقعیت
+            oval.style.transform = `rotate(${angle}deg)`;
+        });
+    } else {
+        // اگر صفحه عمودی باشد، هیچ تغییراتی اعمال نشود
+        ovals.forEach(oval => {
+            oval.style.width = '100%';
+            oval.style.height = '40px';
+            oval.style.transform = 'rotate(0deg)';
+            oval.style.transformOrigin = 'center'; // تنظیم مرکز چرخش
+        });
+    }
+}
+
 
         // نمایش صفحه و بیضی‌ها بعد از بارگذاری
         window.addEventListener('load', function () {
