@@ -88,6 +88,7 @@
             justify-content: space-between;
             padding: 0 10px;
             box-sizing: border-box;
+            transition: all 0.3s ease-in-out; /* اضافه کردن انیمیشن برای تغییرات */
         }
 
         .go-oval {
@@ -99,6 +100,7 @@
             align-items: center;
             justify-content: center;
             border-radius: 20px;
+            transition: all 0.3s ease-in-out; /* انیمیشن برای تغییر اندازه */
         }
 
         #bottom-bar {
@@ -178,12 +180,14 @@
         @media (max-width: 768px) {
             .decorative-oval {
                 width: 280px;
+                transform: rotate(15deg); /* تغییر زاویه برای اندازه‌های کوچک‌تر */
             }
         }
 
         @media (min-width: 769px) {
             .decorative-oval {
                 width: 1300px;
+                transform: rotate(-15deg); /* تغییر زاویه برای اندازه‌های بزرگ‌تر */
             }
         }
     </style>
@@ -242,14 +246,14 @@
     <div id="bottom-bar">
         <div class="icon-container active" id="icon1" tabindex="0">
             <img src="image1.png" alt="Left Icon">
-            <span class="icon-label">Home</span>
+            <span class="icon-label">Friends</span>
         </div>
-        <div class="icon-container" id="icon2">
-            <img src="image3.png" alt="Leaderboard">
-            <span class="icon-label">Leaderboard</span>
+        <div class="icon-container" id="icon2" tabindex="0">
+            <img src="image22.png" alt="Center Icon">
+            <span class="icon-label">Friends</span>
         </div>
-        <div class="icon-container" id="icon3">
-            <img src="image2.png" alt="Friends">
+        <div class="icon-container" id="icon3" tabindex="0">
+            <img src="image33.png" alt="Right Icon">
             <span class="icon-label">Friends</span>
         </div>
     </div>
