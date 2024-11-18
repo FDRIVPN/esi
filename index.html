@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>سیستم جوایز سه‌بعدی</title>
     <style>
-        /* تنظیمات عمومی */
         body {
             margin: 0;
             font-family: Arial, sans-serif;
@@ -84,17 +83,10 @@
             animation: spin 0s linear forwards;
         }
 
-        @keyframes spin {
-            from {
-                transform: rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .hidden {
-            display: none;
+        #countdown {
+            margin-top: 10px;
+            font-size: 1.2rem;
+            color: #ffd700;
         }
 
         ul {
@@ -128,6 +120,7 @@
             <div id="wheel"></div>
             <button id="spin-btn">چرخاندن گردونه</button>
             <p id="result">نتیجه: هنوز چیزی برنده نشده‌اید.</p>
+            <p id="countdown" class="hidden">زمان باقی‌مانده: </p>
             <h3>جوایز شما:</h3>
             <ul id="prizes"></ul>
         </div>
@@ -142,6 +135,7 @@
         const resultParagraph = document.getElementById("result");
         const prizesList = document.getElementById("prizes");
         const wheel = document.getElementById("wheel");
+        const countdown = document.getElementById("countdown");
 
         // بررسی شناسه در localStorage
         const savedGameId = localStorage.getItem("gameId");
@@ -166,8 +160,23 @@
 
         // مدیریت گردونه
         spinBtn.addEventListener("click", () => {
-            const prizes = [50, 100, 150, 200, 250, 300];
-            const randomPrize = prizes[Math.floor(Math.random() * prizes.length)];
+            const now = new Date().getTime();
+            const lastSpin = localStorage.getItem("lastSpin");
+
+            if (lastSpin && now - lastSpin < 24 * 60 * 60 * 1000) {
+                const timeLeft = 24 * 60 * 60 * 1000 - (now - lastSpin);
+                alert(`باید صبر کنید ${Math.floor(timeLeft / (60 * 60 * 1000))} ساعت.`);
+                return;
+            }
+
+            // ذخیره زمان چرخش
+            localStorage.setItem("lastSpin", now);
+
+            // شانس‌ها
+            const weightedPrizes = [
+                10, 10, 10, 20, 20, 20, 40, 40, 80, 160, 200
+            ];
+            const randomPrize = weightedPrizes[Math.floor(Math.random() * weightedPrizes.length)];
 
             // شبیه‌سازی چرخش گردونه
             wheel.style.animation = "spin 2s ease-in-out";
@@ -181,6 +190,25 @@
                 prizesList.appendChild(listItem);
             }, 2000);
         });
+
+        // نمایش تایمر
+        setInterval(() => {
+            const now = new Date().getTime();
+            const lastSpin = localStorage.getItem("lastSpin");
+
+            if (lastSpin && now - lastSpin < 24 * 60 * 60 * 1000) {
+                const timeLeft = 24 * 60 * 60 * 1000 - (now - lastSpin);
+                const hours = Math.floor(timeLeft / (60 * 60 * 1000));
+                const minutes = Math.floor((timeLeft % (60 * 60 * 1000)) / (60 * 1000));
+                const seconds = Math.floor((timeLeft % (60 * 1000)) / 1000);
+                countdown.textContent = `زمان باقی‌مانده: ${hours}:${minutes}:${seconds}`;
+                countdown.classList.remove("hidden");
+                spinBtn.disabled = true;
+            } else {
+                countdown.classList.add("hidden");
+                spinBtn.disabled = false;
+            }
+        }, 1000);
     </script>
 </body>
 </html>
