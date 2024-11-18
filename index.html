@@ -14,7 +14,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            overflow: auto; /* اسکرول صفحه */
+            overflow: auto;
             overflow-x: hidden;
         }
 
@@ -156,13 +156,24 @@
             background: #888;
         }
 
-        .small-arrow {
-            position: absolute;
-            top: 40%;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 2rem;
-            color: #fff;
+        #user-id-prizes {
+            background: #ffcc00;
+            padding: 15px;
+            border-radius: 50px;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        #result {
+            font-size: 1.5rem;
+            color: #ffcc00;
+            margin-top: 10px;
+        }
+
+        .wheel-result {
+            font-size: 1.5rem;
+            color: #ffeaa7;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -171,7 +182,6 @@
         <!-- صفحه ثبت‌نام -->
         <div id="login-section">
             <h1>ثبت‌نام</h1>
-            <div class="ellipse" id="game-id-ellipse">شناسه بازی</div>
             <input type="text" id="game-id" placeholder="شناسه بازی خود را وارد کنید">
             <button id="login-btn">تایید</button>
         </div>
@@ -179,7 +189,7 @@
         <!-- صفحه گردونه -->
         <div id="main-section" class="hidden">
             <div id="user-info">
-                <div class="ellipse ellipse-gray" id="user-id-display"></div>
+                <div class="ellipse ellipse-gray" id="user-id-display">شناسه</div>
                 <div class="ellipse" id="show-prizes-btn">لیست جوایز</div>
             </div>
             <div id="wheel">
@@ -190,7 +200,6 @@
                 <span>160 سکه</span>
                 <span>200 سکه</span>
             </div>
-            <div class="small-arrow">↑</div>
             <button id="spin-btn">چرخاندن گردونه</button>
             <p id="result">نتیجه: هنوز چیزی برنده نشده‌اید.</p>
             <p id="countdown" class="hidden">زمان باقی‌مانده: </p>
@@ -217,13 +226,13 @@
         const countdown = document.getElementById("countdown");
         const showPrizesBtn = document.getElementById("show-prizes-btn");
         const backToMainBtn = document.getElementById("back-to-main");
-        const gameIdEllipse = document.getElementById("game-id-ellipse");
+        const gameId = "gameId";
 
         let userId = "";
         let spinTimeout;
-        
+
         // بررسی شناسه در localStorage
-        const savedGameId = localStorage.getItem("gameId");
+        const savedGameId = localStorage.getItem(gameId);
         if (savedGameId) {
             gameIdInput.value = savedGameId;
             showMainSection(savedGameId);
@@ -233,7 +242,7 @@
         document.getElementById("login-btn").onclick = function() {
             const gameId = gameIdInput.value.trim();
             if (gameId) {
-                localStorage.setItem("gameId", gameId);
+                localStorage.setItem(gameId, gameId);
                 showMainSection(gameId);
             }
         };
@@ -267,6 +276,10 @@
             const weightedSpins = [10, 20, 40, 80, 160, 200]; // وزن‌بندی شانسی
             const spinResult = weightedSpins[Math.floor(Math.random() * weightedSpins.length)];
             resultParagraph.textContent = `نتیجه: ${spinResult} سکه`;
+            document.getElementById("wheel").style.pointerEvents = "none"; // جلوگیری از چرخش دوباره
+            setTimeout(() => {
+                document.getElementById("wheel").style.pointerEvents = "auto"; // فعال کردن گردونه برای دوباره چرخاندن
+            }, 4000); // چرخش ۴ ثانیه
         };
 
         // نمایش جوایز
