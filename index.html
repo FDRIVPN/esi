@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,19 +8,20 @@
         body {
             margin: 0;
             font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            background: linear-gradient(135deg, #ff6f61, #d4a5a5); /* گرادیانت زیبا */
             color: white;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            overflow: hidden;
+            overflow: auto; /* اسکرول صفحه */
+            overflow-x: hidden;
         }
 
         .container {
             text-align: center;
             width: 90%;
-            max-width: 600px;
+            max-width: 700px;
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border-radius: 20px;
@@ -51,14 +52,14 @@
         }
 
         button {
-            background: #007BFF;
+            background: #3498db;
             color: white;
             cursor: pointer;
             transition: 0.3s;
         }
 
         button:hover {
-            background: #0056b3;
+            background: #2980b9;
             transform: translateY(-2px);
         }
 
@@ -68,6 +69,7 @@
             margin: 20px auto;
             border: 5px solid #fff;
             border-radius: 50%;
+            position: relative;
             background: conic-gradient(
                 #ff7675 0 60deg,
                 #55efc4 60deg 120deg,
@@ -80,8 +82,21 @@
             justify-content: center;
             align-items: center;
             box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.5);
-            animation: spin 0s linear forwards;
         }
+
+        #wheel span {
+            position: absolute;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+        }
+
+        #wheel span:nth-child(1) { top: 10%; left: 40%; }
+        #wheel span:nth-child(2) { top: 30%; left: 10%; }
+        #wheel span:nth-child(3) { top: 70%; left: 10%; }
+        #wheel span:nth-child(4) { top: 90%; left: 40%; }
+        #wheel span:nth-child(5) { top: 70%; right: 10%; }
+        #wheel span:nth-child(6) { top: 30%; right: 10%; }
 
         #countdown {
             margin-top: 10px;
@@ -117,7 +132,14 @@
         </div>
         <div id="main-section" class="hidden">
             <p>خوش آمدید! شناسه شما: <span id="user-id"></span></p>
-            <div id="wheel"></div>
+            <div id="wheel">
+                <span>10 سکه</span>
+                <span>20 سکه</span>
+                <span>40 سکه</span>
+                <span>80 سکه</span>
+                <span>160 سکه</span>
+                <span>200 سکه</span>
+            </div>
             <button id="spin-btn">چرخاندن گردونه</button>
             <p id="result">نتیجه: هنوز چیزی برنده نشده‌اید.</p>
             <p id="countdown" class="hidden">زمان باقی‌مانده: </p>
@@ -179,7 +201,7 @@
             const randomPrize = weightedPrizes[Math.floor(Math.random() * weightedPrizes.length)];
 
             // شبیه‌سازی چرخش گردونه
-            wheel.style.animation = "spin 2s ease-in-out";
+            wheel.style.animation = "spin 4s ease-in-out";
             setTimeout(() => {
                 wheel.style.animation = "none";
                 resultParagraph.textContent = `شما ${randomPrize} سکه برنده شدید!`;
@@ -188,7 +210,7 @@
                 const listItem = document.createElement("li");
                 listItem.innerHTML = `🎉 <span>${randomPrize}</span> سکه - تاریخ: ${new Date().toLocaleDateString()}`;
                 prizesList.appendChild(listItem);
-            }, 2000);
+            }, 4000);
         });
 
         // نمایش تایمر
@@ -212,3 +234,4 @@
     </script>
 </body>
 </html>
+
