@@ -63,6 +63,21 @@
             transform: translateY(-2px);
         }
 
+        .ellipse {
+            background: #ffcc00;
+            color: white;
+            padding: 15px;
+            border-radius: 50px;
+            display: inline-block;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        .ellipse-gray {
+            background: #b0b0b0;
+        }
+
         #wheel {
             width: 200px;
             height: 200px;
@@ -121,17 +136,52 @@
             font-weight: bold;
             color: #ffeaa7;
         }
+
+        #prizes-page {
+            display: none;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #b0b0b0;
+            border-radius: 50%;
+            padding: 10px;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .back-button:hover {
+            background: #888;
+        }
+
+        .small-arrow {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2rem;
+            color: #fff;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>سیستم جوایز سه‌بعدی</h1>
+        <!-- صفحه ثبت‌نام -->
         <div id="login-section">
+            <h1>ثبت‌نام</h1>
+            <div class="ellipse" id="game-id-ellipse">شناسه بازی</div>
             <input type="text" id="game-id" placeholder="شناسه بازی خود را وارد کنید">
-            <button id="login-btn">ورود</button>
+            <button id="login-btn">تایید</button>
         </div>
+
+        <!-- صفحه گردونه -->
         <div id="main-section" class="hidden">
-            <p>خوش آمدید! شناسه شما: <span id="user-id"></span></p>
+            <div id="user-info">
+                <div class="ellipse ellipse-gray" id="user-id-display"></div>
+                <div class="ellipse" id="show-prizes-btn">لیست جوایز</div>
+            </div>
             <div id="wheel">
                 <span>10 سکه</span>
                 <span>20 سکه</span>
@@ -140,98 +190,100 @@
                 <span>160 سکه</span>
                 <span>200 سکه</span>
             </div>
+            <div class="small-arrow">↑</div>
             <button id="spin-btn">چرخاندن گردونه</button>
             <p id="result">نتیجه: هنوز چیزی برنده نشده‌اید.</p>
             <p id="countdown" class="hidden">زمان باقی‌مانده: </p>
+        </div>
+
+        <!-- صفحه جوایز -->
+        <div id="prizes-page">
+            <div class="back-button" id="back-to-main">×</div>
+            <div class="ellipse" id="user-id-prizes">شناسه بازی</div>
             <h3>جوایز شما:</h3>
-            <ul id="prizes"></ul>
+            <ul id="prizes-list"></ul>
         </div>
     </div>
 
     <script>
         const loginSection = document.getElementById("login-section");
         const mainSection = document.getElementById("main-section");
+        const prizesPage = document.getElementById("prizes-page");
         const gameIdInput = document.getElementById("game-id");
-        const userIdSpan = document.getElementById("user-id");
+        const userIdDisplay = document.getElementById("user-id-display");
         const spinBtn = document.getElementById("spin-btn");
         const resultParagraph = document.getElementById("result");
-        const prizesList = document.getElementById("prizes");
-        const wheel = document.getElementById("wheel");
+        const prizesList = document.getElementById("prizes-list");
         const countdown = document.getElementById("countdown");
+        const showPrizesBtn = document.getElementById("show-prizes-btn");
+        const backToMainBtn = document.getElementById("back-to-main");
+        const gameIdEllipse = document.getElementById("game-id-ellipse");
 
+        let userId = "";
+        let spinTimeout;
+        
         // بررسی شناسه در localStorage
         const savedGameId = localStorage.getItem("gameId");
         if (savedGameId) {
-            userIdSpan.textContent = savedGameId;
-            loginSection.classList.add("hidden");
-            mainSection.classList.remove("hidden");
+            gameIdInput.value = savedGameId;
+            showMainSection(savedGameId);
         }
 
-        // مدیریت ورود
-        document.getElementById("login-btn").addEventListener("click", () => {
+        // تایید ثبت‌نام
+        document.getElementById("login-btn").onclick = function() {
             const gameId = gameIdInput.value.trim();
-            if (gameId === "") {
-                alert("لطفاً شناسه بازی خود را وارد کنید!");
-                return;
+            if (gameId) {
+                localStorage.setItem("gameId", gameId);
+                showMainSection(gameId);
             }
-            localStorage.setItem("gameId", gameId);
-            userIdSpan.textContent = gameId;
+        };
+
+        // نمایش بخش گردونه
+        function showMainSection(gameId) {
             loginSection.classList.add("hidden");
             mainSection.classList.remove("hidden");
-        });
+            userId = gameId;
+            userIdDisplay.textContent = gameId.slice(0, 10) + (gameId.length > 10 ? "..." : "");
+            countdown.classList.remove("hidden");
+        }
 
-        // مدیریت گردونه
-        spinBtn.addEventListener("click", () => {
-            const now = new Date().getTime();
-            const lastSpin = localStorage.getItem("lastSpin");
+        // نمایش صفحه جوایز
+        showPrizesBtn.onclick = function() {
+            mainSection.classList.add("hidden");
+            prizesPage.classList.remove("hidden");
+            document.getElementById("user-id-prizes").textContent = userId.slice(0, 10) + (userId.length > 10 ? "..." : "");
+            displayPrizes();
+        };
 
-            if (lastSpin && now - lastSpin < 24 * 60 * 60 * 1000) {
-                const timeLeft = 24 * 60 * 60 * 1000 - (now - lastSpin);
-                alert(`باید صبر کنید ${Math.floor(timeLeft / (60 * 60 * 1000))} ساعت.`);
-                return;
-            }
+        // بازگشت به صفحه اصلی
+        backToMainBtn.onclick = function() {
+            prizesPage.classList.add("hidden");
+            mainSection.classList.remove("hidden");
+        };
 
-            // ذخیره زمان چرخش
-            localStorage.setItem("lastSpin", now);
+        // چرخاندن گردونه
+        spinBtn.onclick = function() {
+            const spins = [10, 20, 40, 80, 160, 200];
+            const weightedSpins = [10, 20, 40, 80, 160, 200]; // وزن‌بندی شانسی
+            const spinResult = weightedSpins[Math.floor(Math.random() * weightedSpins.length)];
+            resultParagraph.textContent = `نتیجه: ${spinResult} سکه`;
+        };
 
-            // شانس‌ها
-            const weightedPrizes = [
-                10, 10, 10, 20, 20, 20, 40, 40, 80, 160, 200
+        // نمایش جوایز
+        function displayPrizes() {
+            // برای نمایش جوایز نمونه
+            const examplePrizes = [
+                { amount: 50, date: '2024-11-19' },
+                { amount: 100, date: '2024-11-18' },
+                { amount: 200, date: '2024-11-17' }
             ];
-            const randomPrize = weightedPrizes[Math.floor(Math.random() * weightedPrizes.length)];
-
-            // شبیه‌سازی چرخش گردونه
-            wheel.style.animation = "spin 4s ease-in-out";
-            setTimeout(() => {
-                wheel.style.animation = "none";
-                resultParagraph.textContent = `شما ${randomPrize} سکه برنده شدید!`;
-                
-                // افزودن جایزه به لیست
-                const listItem = document.createElement("li");
-                listItem.innerHTML = `🎉 <span>${randomPrize}</span> سکه - تاریخ: ${new Date().toLocaleDateString()}`;
+            prizesList.innerHTML = '';
+            examplePrizes.forEach(prize => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `<span>${prize.amount} سکه</span> - ${prize.date}`;
                 prizesList.appendChild(listItem);
-            }, 4000);
-        });
-
-        // نمایش تایمر
-        setInterval(() => {
-            const now = new Date().getTime();
-            const lastSpin = localStorage.getItem("lastSpin");
-
-            if (lastSpin && now - lastSpin < 24 * 60 * 60 * 1000) {
-                const timeLeft = 24 * 60 * 60 * 1000 - (now - lastSpin);
-                const hours = Math.floor(timeLeft / (60 * 60 * 1000));
-                const minutes = Math.floor((timeLeft % (60 * 60 * 1000)) / (60 * 1000));
-                const seconds = Math.floor((timeLeft % (60 * 1000)) / 1000);
-                countdown.textContent = `زمان باقی‌مانده: ${hours}:${minutes}:${seconds}`;
-                countdown.classList.remove("hidden");
-                spinBtn.disabled = true;
-            } else {
-                countdown.classList.add("hidden");
-                spinBtn.disabled = false;
-            }
-        }, 1000);
+            });
+        }
     </script>
 </body>
 </html>
-
