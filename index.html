@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>گردونه شانس</title>
     <style>
-        /* استایل عمومی */
         body {
             margin: 0;
             font-family: Arial, sans-serif;
@@ -15,11 +14,6 @@
             align-items: center;
             height: 100vh;
             overflow: hidden;
-            color: black;
-        }
-
-        .hidden {
-            display: none;
         }
 
         .section {
@@ -37,43 +31,24 @@
             margin-bottom: 20px;
         }
 
-        /* بخش ثبت‌نام */
-        input {
+        input, button {
             padding: 15px;
             width: 100%;
             max-width: 280px;
-            border: none;
             border-radius: 50px;
             background: #d3d3d3;
             color: black;
             font-size: 1rem;
             text-align: center;
             margin: 0 auto;
-        }
-
-        input:focus {
-            outline: none;
-            box-shadow: 0px 0px 10px #3498db;
-        }
-
-        /* دکمه‌ها */
-        button {
-            margin-top: 10px;
-            padding: 10px 20px;
-            font-size: 1rem;
-            color: white;
-            background: #3498db;
-            border: none;
-            border-radius: 10px;
             cursor: pointer;
-            box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.3);
+            border: none;
         }
 
-        button:hover {
-            background: #2980b9;
+        input:focus, button:hover {
+            background: #3498db;
         }
 
-        /* استایل گردونه */
         .wheel-container {
             position: relative;
             width: 300px;
@@ -108,13 +83,6 @@
             border-radius: 50px;
         }
 
-        .wheel .n1 { transform: rotate(30deg) translate(120px, 0); }
-        .wheel .n2 { transform: rotate(90deg) translate(120px, 0); }
-        .wheel .n3 { transform: rotate(150deg) translate(120px, 0); }
-        .wheel .n4 { transform: rotate(210deg) translate(120px, 0); }
-        .wheel .n5 { transform: rotate(270deg) translate(120px, 0); }
-        .wheel .n6 { transform: rotate(330deg) translate(120px, 0); }
-
         .arrow {
             position: absolute;
             bottom: -20px;
@@ -127,48 +95,43 @@
             z-index: 2;
         }
 
-        /* نمایش جوایز */
-        .prize-bar {
-            margin: 10px 0;
-            padding: 10px;
-            background: #f8f8f8;
-            color: black;
-            border: 1px solid #000;
-            border-radius: 10px;
-            text-align: right;
+        #countdown {
+            margin-top: 20px;
+            font-size: 1.2rem;
         }
 
-        /* دکمه‌های خاص */
-        #spin-btn, #show-prizes-btn {
-            background: #d3d3d3;
-            color: black;
-            padding: 10px 20px;
-            margin: 0 10px;
-            border-radius: 10px;
-            border: none;
-        }
-
-        #spin-btn:hover, #show-prizes-btn:hover {
-            background: #a9a9a9;
+        #spin-btn {
+            background: #3498db;
+            color: white;
+            margin-top: 20px;
         }
 
         #result {
             margin-top: 20px;
-            font-size: 1.2rem;
+            font-size: 1.5rem;
             font-weight: bold;
             color: #3498db;
+        }
+
+        #prizes-list {
+            margin-top: 20px;
+        }
+
+        #prizes-list .prize-bar {
+            background: #ffeaa7;
+            border-radius: 10px;
+            margin: 5px 0;
+            padding: 10px;
         }
     </style>
 </head>
 <body>
-    <!-- صفحه ثبت‌نام -->
     <div class="section" id="sign-section">
         <h2>ثبت شناسه</h2>
         <input type="text" id="game-id-input" placeholder="شناسه بازی">
         <button id="login-btn">تایید</button>
     </div>
 
-    <!-- صفحه گردونه -->
     <div class="section hidden" id="spin-section">
         <h2>گردونه شانس</h2>
         <div class="wheel-container">
@@ -182,13 +145,11 @@
                 <div class="number n6">200</div>
             </div>
         </div>
-        <div id="countdown" style="margin-top: 20px; font-size: 1.2rem;">زمان باقی‌مانده: </div>
+        <div id="countdown"></div>
         <button id="spin-btn">چرخاندن گردونه</button>
-        <button id="show-prizes-btn">نمایش جوایز</button>
         <div id="result"></div>
     </div>
 
-    <!-- صفحه نمایش جوایز -->
     <div class="section hidden" id="prizes-page">
         <h2>جوایز شما</h2>
         <div id="prizes-list"></div>
@@ -196,23 +157,19 @@
     </div>
 
     <script>
-        // مدیریت بخش ثبت‌نام و گردونه
         const signSection = document.getElementById("sign-section");
         const spinSection = document.getElementById("spin-section");
-        const prizesPage = document.getElementById("prizes-page");
-
         const gameIdInput = document.getElementById("game-id-input");
         const spinBtn = document.getElementById("spin-btn");
         const countdown = document.getElementById("countdown");
-        const showPrizesBtn = document.getElementById("show-prizes-btn");
-        const backToMainBtn = document.getElementById("back-to-main");
-        const prizesList = document.getElementById("prizes-list");
         const resultDiv = document.getElementById("result");
+        const prizesPage = document.getElementById("prizes-page");
+        const prizesList = document.getElementById("prizes-list");
+        const backToMainBtn = document.getElementById("back-to-main");
 
         let lastSpinTime = localStorage.getItem("lastSpinTime") || 0;
         const prizes = JSON.parse(localStorage.getItem("prizes") || "[]");
 
-        // بروزرسانی تایمر گردونه
         function updateCountdown() {
             const now = Date.now();
             const timeRemaining = 24 * 60 * 60 * 1000 - (now - lastSpinTime);
@@ -241,24 +198,22 @@
         spinBtn.onclick = function () {
             if (spinBtn.disabled) return;
 
-            // شبیه‌سازی چرخش گردونه
             const spins = [10, 20, 40, 80, 160, 200];
             const randomIndex = Math.floor(Math.random() * spins.length);
             const chosenPrize = spins[randomIndex];
-
-            // اعمال چرخش گردونه
             const wheel = document.getElementById("wheel");
+
             const rotationDegree = 360 * 3 + randomIndex * 60;
+            wheel.style.transition = "transform 4s ease-out"; 
             wheel.style.transform = `rotate(${rotationDegree}deg)`;
 
-            // نمایش نتیجه بعد از چرخش
             setTimeout(() => {
                 resultDiv.textContent = `تبریک! شما ${chosenPrize} سکه برنده شدید!`;
                 prizes.push(chosenPrize);
                 localStorage.setItem("prizes", JSON.stringify(prizes));
                 localStorage.setItem("lastSpinTime", Date.now());
                 updateCountdown();
-            }, 4000); // بعد از 4 ثانیه (مدت چرخش گردونه)
+            }, 4000);
         };
 
         showPrizesBtn.onclick = function () {
