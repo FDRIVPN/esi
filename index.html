@@ -1,308 +1,186 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coin Game</title>
+    <title>سیستم جوایز سه‌بعدی</title>
     <style>
-        /* استایل برای صفحه بارگذاری */
-        #loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: black;
+        /* تنظیمات عمومی */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            height: 100vh;
+            overflow: hidden;
         }
 
-        .loading-circle {
-            border: 8px solid transparent;
-            border-top: 8px solid white;
+        .container {
+            text-align: center;
+            width: 90%;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        input, button {
+            font-size: 1.2rem;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            margin: 10px 0;
+            width: 100%;
+            outline: none;
+            box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        input {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        button {
+            background: #007BFF;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        #wheel {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            border: 5px solid #fff;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
+            background: conic-gradient(
+                #ff7675 0 60deg,
+                #55efc4 60deg 120deg,
+                #74b9ff 120deg 180deg,
+                #ffeaa7 180deg 240deg,
+                #a29bfe 240deg 300deg,
+                #fab1a0 300deg 360deg
+            );
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.5);
+            animation: spin 0s linear forwards;
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            margin-top: 8px;
-            color: white;
-            font-size: 20px;
-        }
-
-        /* استایل های اصلی */
-        html, body {
-            background-color: black;
-            margin: 0;
-            font-family: Arial, sans-serif;
-            height: 100%;
-            overflow-y: scroll;
-            padding-bottom: 70px;
-        }
-
-        body {
-            overflow: hidden; /* پنهان کردن نوار اسکرول */
-            height: calc(100% + 70px); /* افزایش ارتفاع */
-        }
-
-        #score-container {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: white;
-            font-size: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
-
-        #ovals-container {
-            margin-top: 50px;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .decorative-oval {
-            width: 80%;
-            height: 40px;
-            background-color: white;
-            border-radius: 20px;
-            margin: 10px 0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 10px;
-            box-sizing: border-box;
-            transition: all 0.3s ease;
-        }
-
-        .go-oval {
-            background-color: black;
-            color: white;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 20px;
-        }
-
-        #bottom-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 70px; 
-            background-color: #1a1a1a;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding: 0 10px;
-            z-index: 1000; 
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5); 
-        }
-
-        .icon-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: transform 0.3s, opacity 0.3s;
-            cursor: pointer;
-            padding: 0 4px;
-        }
-
-        .icon-container img {
-            width: 25px; 
-            height: 25px;
-            transition: transform 0.3s, filter 0.3s;
-            margin-bottom: 5px;
-        }
-
-        .icon-container:hover img {
-            transform: scale(1.2);
-            filter: brightness(1.2);
-        }
-
-        .icon-label {
-            visibility: hidden;
-            font-size: 14px;
-            opacity: 0;
-            transition: opacity 0.3s, transform 0.3s;
-            transform: translateY(10px);
-            color: white;
-        }
-
-        .icon-container.active .icon-label {
-            visibility: visible;
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .icon-container.active img {
-            transform: scale(1.2);
-        }
-
-        .page {
-            display: none;
-            color: white;
-            font-size: 24px;
-            text-align: center;
-            flex: 1;
-            align-items: center;
-            justify-content: center;
-            background-color: black;
-            height: 100vh;
-        }
-
-        #showMore {
-            display: none;
-            cursor: pointer;
-            color: white;
-            font-size: 16px;
-            text-align: center;
-        }
-
-        /* استایل برای موبایل */
-        @media (max-width: 768px) {
-            .decorative-oval {
-                width: 90%; /* درصدی برای موبایل */
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
             }
         }
 
-        /* استایل برای صفحات بزرگتر از 768px */
-        @media (min-width: 769px) {
-            .decorative-oval {
-                width: 70%; /* درصدی برای دسکتاپ */
-            }
+        .hidden {
+            display: none;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        ul li {
+            background: rgba(255, 255, 255, 0.1);
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: left;
+        }
+
+        ul li span {
+            font-weight: bold;
+            color: #ffeaa7;
         }
     </style>
 </head>
 <body>
-
-    <div id="loading-screen">
-        <div class="loading-circle"></div>
-        <div class="loading-text">Loading...</div>
-    </div>
-
-    <div id="score-container" style="display:none;">
-        <img src="tortles.png" alt="Tortles" style="width: 50px; height: 50px;">
-        <div id="score-content">
-            <span id="userScore">0</span>
-            <span style="margin-left: 10px;">tortles</span>
+    <div class="container">
+        <h1>سیستم جوایز سه‌بعدی</h1>
+        <div id="login-section">
+            <input type="text" id="game-id" placeholder="شناسه بازی خود را وارد کنید">
+            <button id="login-btn">ورود</button>
         </div>
-    </div>
-
-    <div id="ovals-container" style="display:none;">
-        <div class="decorative-oval">
-            <span>Channel Telegram</span>
-            <div class="go-oval">Go</div>
-        </div>
-        <div class="decorative-oval">
-            <span>Join X</span>
-            <div class="go-oval">Go</div>
-        </div>
-        <div class="decorative-oval">
-            <span>Follow X</span>
-            <div class="go-oval">Go</div>
-        </div>
-        <div class="decorative-oval">
-            <span>Join Bot</span>
-            <div class="go-oval">Go</div>
-        </div>
-        <div class="decorative-oval">
-            <span>Friend</span>
-            <div class="go-oval">Go</div>
-        </div>
-    </div>
-
-    <div id="showMore" style="display:none;">
-        Show More <span class="arrow">▼</span>
-    </div>
-
-    <div class="page" id="firstPage" style="display: none;">
-        <div class="header-text">این صفحه مربوط به آیکون اول است.</div>
-    </div>
-    <div class="page" id="comingSoon1">
-        <div class="header-text">این صفحه مربوط به آیکون دوم است.</div>
-    </div>
-    <div class="page" id="comingSoon2">
-        <div class="header-text">این صفحه مربوط به آیکون سوم است.</div>
-    </div>
-
-    <div id="bottom-bar">
-        <div class="icon-container active" id="icon1" tabindex="0">
-            <img src="image1.png" alt="Left Icon">
-            <span class="icon-label">Home</span>
-        </div>
-        <div class="icon-container" id="icon2">
-            <img src="image3.png" alt="Leaderboard">
-            <span class="icon-label">Leaderboard</span>
-        </div>
-        <div class="icon-container" id="icon3">
-            <img src="image2.png" alt="Friends">
-            <span class="icon-label">Friends</span>
+        <div id="main-section" class="hidden">
+            <p>خوش آمدید! شناسه شما: <span id="user-id"></span></p>
+            <div id="wheel"></div>
+            <button id="spin-btn">چرخاندن گردونه</button>
+            <p id="result">نتیجه: هنوز چیزی برنده نشده‌اید.</p>
+            <h3>جوایز شما:</h3>
+            <ul id="prizes"></ul>
         </div>
     </div>
 
     <script>
-        const scoreElement = document.getElementById('userScore');
-        const icon1 = document.getElementById('icon1');
-        const icon2 = document.getElementById('icon2');
-        const icon3 = document.getElementById('icon3');
-        const loadingScreen = document.getElementById('loading-screen');
-        const scoreContainer = document.getElementById('score-container');
-        const pages = document.querySelectorAll('.page');
-        const showMoreBtn = document.getElementById('showMore');
+        const loginSection = document.getElementById("login-section");
+        const mainSection = document.getElementById("main-section");
+        const gameIdInput = document.getElementById("game-id");
+        const userIdSpan = document.getElementById("user-id");
+        const spinBtn = document.getElementById("spin-btn");
+        const resultParagraph = document.getElementById("result");
+        const prizesList = document.getElementById("prizes");
+        const wheel = document.getElementById("wheel");
 
-        window.onload = () => {
+        // بررسی شناسه در localStorage
+        const savedGameId = localStorage.getItem("gameId");
+        if (savedGameId) {
+            userIdSpan.textContent = savedGameId;
+            loginSection.classList.add("hidden");
+            mainSection.classList.remove("hidden");
+        }
+
+        // مدیریت ورود
+        document.getElementById("login-btn").addEventListener("click", () => {
+            const gameId = gameIdInput.value.trim();
+            if (gameId === "") {
+                alert("لطفاً شناسه بازی خود را وارد کنید!");
+                return;
+            }
+            localStorage.setItem("gameId", gameId);
+            userIdSpan.textContent = gameId;
+            loginSection.classList.add("hidden");
+            mainSection.classList.remove("hidden");
+        });
+
+        // مدیریت گردونه
+        spinBtn.addEventListener("click", () => {
+            const prizes = [50, 100, 150, 200, 250, 300];
+            const randomPrize = prizes[Math.floor(Math.random() * prizes.length)];
+
+            // شبیه‌سازی چرخش گردونه
+            wheel.style.animation = "spin 2s ease-in-out";
             setTimeout(() => {
-                loadingScreen.style.display = 'none';
-                scoreContainer.style.display = 'flex';
-                scoreElement.textContent = 1000;
-                document.getElementById('ovals-container').style.display = 'flex';
+                wheel.style.animation = "none";
+                resultParagraph.textContent = `شما ${randomPrize} سکه برنده شدید!`;
+                
+                // افزودن جایزه به لیست
+                const listItem = document.createElement("li");
+                listItem.innerHTML = `🎉 <span>${randomPrize}</span> سکه - تاریخ: ${new Date().toLocaleDateString()}`;
+                prizesList.appendChild(listItem);
             }, 2000);
-        };
-
-        icon1.addEventListener('click', () => {
-            pages.forEach(page => page.style.display = 'none');
-            document.getElementById('firstPage').style.display = 'flex';
         });
-
-        icon2.addEventListener('click', () => {
-            pages.forEach(page => page.style.display = 'none');
-            document.getElementById('comingSoon1').style.display = 'flex';
-        });
-
-        icon3.addEventListener('click', () => {
-            pages.forEach(page => page.style.display = 'none');
-            document.getElementById('comingSoon2').style.display = 'flex';
-        });
-
-        document.querySelectorAll('.icon-container').forEach(container => {
-            container.addEventListener('mouseenter', () => container.classList.add('active'));
-            container.addEventListener('mouseleave', () => container.classList.remove('active'));
-        });
-
-        showMoreBtn.style.display = 'block';
     </script>
-</body>
-</html>
-
-
 </body>
 </html>
