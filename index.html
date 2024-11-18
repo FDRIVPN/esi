@@ -43,10 +43,15 @@
             width: 100%;
             border: none;
             border-radius: 50px;
-            margin-bottom: 20px;
             background: #d3d3d3;
             color: black;
             font-size: 1rem;
+            text-align: center;
+        }
+
+        input:focus {
+            outline: none;
+            box-shadow: 0px 0px 10px #3498db;
         }
 
         /* دکمه‌ها */
@@ -100,18 +105,18 @@
             border-radius: 50px;
         }
 
-        .wheel .n1 { transform: rotate(30deg) translate(110px); }
-        .wheel .n2 { transform: rotate(90deg) translate(110px); }
-        .wheel .n3 { transform: rotate(150deg) translate(110px); }
-        .wheel .n4 { transform: rotate(210deg) translate(110px); }
-        .wheel .n5 { transform: rotate(270deg) translate(110px); }
-        .wheel .n6 { transform: rotate(330deg) translate(110px); }
+        .wheel .n1 { transform: rotate(30deg) translate(120px, 20px); }
+        .wheel .n2 { transform: rotate(90deg) translate(120px, 20px); }
+        .wheel .n3 { transform: rotate(150deg) translate(120px, 20px); }
+        .wheel .n4 { transform: rotate(210deg) translate(120px, 20px); }
+        .wheel .n5 { transform: rotate(270deg) translate(120px, 20px); }
+        .wheel .n6 { transform: rotate(330deg) translate(120px, 20px); }
 
         .arrow {
             position: absolute;
-            top: -20px;
+            bottom: -20px;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translateX(-50%) rotate(180deg);
             width: 40px;
             height: 40px;
             background: #ffcc00;
@@ -123,10 +128,11 @@
         .prize-bar {
             margin: 10px 0;
             padding: 10px;
-            background: #fff;
+            background: #f8f8f8;
             color: black;
             border: 1px solid #000;
             border-radius: 10px;
+            text-align: right;
         }
 
         /* دکمه‌های خاص */
@@ -226,9 +232,14 @@
             const randomIndex = Math.floor(Math.random() * spins.length);
             const chosenPrize = spins[randomIndex];
             alert(`تبریک! شما ${chosenPrize} امتیاز برنده شدید.`);
+            prizes.push(chosenPrize);
+            localStorage.setItem("prizes", JSON.stringify(prizes));
         };
 
         showPrizesBtn.onclick = function () {
+            prizesList.innerHTML = prizes.length > 0
+                ? prizes.map(p => `<div class="prize-bar">امتیاز: ${p}</div>`).join("")
+                : `<div class="prize-bar">هنوز جایزه‌ای ثبت نشده است.</div>`;
             prizesPage.classList.remove("hidden");
             spinSection.classList.add("hidden");
         };
