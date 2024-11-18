@@ -41,12 +41,14 @@
         input {
             padding: 15px;
             width: 100%;
+            max-width: 280px;
             border: none;
             border-radius: 50px;
             background: #d3d3d3;
             color: black;
             font-size: 1rem;
             text-align: center;
+            margin: 0 auto;
         }
 
         input:focus {
@@ -97,7 +99,7 @@
 
         .wheel .number {
             position: absolute;
-            font-size: 1rem;
+            font-size: 1.2rem;
             font-weight: bold;
             color: black;
             background: #fff;
@@ -105,12 +107,12 @@
             border-radius: 50px;
         }
 
-        .wheel .n1 { transform: rotate(30deg) translate(120px, 20px); }
-        .wheel .n2 { transform: rotate(90deg) translate(120px, 20px); }
-        .wheel .n3 { transform: rotate(150deg) translate(120px, 20px); }
-        .wheel .n4 { transform: rotate(210deg) translate(120px, 20px); }
-        .wheel .n5 { transform: rotate(270deg) translate(120px, 20px); }
-        .wheel .n6 { transform: rotate(330deg) translate(120px, 20px); }
+        .wheel .n1 { transform: rotate(30deg) translate(120px, 0); }
+        .wheel .n2 { transform: rotate(90deg) translate(120px, 0); }
+        .wheel .n3 { transform: rotate(150deg) translate(120px, 0); }
+        .wheel .n4 { transform: rotate(210deg) translate(120px, 0); }
+        .wheel .n5 { transform: rotate(270deg) translate(120px, 0); }
+        .wheel .n6 { transform: rotate(330deg) translate(120px, 0); }
 
         .arrow {
             position: absolute;
@@ -231,9 +233,12 @@
             const spins = [10, 20, 40, 80, 160, 200];
             const randomIndex = Math.floor(Math.random() * spins.length);
             const chosenPrize = spins[randomIndex];
-            alert(`تبریک! شما ${chosenPrize} امتیاز برنده شدید.`);
+            alert(`تبریک! شما ${chosenPrize} سکه برنده شدید!`);
+            
             prizes.push(chosenPrize);
             localStorage.setItem("prizes", JSON.stringify(prizes));
+            localStorage.setItem("lastSpinTime", Date.now());
+            updateCountdown();
         };
 
         showPrizesBtn.onclick = function () {
