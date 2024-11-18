@@ -9,7 +9,7 @@
         body {
             margin: 0;
             font-family: Arial, sans-serif;
-            background: #ffffff; /* پس‌زمینه سفید */
+            background: #ffffff;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -18,17 +18,26 @@
             color: black;
         }
 
+        .hidden {
+            display: none;
+        }
+
         .section {
-            width: 100%;
+            width: 90%;
             max-width: 400px;
             padding: 20px;
             text-align: center;
-            border-radius: 10px;
             background: #ffffff;
             border: 2px solid #000;
+            border-radius: 10px;
             box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
         }
 
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        /* بخش ثبت‌نام */
         input {
             padding: 15px;
             width: 100%;
@@ -40,6 +49,7 @@
             font-size: 1rem;
         }
 
+        /* دکمه‌ها */
         button {
             margin-top: 10px;
             padding: 10px 20px;
@@ -109,6 +119,7 @@
             z-index: 2;
         }
 
+        /* نمایش جوایز */
         .prize-bar {
             margin: 10px 0;
             padding: 10px;
@@ -118,6 +129,7 @@
             border-radius: 10px;
         }
 
+        /* دکمه‌های خاص */
         #spin-btn, #show-prizes-btn {
             background: #d3d3d3;
             color: black;
@@ -133,7 +145,7 @@
     </style>
 </head>
 <body>
-    <!-- صفحه ثبت نام -->
+    <!-- صفحه ثبت‌نام -->
     <div class="section" id="sign-section">
         <h2>ثبت شناسه</h2>
         <input type="text" id="game-id-input" placeholder="شناسه بازی">
@@ -142,6 +154,7 @@
 
     <!-- صفحه گردونه -->
     <div class="section hidden" id="spin-section">
+        <h2>گردونه شانس</h2>
         <div class="wheel-container">
             <div class="arrow"></div>
             <div class="wheel" id="wheel">
@@ -158,7 +171,7 @@
         <button id="show-prizes-btn">نمایش جوایز</button>
     </div>
 
-    <!-- صفحه جوایز -->
+    <!-- صفحه نمایش جوایز -->
     <div class="section hidden" id="prizes-page">
         <h2>جوایز شما</h2>
         <div id="prizes-list"></div>
@@ -166,7 +179,7 @@
     </div>
 
     <script>
-        // مدیریت بخش ثبت‌نام
+        // مدیریت بخش ثبت‌نام و گردونه
         const signSection = document.getElementById("sign-section");
         const spinSection = document.getElementById("spin-section");
         const prizesPage = document.getElementById("prizes-page");
@@ -181,6 +194,7 @@
         let lastSpinTime = localStorage.getItem("lastSpinTime") || 0;
         const prizes = JSON.parse(localStorage.getItem("prizes") || "[]");
 
+        // بروزرسانی تایمر گردونه
         function updateCountdown() {
             const now = Date.now();
             const timeRemaining = 24 * 60 * 60 * 1000 - (now - lastSpinTime);
@@ -209,47 +223,14 @@
             if (spinBtn.disabled) return;
 
             const spins = [10, 20, 40, 80, 160, 200];
-            const weights = [3, 3, 2, 2, 1, 1];
-            const totalWeight = weights.reduce((a, b) => a + b, 0);
-            const random = Math.random() * totalWeight;
-            let cumulativeWeight = 0;
-            let chosenIndex = 0;
-
-            for (let i = 0; i < weights.length; i++) {
-                cumulativeWeight += weights[i];
-                if (random < cumulativeWeight) {
-                    chosenIndex = i;
-                    break;
-                }
-            }
-
-            const chosenPrize = spins[chosenIndex];
-            const rotation = 360 * 4 + (360 - chosenIndex * (360 / spins.length));
-            const finalRotation = rotation % 360;
-
-            const wheel = document.getElementById("wheel");
-            wheel.style.transition = "transform 4s ease-out";
-            wheel.style.transform = `rotate(${rotation}deg)`;
-
-            setTimeout(() => {
-                wheel.style.transition = "none";
-                wheel.style.transform = `rotate(${finalRotation}deg)`;
-                alert(`تبریک! شما ${chosenPrize} امتیاز برنده شدید.`);
-                prizes.push(chosenPrize);
-                localStorage.setItem("prizes", JSON.stringify(prizes));
-                lastSpinTime = Date.now();
-                localStorage.setItem("lastSpinTime", lastSpinTime);
-                updateCountdown();
-            }, 4000);
+            const randomIndex = Math.floor(Math.random() * spins.length);
+            const chosenPrize = spins[randomIndex];
+            alert(`تبریک! شما ${chosenPrize} امتیاز برنده شدید.`);
         };
 
         showPrizesBtn.onclick = function () {
-            spinSection.classList.add("hidden");
             prizesPage.classList.remove("hidden");
-
-            prizesList.innerHTML = prizes
-                .map((prize, index) => `<div class="prize-bar">جایزه ${index + 1}: ${prize} امتیاز</div>`)
-                .join("");
+            spinSection.classList.add("hidden");
         };
 
         backToMainBtn.onclick = function () {
