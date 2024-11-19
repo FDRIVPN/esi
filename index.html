@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بازی گردونه</title>
+    <title>بازی گردونه سفارشی</title>
     <style>
         * {
             margin: 0;
@@ -44,12 +44,12 @@
         }
 
         .oval.left {
-            top: 20px;
+            top: 60px;
             left: 20px;
         }
 
         .oval.right {
-            top: 20px;
+            top: 60px;
             right: 20px;
             cursor: pointer;
         }
@@ -67,32 +67,12 @@
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            border: 5px solid #ccc;
             position: relative;
-            background: conic-gradient(
-                #ffcccb 0deg 45deg,
-                #d4f7d4 45deg 90deg,
-                #ffffcc 90deg 135deg,
-                #cce5ff 135deg 180deg,
-                #ffcccc 180deg 225deg,
-                #e6ccff 225deg 270deg,
-                #ffebcc 270deg 315deg,
-                #cce5cc 315deg 360deg
-            );
+            background-image: url('Picsart_24-11-20_02-55-22-285.png');
+            background-size: cover;
+            background-position: center;
             transform: rotate(0deg);
             transition: transform 3s ease-out;
-        }
-
-        .wheel span {
-            position: absolute;
-            width: 100px;
-            height: 30px;
-            background-color: rgba(255, 255, 255, 0.7);
-            line-height: 30px;
-            border-radius: 5px;
-            text-align: center;
-            font-weight: bold;
-            transform-origin: center 150px;
         }
 
         .pointer {
@@ -109,7 +89,7 @@
 
         .spin-button {
             position: absolute;
-            top: 70%;
+            top: 75%;
             left: 50%;
             transform: translateX(-50%);
             width: 150px;
@@ -128,51 +108,33 @@
             font-size: 18px;
             font-weight: bold;
         }
-
-        .prizes-list {
-            display: none;
-            background-color: white;
-            margin-top: 20px;
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid lightgray;
-            text-align: center;
-        }
     </style>
 </head>
 <body>
-    <div class="header">بازی گردونه</div>
+    <div class="header">بازی گردونه سفارشی</div>
 
     <div class="oval left" id="user-info">کاربر</div>
     <div class="oval right" onclick="showPrizes()">جوایز</div>
 
     <div class="wheel-container">
         <div class="pointer"></div>
-        <div class="wheel" id="wheel">
-            <!-- اعداد گردونه -->
-            <span style="transform: rotate(22.5deg);">30</span>
-            <span style="transform: rotate(67.5deg);">60</span>
-            <span style="transform: rotate(112.5deg);">90</span>
-            <span style="transform: rotate(157.5deg);">120</span>
-            <span style="transform: rotate(202.5deg);">150</span>
-            <span style="transform: rotate(247.5deg);">180</span>
-            <span style="transform: rotate(292.5deg);">210</span>
-            <span style="transform: rotate(337.5deg);">240</span>
-        </div>
+        <div class="wheel" id="wheel"></div>
     </div>
 
     <button class="spin-button" id="spin-btn" onclick="spinWheel()">چرخاندن</button>
 
     <div class="result" id="result"></div>
 
-    <div class="prizes-list" id="prizes-list">
-        <h3>جوایز شما</h3>
-        <div id="prizes"></div>
-    </div>
-
     <script>
-        let prizes = [];
         let spinning = false;
+        const prizeChances = [
+            { angle: 360, prize: 30, chance: 35 }, // 30 سکه، 35 درصد
+            { angle: 60, prize: 60, chance: 35 }, // 60 سکه، 35 درصد
+            { angle: 120, prize: 90, chance: 20 }, // 90 سکه، 20 درصد
+            { angle: 180, prize: 120, chance: 10 }, // 120 سکه، 10 درصد
+            { angle: 240, prize: 150, chance: 10 }, // 150 سکه، 10 درصد
+            { angle: 300, prize: 180, chance: 10 }, // 180 سکه، 10 درصد
+        ];
 
         function spinWheel() {
             if (spinning) return;
@@ -185,29 +147,30 @@
 
             spinBtn.disabled = true;
 
-            const randomSpin = Math.floor(Math.random() * 8) * 45 + 3600; // چرخش تصادفی
+            // انتخاب جایزه بر اساس شانس‌ها
+            const selectedPrize = selectPrize();
+            const randomSpin = selectedPrize.angle + 3600; // اضافه کردن چند دور کامل
             wheel.style.transform = `rotate(${randomSpin}deg)`;
 
             setTimeout(() => {
-                const finalAngle = randomSpin % 360;
-                const prizeValues = [30, 60, 90, 120, 150, 180, 210, 240];
-                const prizeIndex = Math.floor(finalAngle / 45);
-                const prize = prizeValues[prizeIndex];
-
-                result.textContent = `شما ${prize} سکه بردید!`;
-                prizes.push({ value: prize, date: new Date().toLocaleDateString("fa-IR") });
-
+                result.textContent = `شما ${selectedPrize.prize} سکه بردید!`;
                 spinBtn.disabled = false;
                 spinning = false;
             }, 3000);
         }
 
-        function showPrizes() {
-            const prizeList = document.getElementById("prizes");
-            prizeList.innerHTML = prizes
-                .map((p) => `<p>سکه: ${p.value} - تاریخ: ${p.date}</p>`)
-                .join("");
-            document.getElementById("prizes-list").style.display = "block";
+        function selectPrize() {
+            const random = Math.random() * 100;
+            let cumulativeChance = 0;
+
+            for (const prize of prizeChances) {
+                cumulativeChance += prize.chance;
+                if (random <= cumulativeChance) {
+                    return prize;
+                }
+            }
+
+            return prizeChances[0]; // پیش‌فرض، اگر هیچ جایزه‌ای انتخاب نشد
         }
     </script>
 </body>
