@@ -3,197 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>گردونه شانس</title>
+    <title>بازی گردونه</title>
     <style>
         body {
-            margin: 0;
             font-family: Arial, sans-serif;
-            background: #ffffff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-            color: black;
+            margin: 0;
+            padding: 0;
+            direction: rtl;
+            text-align: center;
         }
-
-        .hidden {
-            display: none;
+        .header {
+            background-color: black;
+            color: white;
+            padding: 10px 0;
         }
-
-        .section {
-            width: 90%;
-            max-width: 400px;
+        .input-container {
+            background-color: lightgray;
             padding: 20px;
-            text-align: center;
-            background: #ffffff;
-            border: 2px solid #000;
-            border-radius: 10px;
-            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+            border-radius: 30px;
+            margin: 20px auto;
+            width: 300px;
         }
-
-        h2 {
-            margin-bottom: 20px;
-        }
-
-        input {
-            padding: 15px;
-            width: 100%;
-            max-width: 280px;
+        .input-container input {
+            width: 80%;
+            padding: 10px;
             border: none;
-            border-radius: 50px;
-            background: #d3d3d3;
-            color: black;
-            font-size: 1rem;
-            text-align: center;
-            margin: 0 auto;
-        }
-
-        input:focus {
+            border-radius: 30px;
             outline: none;
-            box-shadow: 0px 0px 10px #3498db;
+            text-align: center;
         }
-
-        button {
+        .input-container button {
             margin-top: 10px;
             padding: 10px 20px;
-            font-size: 1rem;
-            color: white;
-            background: #3498db;
             border: none;
-            border-radius: 10px;
+            border-radius: 30px;
+            background-color: green;
+            color: white;
             cursor: pointer;
-            box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.3);
         }
-
-        button:hover {
-            background: #2980b9;
-        }
-
         .wheel-container {
+            margin: 20px auto;
             position: relative;
+        }
+        .wheel {
             width: 300px;
             height: 300px;
-            margin: 20px auto;
-        }
-
-        .wheel {
-            position: relative;
-            width: 100%;
-            height: 100%;
             border-radius: 50%;
-            border: 5px solid #000;
-            background: conic-gradient(
-                #ff7675 0 60deg,
-                #55efc4 60deg 120deg,
-                #74b9ff 120deg 180deg,
-                #ffeaa7 180deg 240deg,
-                #a29bfe 240deg 300deg,
-                #fab1a0 300deg 360deg
-            );
-            transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1);
+            border: 10px solid lightgray;
+            position: relative;
         }
-
-        .wheel .number {
+        .segment {
+            width: 50%;
+            height: 50%;
+            background-color: #f4f4f4;
+            border: 1px solid black;
             position: absolute;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: black;
-            transform: translate(-50%, -50%);
+            transform-origin: bottom right;
         }
-
-        .wheel .n1 { transform: rotate(30deg) translate(0, -130px); }
-        .wheel .n2 { transform: rotate(90deg) translate(0, -130px); }
-        .wheel .n3 { transform: rotate(150deg) translate(0, -130px); }
-        .wheel .n4 { transform: rotate(210deg) translate(0, -130px); }
-        .wheel .n5 { transform: rotate(270deg) translate(0, -130px); }
-        .wheel .n6 { transform: rotate(330deg) translate(0, -130px); }
-
-        .arrow {
-            position: absolute;
-            bottom: -20px;
-            left: 50%;
-            transform: translateX(-50%) rotate(180deg);
-            width: 40px;
-            height: 40px;
-            background: #ffcc00;
-            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-            z-index: 2;
-        }
-
-        .prize-bar {
-            margin: 10px 0;
-            padding: 10px;
-            background: #f8f8f8;
-            color: black;
-            border: 1px solid #000;
-            border-radius: 10px;
-            text-align: right;
-        }
-
-        #spin-btn, #show-prizes-btn {
-            background: #d3d3d3;
-            color: black;
-            padding: 10px 20px;
-            margin: 0 10px;
-            border-radius: 10px;
-            border: none;
-        }
-
-        #spin-btn:hover, #show-prizes-btn:hover {
-            background: #a9a9a9;
-        }
-
-        #result {
+        .spin-button {
             margin-top: 20px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #3498db;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 30px;
+            background-color: blue;
+            color: white;
+            cursor: pointer;
         }
-
-        @media (max-width: 400px) {
-            .section {
-                width: 100%;
-                padding: 10px;
-            }
-            .wheel-container {
-                width: 250px;
-                height: 250px;
-            }
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .oval {
+            position: absolute;
+            border-radius: 50%;
+            width: 100px;
+            height: 50px;
+            background-color: lightgray;
+            text-align: center;
+            line-height: 50px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .oval.left {
+            top: 10px;
+            left: 10px;
+        }
+        .oval.right {
+            top: 10px;
+            right: 10px;
+        }
+        .prize-list {
+            display: none;
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid lightgray;
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
-    <!-- صفحات برنامه -->
-    <div class="section" id="sign-section">
-        <h2>ثبت شناسه</h2>
-        <input type="text" id="game-id-input" placeholder="شناسه بازی">
-        <button id="login-btn">تایید</button>
+    <div class="header">بازی گردونه</div>
+
+    <div class="input-container" id="login-section">
+        <input type="text" id="username" placeholder="شناسه خود را وارد کنید">
+        <button onclick="startGame()">تایید</button>
     </div>
 
-    <div class="section hidden" id="spin-section">
-        <h2>گردونه شانس</h2>
+    <div id="game-section" style="display: none;">
+        <div class="oval left" id="user-display"></div>
+        <div class="oval right" onclick="showPrizes()">جوایز</div>
         <div class="wheel-container">
-            <div class="arrow"></div>
             <div class="wheel" id="wheel">
-                <div class="number n1">10</div>
-                <div class="number n2">20</div>
-                <div class="number n3">40</div>
-                <div class="number n4">80</div>
-                <div class="number n5">160</div>
-                <div class="number n6">200</div>
+                <div class="segment" style="transform: rotate(0deg); background-color: lightblue;">30</div>
+                <div class="segment" style="transform: rotate(45deg); background-color: lightgreen;">60</div>
+                <div class="segment" style="transform: rotate(90deg); background-color: lightcoral;">90</div>
+                <div class="segment" style="transform: rotate(135deg); background-color: lightgoldenrodyellow;">120</div>
+                <div class="segment" style="transform: rotate(180deg); background-color: lightpink;">150</div>
+                <div class="segment" style="transform: rotate(225deg); background-color: lightgray;">180</div>
+                <div class="segment" style="transform: rotate(270deg); background-color: lightsteelblue;">210</div>
+                <div class="segment" style="transform: rotate(315deg); background-color: lightsalmon;">240</div>
             </div>
         </div>
-        <div id="countdown" style="margin-top: 20px; font-size: 1.2rem;">زمان باقی‌مانده: </div>
-        <button id="spin-btn">چرخاندن گردونه</button>
-        <button id="show-prizes-btn">نمایش جوایز</button>
-        <div id="result"></div>
+        <button class="spin-button" id="spin-btn" onclick="spinWheel()">چرخاندن</button>
+        <div class="result" id="result"></div>
     </div>
 
-    <div class="section hidden" id="prizes-page">
-        <h2>جوایز شما</h2>
-        <div id="prizes-list"></div>
-        <button id="back-to-main">بازگشت</button>
+    <div class="prize-list" id="prize-list">
+        <h3>جوایز</h3>
+        <div id="prizes"></div>
     </div>
+
+    <script>
+        let prizes = [];
+        let spinning = false;
+
+        function startGame() {
+            const username = document.getElementById("username").value;
+            if (username) {
+                document.getElementById("login-section").style.display = "none";
+                document.getElementById("game-section").style.display = "block";
+                document.getElementById("user-display").textContent = username;
+            } else {
+                alert("لطفا شناسه خود را وارد کنید");
+            }
+        }
+
+        function spinWheel() {
+            if (spinning) return;
+            spinning = true;
+
+            const wheel = document.getElementById("wheel");
+            const spinBtn = document.getElementById("spin-btn");
+            const result = document.getElementById("result");
+
+            spinBtn.disabled = true;
+            result.textContent = "";
+
+            const randomSpin = Math.floor(Math.random() * 8) * 45 + 3600; // چرخش تصادفی
+            wheel.style.transition = "transform 3s ease-out";
+            wheel.style.transform = `rotate(${randomSpin}deg)`;
+
+            setTimeout(() => {
+                spinning = false;
+                const finalAngle = randomSpin % 360;
+                const prizeIndex = Math.floor(finalAngle / 45);
+                const prizeValues = [30, 60, 90, 120, 150, 180, 210, 240];
+                const prize = prizeValues[prizeIndex];
+                prizes.push({ value: prize, date: new Date().toLocaleDateString("fa-IR") });
+                result.textContent = `${prize} سکه بردی!`;
+                spinBtn.disabled = true;
+            }, 3000);
+        }
+
+        function showPrizes() {
+            const prizeList = document.getElementById("prize-list");
+            const prizesDiv = document.getElementById("prizes");
+            prizesDiv.innerHTML = prizes.map(p => `<p>سکه: ${p.value} - تاریخ: ${p.date}</p>`).join("");
+            prizeList.style.display = "block";
+        }
+    </script>
 </body>
 </html>
