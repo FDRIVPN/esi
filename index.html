@@ -6,33 +6,37 @@
     <title>بازی گردونه</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            direction: rtl;
+            font-family: Arial, sans-serif;
             text-align: center;
+            direction: rtl;
         }
+
         .header {
             background-color: black;
             color: white;
             padding: 10px 0;
         }
-        .input-container {
+
+        .input-section {
             background-color: lightgray;
-            padding: 20px;
-            border-radius: 30px;
             margin: 20px auto;
+            padding: 20px;
             width: 300px;
+            border-radius: 30px;
         }
-        .input-container input {
+
+        .input-section input {
             width: 80%;
             padding: 10px;
             border: none;
             border-radius: 30px;
-            outline: none;
             text-align: center;
+            outline: none;
         }
-        .input-container button {
+
+        .input-section button {
             margin-top: 10px;
             padding: 10px 20px;
             border: none;
@@ -41,25 +45,61 @@
             color: white;
             cursor: pointer;
         }
-        .wheel-container {
-            margin: 20px auto;
+
+        #game-page {
+            display: none;
             position: relative;
         }
-        .wheel {
+
+        .oval {
+            position: absolute;
+            width: 100px;
+            height: 50px;
+            background-color: lightgray;
+            border-radius: 50%;
+            line-height: 50px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .oval.left {
+            top: 20px;
+            left: 30px;
+        }
+
+        .oval.right {
+            top: 20px;
+            right: 30px;
+            cursor: pointer;
+        }
+
+        .wheel-container {
+            margin: 50px auto;
+            position: relative;
             width: 300px;
             height: 300px;
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
             border: 10px solid lightgray;
             position: relative;
+            transform: rotate(0deg);
+            transition: transform 3s ease-out;
         }
+
         .segment {
+            position: absolute;
             width: 50%;
             height: 50%;
-            background-color: #f4f4f4;
-            border: 1px solid black;
-            position: absolute;
+            background: lightblue;
             transform-origin: bottom right;
+            clip-path: polygon(100% 0, 0 0, 0 100%);
+            border: 1px solid white;
         }
+
         .spin-button {
             margin-top: 20px;
             padding: 10px 20px;
@@ -69,52 +109,38 @@
             color: white;
             cursor: pointer;
         }
+
         .result {
             margin-top: 20px;
             font-size: 18px;
             font-weight: bold;
         }
-        .oval {
-            position: absolute;
-            border-radius: 50%;
-            width: 100px;
-            height: 50px;
-            background-color: lightgray;
-            text-align: center;
-            line-height: 50px;
-            font-size: 14px;
-            font-weight: bold;
-        }
-        .oval.left {
-            top: 10px;
-            left: 10px;
-        }
-        .oval.right {
-            top: 10px;
-            right: 10px;
-        }
-        .prize-list {
+
+        .prizes-list {
             display: none;
-            background-color: #fff;
+            background-color: white;
             padding: 20px;
             border: 1px solid lightgray;
             border-radius: 10px;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
     <div class="header">بازی گردونه</div>
 
-    <div class="input-container" id="login-section">
+    <div class="input-section" id="login-page">
         <input type="text" id="username" placeholder="شناسه خود را وارد کنید">
         <button onclick="startGame()">تایید</button>
     </div>
 
-    <div id="game-section" style="display: none;">
-        <div class="oval left" id="user-display"></div>
+    <div id="game-page">
+        <div class="oval left" id="user-info"></div>
         <div class="oval right" onclick="showPrizes()">جوایز</div>
+
         <div class="wheel-container">
             <div class="wheel" id="wheel">
+                <!-- قطعات گردونه -->
                 <div class="segment" style="transform: rotate(0deg); background-color: lightblue;">30</div>
                 <div class="segment" style="transform: rotate(45deg); background-color: lightgreen;">60</div>
                 <div class="segment" style="transform: rotate(90deg); background-color: lightcoral;">90</div>
@@ -125,13 +151,14 @@
                 <div class="segment" style="transform: rotate(315deg); background-color: lightsalmon;">240</div>
             </div>
         </div>
+
         <button class="spin-button" id="spin-btn" onclick="spinWheel()">چرخاندن</button>
         <div class="result" id="result"></div>
-    </div>
 
-    <div class="prize-list" id="prize-list">
-        <h3>جوایز</h3>
-        <div id="prizes"></div>
+        <div class="prizes-list" id="prizes-list">
+            <h3>جوایز:</h3>
+            <div id="prizes"></div>
+        </div>
     </div>
 
     <script>
@@ -141,11 +168,11 @@
         function startGame() {
             const username = document.getElementById("username").value;
             if (username) {
-                document.getElementById("login-section").style.display = "none";
-                document.getElementById("game-section").style.display = "block";
-                document.getElementById("user-display").textContent = username;
+                document.getElementById("login-page").style.display = "none";
+                document.getElementById("game-page").style.display = "block";
+                document.getElementById("user-info").textContent = username;
             } else {
-                alert("لطفا شناسه خود را وارد کنید");
+                alert("لطفاً شناسه خود را وارد کنید!");
             }
         }
 
@@ -155,32 +182,28 @@
 
             const wheel = document.getElementById("wheel");
             const spinBtn = document.getElementById("spin-btn");
-            const result = document.getElementById("result");
-
             spinBtn.disabled = true;
-            result.textContent = "";
 
-            const randomSpin = Math.floor(Math.random() * 8) * 45 + 3600; // چرخش تصادفی
-            wheel.style.transition = "transform 3s ease-out";
-            wheel.style.transform = `rotate(${randomSpin}deg)`;
+            const randomDegree = Math.floor(Math.random() * 8) * 45 + 3600; // چرخش تصادفی
+            wheel.style.transform = `rotate(${randomDegree}deg)`;
 
             setTimeout(() => {
-                spinning = false;
-                const finalAngle = randomSpin % 360;
-                const prizeIndex = Math.floor(finalAngle / 45);
+                const finalAngle = randomDegree % 360;
                 const prizeValues = [30, 60, 90, 120, 150, 180, 210, 240];
+                const prizeIndex = Math.floor(finalAngle / 45);
                 const prize = prizeValues[prizeIndex];
+
+                document.getElementById("result").textContent = `${prize} سکه بردی!`;
                 prizes.push({ value: prize, date: new Date().toLocaleDateString("fa-IR") });
-                result.textContent = `${prize} سکه بردی!`;
-                spinBtn.disabled = true;
+
+                spinBtn.disabled = true; // جلوگیری از چرخش مجدد
             }, 3000);
         }
 
         function showPrizes() {
-            const prizeList = document.getElementById("prize-list");
             const prizesDiv = document.getElementById("prizes");
             prizesDiv.innerHTML = prizes.map(p => `<p>سکه: ${p.value} - تاریخ: ${p.date}</p>`).join("");
-            prizeList.style.display = "block";
+            document.getElementById("prizes-list").style.display = "block";
         }
     </script>
 </body>
