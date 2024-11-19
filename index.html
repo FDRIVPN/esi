@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>گردونه شانس</title>
     <style>
-        /* استایل عمومی */
         body {
             margin: 0;
             font-family: Arial, sans-serif;
@@ -37,7 +36,6 @@
             margin-bottom: 20px;
         }
 
-        /* بخش ثبت‌نام */
         input {
             padding: 15px;
             width: 100%;
@@ -56,7 +54,6 @@
             box-shadow: 0px 0px 10px #3498db;
         }
 
-        /* دکمه‌ها */
         button {
             margin-top: 10px;
             padding: 10px 20px;
@@ -73,7 +70,6 @@
             background: #2980b9;
         }
 
-        /* استایل گردونه */
         .wheel-container {
             position: relative;
             width: 300px;
@@ -95,7 +91,7 @@
                 #a29bfe 240deg 300deg,
                 #fab1a0 300deg 360deg
             );
-            transition: transform 4s ease-out;
+            transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
 
         .wheel .number {
@@ -127,7 +123,6 @@
             z-index: 2;
         }
 
-        /* نمایش جوایز */
         .prize-bar {
             margin: 10px 0;
             padding: 10px;
@@ -138,7 +133,6 @@
             text-align: right;
         }
 
-        /* دکمه‌های خاص */
         #spin-btn, #show-prizes-btn {
             background: #d3d3d3;
             color: black;
@@ -158,17 +152,27 @@
             font-weight: bold;
             color: #3498db;
         }
+
+        @media (max-width: 400px) {
+            .section {
+                width: 100%;
+                padding: 10px;
+            }
+            .wheel-container {
+                width: 250px;
+                height: 250px;
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- صفحه ثبت‌نام -->
+    <!-- صفحات برنامه -->
     <div class="section" id="sign-section">
         <h2>ثبت شناسه</h2>
         <input type="text" id="game-id-input" placeholder="شناسه بازی">
         <button id="login-btn">تایید</button>
     </div>
 
-    <!-- صفحه گردونه -->
     <div class="section hidden" id="spin-section">
         <h2>گردونه شانس</h2>
         <div class="wheel-container">
@@ -188,7 +192,6 @@
         <div id="result"></div>
     </div>
 
-    <!-- صفحه نمایش جوایز -->
     <div class="section hidden" id="prizes-page">
         <h2>جوایز شما</h2>
         <div id="prizes-list"></div>
@@ -196,7 +199,6 @@
     </div>
 
     <script>
-        // مدیریت بخش ثبت‌نام و گردونه
         const signSection = document.getElementById("sign-section");
         const spinSection = document.getElementById("spin-section");
         const prizesPage = document.getElementById("prizes-page");
@@ -212,7 +214,6 @@
         let lastSpinTime = localStorage.getItem("lastSpinTime") || 0;
         const prizes = JSON.parse(localStorage.getItem("prizes") || "[]");
 
-        // بروزرسانی تایمر گردونه
         function updateCountdown() {
             const now = Date.now();
             const timeRemaining = 24 * 60 * 60 * 1000 - (now - lastSpinTime);
@@ -220,7 +221,7 @@
                 const hours = Math.floor(timeRemaining / 1000 / 60 / 60);
                 const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
-                countdown.textContent = `زمان باقی‌مانده: ${hours} ساعت و ${minutes} دقیقه و ${seconds} ثانیه`;
+                countdown.textContent = ` ${hours}:${minutes}:${seconds}`;
                 spinBtn.disabled = true;
             } else {
                 countdown.textContent = "گردونه آماده چرخش است.";
@@ -241,32 +242,30 @@
         spinBtn.onclick = function () {
             if (spinBtn.disabled) return;
 
-            // شبیه‌سازی چرخش گردونه
             const spins = [10, 20, 40, 80, 160, 200];
             const randomIndex = Math.floor(Math.random() * spins.length);
-            const chosenPrize = spins[randomIndex];
-
-            // اعمال چرخش گردونه
+            const degree = randomIndex * 60 + 720;
             const wheel = document.getElementById("wheel");
-            const rotationDegree = 360 * 3 + randomIndex * 60;
-            wheel.style.transform = `rotate(${rotationDegree}deg)`;
 
-            // نمایش نتیجه بعد از چرخش
+            wheel.style.transform = `rotate(${degree}deg)`;
             setTimeout(() => {
-                resultDiv.textContent = `تبریک! شما ${chosenPrize} سکه برنده شدید!`;
-                prizes.push(chosenPrize);
+                const prize = spins[randomIndex];
+                prizes.push(prize);
                 localStorage.setItem("prizes", JSON.stringify(prizes));
-                localStorage.setItem("lastSpinTime", Date.now());
+                resultDiv.textContent = ` ${prize} سکه بردی`;
+                lastSpinTime = Date.now();
+                localStorage.setItem("lastSpinTime", lastSpinTime);
                 updateCountdown();
-            }, 4000); // بعد از 4 ثانیه (مدت چرخش گردونه)
+            }, 4000);
         };
 
         showPrizesBtn.onclick = function () {
-            prizesList.innerHTML = prizes.length > 0
-                ? prizes.map(p => `<div class="prize-bar">امتیاز: ${p}</div>`).join("")
-                : `<div class="prize-bar">هنوز جایزه‌ای ثبت نشده است.</div>`;
             prizesPage.classList.remove("hidden");
             spinSection.classList.add("hidden");
+
+            prizesList.innerHTML = prizes.length
+                ? prizes.map(p => `<div class="prize-bar">اسکه دریافتی: ${p}</div>`).join("")
+                : `<div class="prize-bar">هنوز جایزه‌ای دریافت نکردید</div>`;
         };
 
         backToMainBtn.onclick = function () {
@@ -274,7 +273,7 @@
             spinSection.classList.remove("hidden");
         };
 
-        updateCountdown();
+        setInterval(updateCountdown, 1000);
     </script>
 </body>
 </html>
