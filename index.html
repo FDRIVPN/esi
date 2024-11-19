@@ -99,17 +99,15 @@
             font-size: 1.2rem;
             font-weight: bold;
             color: black;
-            background: #fff;
-            padding: 5px 10px;
-            border-radius: 50px;
+            transform: translate(-50%, -50%);
         }
 
-        .wheel .n1 { transform: rotate(30deg) translate(120px, 0); }
-        .wheel .n2 { transform: rotate(90deg) translate(120px, 0); }
-        .wheel .n3 { transform: rotate(150deg) translate(120px, 0); }
-        .wheel .n4 { transform: rotate(210deg) translate(120px, 0); }
-        .wheel .n5 { transform: rotate(270deg) translate(120px, 0); }
-        .wheel .n6 { transform: rotate(330deg) translate(120px, 0); }
+        .wheel .n1 { transform: rotate(30deg) translate(0, -130px); }
+        .wheel .n2 { transform: rotate(90deg) translate(0, -130px); }
+        .wheel .n3 { transform: rotate(150deg) translate(0, -130px); }
+        .wheel .n4 { transform: rotate(210deg) translate(0, -130px); }
+        .wheel .n5 { transform: rotate(270deg) translate(0, -130px); }
+        .wheel .n6 { transform: rotate(330deg) translate(0, -130px); }
 
         .arrow {
             position: absolute;
@@ -197,83 +195,5 @@
         <div id="prizes-list"></div>
         <button id="back-to-main">بازگشت</button>
     </div>
-
-    <script>
-        const signSection = document.getElementById("sign-section");
-        const spinSection = document.getElementById("spin-section");
-        const prizesPage = document.getElementById("prizes-page");
-
-        const gameIdInput = document.getElementById("game-id-input");
-        const spinBtn = document.getElementById("spin-btn");
-        const countdown = document.getElementById("countdown");
-        const showPrizesBtn = document.getElementById("show-prizes-btn");
-        const backToMainBtn = document.getElementById("back-to-main");
-        const prizesList = document.getElementById("prizes-list");
-        const resultDiv = document.getElementById("result");
-
-        let lastSpinTime = localStorage.getItem("lastSpinTime") || 0;
-        const prizes = JSON.parse(localStorage.getItem("prizes") || "[]");
-
-        function updateCountdown() {
-            const now = Date.now();
-            const timeRemaining = 24 * 60 * 60 * 1000 - (now - lastSpinTime);
-            if (timeRemaining > 0) {
-                const hours = Math.floor(timeRemaining / 1000 / 60 / 60);
-                const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
-                countdown.textContent = ` ${hours}:${minutes}:${seconds}`;
-                spinBtn.disabled = true;
-            } else {
-                countdown.textContent = "گردونه آماده چرخش است.";
-                spinBtn.disabled = false;
-            }
-        }
-
-        document.getElementById("login-btn").onclick = function () {
-            const gameId = gameIdInput.value.trim();
-            if (gameId) {
-                localStorage.setItem("gameId", gameId);
-                signSection.classList.add("hidden");
-                spinSection.classList.remove("hidden");
-                updateCountdown();
-            }
-        };
-
-        spinBtn.onclick = function () {
-            if (spinBtn.disabled) return;
-
-            const spins = [10, 20, 40, 80, 160, 200];
-            const randomIndex = Math.floor(Math.random() * spins.length);
-            const degree = randomIndex * 60 + 720;
-            const wheel = document.getElementById("wheel");
-
-            wheel.style.transform = `rotate(${degree}deg)`;
-            setTimeout(() => {
-                const prize = spins[randomIndex];
-                prizes.push(prize);
-                localStorage.setItem("prizes", JSON.stringify(prizes));
-                resultDiv.textContent = ` ${prize} سکه بردی`;
-                lastSpinTime = Date.now();
-                localStorage.setItem("lastSpinTime", lastSpinTime);
-                updateCountdown();
-            }, 4000);
-        };
-
-        showPrizesBtn.onclick = function () {
-            prizesPage.classList.remove("hidden");
-            spinSection.classList.add("hidden");
-
-            prizesList.innerHTML = prizes.length
-                ? prizes.map(p => `<div class="prize-bar">اسکه دریافتی: ${p}</div>`).join("")
-                : `<div class="prize-bar">هنوز جایزه‌ای دریافت نکردید</div>`;
-        };
-
-        backToMainBtn.onclick = function () {
-            prizesPage.classList.add("hidden");
-            spinSection.classList.remove("hidden");
-        };
-
-        setInterval(updateCountdown, 1000);
-    </script>
 </body>
 </html>
