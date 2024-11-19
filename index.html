@@ -5,13 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>بازی گردونه</title>
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
             font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
             direction: rtl;
             text-align: center;
-            background-color: #f4f4f4;
+            overflow: hidden;
+            position: relative;
+            height: 100vh;
         }
 
         .header {
@@ -20,49 +27,18 @@
             padding: 15px 0;
             font-size: 20px;
             font-weight: bold;
-        }
-
-        .input-section {
-            margin: 30px auto;
-            padding: 20px;
-            width: 300px;
-            background-color: lightgray;
-            border-radius: 20px;
-        }
-
-        .input-section input {
-            width: 80%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: none;
-            border-radius: 20px;
-            text-align: center;
-            outline: none;
-        }
-
-        .input-section button {
-            width: 50%;
-            padding: 10px;
-            border: none;
-            border-radius: 20px;
-            background-color: green;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        #game-page {
-            display: none;
-            position: relative;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
         .oval {
             position: absolute;
             width: 120px;
-            height: 60px;
+            height: 50px;
             background-color: lightgray;
-            border-radius: 50%;
-            line-height: 60px;
+            border-radius: 25px;
+            line-height: 50px;
             font-weight: bold;
             text-align: center;
         }
@@ -79,8 +55,10 @@
         }
 
         .wheel-container {
-            position: relative;
-            margin: 50px auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             width: 300px;
             height: 300px;
         }
@@ -105,6 +83,18 @@
             transition: transform 3s ease-out;
         }
 
+        .wheel span {
+            position: absolute;
+            width: 100px;
+            height: 30px;
+            background-color: rgba(255, 255, 255, 0.7);
+            line-height: 30px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            transform-origin: center 150px;
+        }
+
         .pointer {
             width: 0;
             height: 0;
@@ -112,20 +102,25 @@
             border-right: 15px solid transparent;
             border-bottom: 30px solid red;
             position: absolute;
-            top: -20px;
+            top: -40px;
             left: 50%;
             transform: translateX(-50%);
         }
 
         .spin-button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 20px;
+            position: absolute;
+            top: 70%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 50px;
+            border-radius: 25px;
             background-color: blue;
             color: white;
+            font-size: 18px;
             font-weight: bold;
             cursor: pointer;
+            border: none;
         }
 
         .result {
@@ -148,43 +143,36 @@
 <body>
     <div class="header">بازی گردونه</div>
 
-    <div class="input-section" id="login-page">
-        <input type="text" id="username" placeholder="شناسه خود را وارد کنید">
-        <button onclick="startGame()">تایید</button>
+    <div class="oval left" id="user-info">کاربر</div>
+    <div class="oval right" onclick="showPrizes()">جوایز</div>
+
+    <div class="wheel-container">
+        <div class="pointer"></div>
+        <div class="wheel" id="wheel">
+            <!-- اعداد گردونه -->
+            <span style="transform: rotate(22.5deg);">30</span>
+            <span style="transform: rotate(67.5deg);">60</span>
+            <span style="transform: rotate(112.5deg);">90</span>
+            <span style="transform: rotate(157.5deg);">120</span>
+            <span style="transform: rotate(202.5deg);">150</span>
+            <span style="transform: rotate(247.5deg);">180</span>
+            <span style="transform: rotate(292.5deg);">210</span>
+            <span style="transform: rotate(337.5deg);">240</span>
+        </div>
     </div>
 
-    <div id="game-page">
-        <div class="oval left" id="user-info"></div>
-        <div class="oval right" onclick="showPrizes()">جوایز</div>
+    <button class="spin-button" id="spin-btn" onclick="spinWheel()">چرخاندن</button>
 
-        <div class="wheel-container">
-            <div class="pointer"></div>
-            <div class="wheel" id="wheel"></div>
-        </div>
+    <div class="result" id="result"></div>
 
-        <button class="spin-button" id="spin-btn" onclick="spinWheel()">چرخاندن</button>
-        <div class="result" id="result"></div>
-
-        <div class="prizes-list" id="prizes-list">
-            <h3>جوایز شما</h3>
-            <div id="prizes"></div>
-        </div>
+    <div class="prizes-list" id="prizes-list">
+        <h3>جوایز شما</h3>
+        <div id="prizes"></div>
     </div>
 
     <script>
         let prizes = [];
         let spinning = false;
-
-        function startGame() {
-            const username = document.getElementById("username").value;
-            if (username.trim() !== "") {
-                document.getElementById("login-page").style.display = "none";
-                document.getElementById("game-page").style.display = "block";
-                document.getElementById("user-info").textContent = username;
-            } else {
-                alert("لطفاً شناسه خود را وارد کنید!");
-            }
-        }
 
         function spinWheel() {
             if (spinning) return;
