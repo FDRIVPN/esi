@@ -157,6 +157,11 @@
     <div class="oval left" id="user-info">کاربر</div>
     <div class="oval right" onclick="openScorePage()">جوایز</div>
 
+    <!-- Coins won display -->
+    <div class="oval" id="coins-info" style="top: 10px; left: 150px;">
+        <span id="coins-text">0 سکه بردی</span>
+    </div>
+
     <!-- Input container to enter User ID -->
     <div class="input-container" id="input-container">
         <input type="text" id="user-id" class="input-box" placeholder="شناسه خود را وارد کنید" />
@@ -175,6 +180,7 @@
 
     <script>
         let spinning = false;
+        let totalCoins = 0; // Track total coins won
         const prizeChances = [
             { angle: 360, prize: 30, chance: 35 }, // 30 سکه، 35 درصد
             { angle: 60, prize: 60, chance: 35 }, // 60 سکه، 35 درصد
@@ -216,6 +222,8 @@
 
             setTimeout(() => {
                 result.textContent = `شما ${selectedPrize.prize} سکه بردید!`;
+                totalCoins += selectedPrize.prize;
+                document.getElementById("coins-text").textContent = `${totalCoins} سکه بردی`;
                 spinBtn.disabled = false;
                 spinning = false;
             }, 3000);
@@ -239,21 +247,10 @@
         function openScorePage() {
             const userId = localStorage.getItem('userId');
             if (userId) {
-                window.location.href = `scorePage.html?userId=${userId}`;
+                window.location.href = `scorePage.html?userId=${userId}&coins=${totalCoins}`;
             }
         }
     </script>
 
-    <script>
-        // Check if we are on the score page and display user info
-        if (window.location.pathname.includes('scorePage.html')) {
-            const params = new URLSearchParams(window.location.search);
-            const userId = params.get('userId');
-            if (userId) {
-                document.getElementById('user-info').textContent = `سلام، ${userId}`;
-                // You can fetch user score and Iranian date here
-            }
-        }
-    </script>
 </body>
 </html>
