@@ -139,7 +139,7 @@
         <span id="coins-text">0 سکه بردی</span>
     </div>
 
-    <!-- Input container to enter User ID -->
+    <!-- Input container to enter User ID (will hide if ID is stored) -->
     <div class="input-container" id="input-container">
         <input type="text" id="user-id" class="input-box" placeholder="شناسه خود را وارد کنید" />
         <button class="confirm-button" onclick="confirmUserId()">تایید</button>
@@ -188,6 +188,16 @@
             } else {
                 alert("شما قبلاً شناسه وارد کرده‌اید.");
             }
+        }
+
+        // Check if user is already logged in
+        if (userId) {
+            document.getElementById('user-info').textContent = userId;
+            document.getElementById('coins-text').textContent = `${localStorage.getItem('coins')} سکه بردی`;
+            document.getElementById('input-container').style.display = 'none';
+            document.getElementById('wheel-container').style.display = 'block';
+            document.getElementById('spin-btn').style.display = 'inline-block';
+            updateTimer();
         }
 
         // Timer update function
@@ -247,14 +257,6 @@
             }
 
             return prizeChances[0];
-        }
-
-        // Load user data if available
-        window.onload = function() {
-            const storedCoins = localStorage.getItem('coins');
-            totalCoins = storedCoins ? parseInt(storedCoins) : 0;
-            document.getElementById('coins-text').textContent = `${totalCoins} سکه بردی`;
-            updateTimer();
         }
     </script>
 
