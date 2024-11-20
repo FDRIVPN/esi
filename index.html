@@ -170,6 +170,7 @@
         ];
 
         let lastSpinTime = localStorage.getItem('lastSpinTime');
+        let coins = parseInt(localStorage.getItem('coins')) || 0;
         const userId = localStorage.getItem('userId');
         
         // Handle user ID confirmation
@@ -193,7 +194,7 @@
         // Check if user is already logged in
         if (userId) {
             document.getElementById('user-info').textContent = userId;
-            document.getElementById('coins-text').textContent = `${localStorage.getItem('coins')} سکه بردی`;
+            document.getElementById('coins-text').textContent = `${coins} سکه بردی`;
             document.getElementById('input-container').style.display = 'none';
             document.getElementById('wheel-container').style.display = 'block';
             document.getElementById('spin-btn').style.display = 'inline-block';
@@ -235,9 +236,9 @@
 
             setTimeout(() => {
                 result.textContent = `شما ${selectedPrize.prize} سکه بردید!`;
-                totalCoins += selectedPrize.prize;
-                localStorage.setItem('coins', totalCoins);
-                document.getElementById("coins-text").textContent = `${totalCoins} سکه بردی`;
+                coins += selectedPrize.prize;
+                localStorage.setItem('coins', coins);
+                document.getElementById("coins-text").textContent = `${coins} سکه بردی`;
                 localStorage.setItem('lastSpinTime', Date.now());
                 spinning = false;
                 updateTimer();
