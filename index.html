@@ -54,6 +54,32 @@
             cursor: pointer;
         }
 
+        .input-container {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+        }
+
+        .input-box {
+            width: 200px;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .confirm-button {
+            background-color: green;
+            color: white;
+            padding: 10px 20px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
         .wheel-container {
             position: absolute;
             top: 50%;
@@ -108,22 +134,51 @@
             font-size: 18px;
             font-weight: bold;
         }
+
+        .score-page {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .score-header {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .iranian-date {
+            font-size: 18px;
+            margin-top: 10px;
+        }
+
+        .back-button {
+            background-color: blue;
+            color: white;
+            padding: 10px 20px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
-    <div class="header">بازی گردونه سفارشی</div>
-
-    <div class="oval left" id="user-info">کاربر</div>
-    <div class="oval right" onclick="showPrizes()">جوایز</div>
-
-    <div class="wheel-container">
+    <!-- Initial Page -->
+    <div class="header" id="game-header">بازی گردونه سفارشی</div>
+    
+    <div class="input-container" id="input-container">
+        <input type="text" id="user-id" class="input-box" placeholder="شناسه خود را وارد کنید" />
+        <button class="confirm-button" onclick="confirmUserId()">تایید</button>
+    </div>
+    
+    <div class="wheel-container" id="wheel-container" style="display: none;">
         <div class="pointer"></div>
         <div class="wheel" id="wheel"></div>
     </div>
+    
+    <button class="spin-button" id="spin-btn" onclick="spinWheel()" style="display: none;">چرخاندن</button>
 
-    <button class="spin-button" id="spin-btn" onclick="spinWheel()">چرخاندن</button>
-
-    <div class="result" id="result"></div>
+    <div class="result" id="result" style="display: none;"></div>
 
     <script>
         let spinning = false;
@@ -135,6 +190,20 @@
             { angle: 240, prize: 150, chance: 10 }, // 150 سکه، 10 درصد
             { angle: 300, prize: 180, chance: 10 }, // 180 سکه، 10 درصد
         ];
+
+        // Handle user ID confirmation
+        function confirmUserId() {
+            const userId = document.getElementById('user-id').value.trim();
+            if (userId) {
+                localStorage.setItem('userId', userId);
+                document.getElementById('game-header').textContent = `سلام، ${userId}`;
+                document.getElementById('input-container').style.display = 'none';
+                document.getElementById('wheel-container').style.display = 'block';
+                document.getElementById('spin-btn').style.display = 'inline-block';
+            } else {
+                alert("لطفا شناسه خود را وارد کنید.");
+            }
+        }
 
         function spinWheel() {
             if (spinning) return;
@@ -171,6 +240,26 @@
             }
 
             return prizeChances[0]; // پیش‌فرض، اگر هیچ جایزه‌ای انتخاب نشد
+        }
+
+        // Navigation to the score page
+        function openScorePage() {
+            const userId = localStorage.getItem('userId');
+            if (userId) {
+                window.location.href = `scorePage.html?userId=${userId}`;
+            }
+        }
+    </script>
+
+    <script>
+        // Check if we are on the score page and display user info
+        if (window.location.pathname.includes('scorePage.html')) {
+            const params = new URLSearchParams(window.location.search);
+            const userId = params.get('userId');
+            if (userId) {
+                document.getElementById('game-header').textContent = `سلام، ${userId}`;
+                // You can also fetch user score here and display it
+            }
         }
     </script>
 </body>
