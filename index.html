@@ -124,41 +124,18 @@
             font-weight: bold;
         }
 
-        .score-page {
-            padding: 20px;
-            text-align: center;
-        }
-
-        .score-header {
-            font-size: 22px;
-            font-weight: bold;
-        }
-
-        .iranian-date {
+        .timer {
             font-size: 18px;
-            margin-top: 10px;
-        }
-
-        .back-button {
-            background-color: blue;
-            color: white;
-            padding: 10px 20px;
-            font-size: 18px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
             margin-top: 20px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-    <!-- Ovals for User Info and Prizes -->
+    <!-- Ovals for User Info and Timer -->
     <div class="oval left" id="user-info">کاربر</div>
-    <div class="oval right" onclick="openScorePage()">جوایز</div>
-
-    <!-- Coins won display -->
-    <div class="oval" id="coins-info" style="top: 10px; left: 150px;">
+    <div class="oval right" id="coins-info" style="top: 10px; left: 150px;">
         <span id="coins-text">0 سکه بردی</span>
     </div>
 
@@ -167,43 +144,69 @@
         <input type="text" id="user-id" class="input-box" placeholder="شناسه خود را وارد کنید" />
         <button class="confirm-button" onclick="confirmUserId()">تایید</button>
     </div>
-    
+
     <!-- Wheel and Spin Button (hidden initially) -->
     <div class="wheel-container" id="wheel-container" style="display: none;">
         <div class="pointer"></div>
         <div class="wheel" id="wheel"></div>
     </div>
-    
+
     <button class="spin-button" id="spin-btn" onclick="spinWheel()" style="display: none;">چرخاندن</button>
 
     <div class="result" id="result" style="display: none;"></div>
+
+    <div class="timer" id="timer" style="display: none;"></div>
 
     <script>
         let spinning = false;
         let totalCoins = 0; // Track total coins won
         const prizeChances = [
-            { angle: 360, prize: 30, chance: 35 }, // 30 سکه، 35 درصد
-            { angle: 60, prize: 60, chance: 35 }, // 60 سکه، 35 درصد
-            { angle: 120, prize: 90, chance: 20 }, // 90 سکه، 20 درصد
-            { angle: 180, prize: 120, chance: 10 }, // 120 سکه، 10 درصد
-            { angle: 240, prize: 150, chance: 10 }, // 150 سکه، 10 درصد
-            { angle: 300, prize: 180, chance: 10 }, // 180 سکه، 10 درصد
+            { angle: 360, prize: 30, chance: 35 },
+            { angle: 60, prize: 60, chance: 35 },
+            { angle: 120, prize: 90, chance: 20 },
+            { angle: 180, prize: 120, chance: 10 },
+            { angle: 240, prize: 150, chance: 10 },
+            { angle: 300, prize: 180, chance: 10 },
         ];
 
+        let lastSpinTime = localStorage.getItem('lastSpinTime');
+        const userId = localStorage.getItem('userId');
+        
         // Handle user ID confirmation
         function confirmUserId() {
-            const userId = document.getElementById('user-id').value.trim();
-            if (userId) {
-                localStorage.setItem('userId', userId);
-                document.getElementById('user-info').textContent = userId;
+            const inputUserId = document.getElementById('user-id').value.trim();
+            if (inputUserId && !userId) {
+                localStorage.setItem('userId', inputUserId);
+                localStorage.setItem('coins', 0);
+                document.getElementById('user-info').textContent = inputUserId;
                 document.getElementById('input-container').style.display = 'none';
                 document.getElementById('wheel-container').style.display = 'block';
                 document.getElementById('spin-btn').style.display = 'inline-block';
-            } else {
+                localStorage.setItem('lastSpinTime', Date.now());
+            } else if (!inputUserId) {
                 alert("لطفا شناسه خود را وارد کنید.");
+            } else {
+                alert("شما قبلاً شناسه وارد کرده‌اید.");
             }
         }
 
+        // Timer update function
+        function updateTimer() {
+            const now = Date.now();
+            const remainingTime = lastSpinTime ? 86400000 - (now - lastSpinTime) : 0; // 24 hours in milliseconds
+            if (remainingTime <= 0) {
+                document.getElementById('timer').textContent = "می‌توانید دوباره چرخش کنید!";
+                document.getElementById('spin-btn').disabled = false;
+            } else {
+                const hours = Math.floor(remainingTime / 3600000);
+                const minutes = Math.floor((remainingTime % 3600000) / 60000);
+                const seconds = Math.floor((remainingTime % 60000) / 1000);
+                document.getElementById('timer').textContent = `زمان باقی‌مانده: ${hours}:${minutes}:${seconds}`;
+                document.getElementById('spin-btn').disabled = true;
+            }
+        }
+
+        // Spin the wheel
         function spinWheel() {
             if (spinning) return;
             spinning = true;
@@ -215,20 +218,23 @@
 
             spinBtn.disabled = true;
 
-            // انتخاب جایزه بر اساس شانس‌ها
+            // Select prize based on chances
             const selectedPrize = selectPrize();
-            const randomSpin = selectedPrize.angle + 3600; // اضافه کردن چند دور کامل
+            const randomSpin = selectedPrize.angle + 3600;
             wheel.style.transform = `rotate(${randomSpin}deg)`;
 
             setTimeout(() => {
                 result.textContent = `شما ${selectedPrize.prize} سکه بردید!`;
                 totalCoins += selectedPrize.prize;
+                localStorage.setItem('coins', totalCoins);
                 document.getElementById("coins-text").textContent = `${totalCoins} سکه بردی`;
-                spinBtn.disabled = false;
+                localStorage.setItem('lastSpinTime', Date.now());
                 spinning = false;
+                updateTimer();
             }, 3000);
         }
 
+        // Select prize based on chances
         function selectPrize() {
             const random = Math.random() * 100;
             let cumulativeChance = 0;
@@ -240,15 +246,15 @@
                 }
             }
 
-            return prizeChances[0]; // پیش‌فرض، اگر هیچ جایزه‌ای انتخاب نشد
+            return prizeChances[0];
         }
 
-        // Navigate to score page
-        function openScorePage() {
-            const userId = localStorage.getItem('userId');
-            if (userId) {
-                window.location.href = `scorePage.html?userId=${userId}&coins=${totalCoins}`;
-            }
+        // Load user data if available
+        window.onload = function() {
+            const storedCoins = localStorage.getItem('coins');
+            totalCoins = storedCoins ? parseInt(storedCoins) : 0;
+            document.getElementById('coins-text').textContent = `${totalCoins} سکه بردی`;
+            updateTimer();
         }
     </script>
 
