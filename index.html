@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بازی گردونه سفارشی</title>
+    <title>بازی گردونه</title>
     <style>
         * {
             margin: 0;
@@ -13,152 +13,178 @@
 
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
             direction: rtl;
+            background-color: #f4f4f4;
             text-align: center;
             overflow: hidden;
             position: relative;
             height: 100vh;
         }
 
-        .header {
-            background-color: black;
-            color: white;
-            padding: 15px 0;
-            font-size: 20px;
-            font-weight: bold;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .oval {
-            position: absolute;
-            width: 120px;
-            height: 50px;
+        .center-box {
+            width: 300px;
+            margin: auto;
             background-color: lightgray;
-            border-radius: 25px;
-            line-height: 50px;
-            font-weight: bold;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20%;
+        }
+
+        input[type="text"] {
+            width: 90%;
+            height: 40px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
             text-align: center;
+            font-size: 16px;
+            margin-bottom: 20px;
         }
 
-        .oval.left {
-            top: 60px;
-            left: 20px;
-        }
-
-        .oval.right {
-            top: 60px;
-            right: 20px;
+        button {
+            width: 90%;
+            height: 40px;
+            border-radius: 20px;
+            border: none;
+            background-color: green;
+            color: white;
+            font-size: 18px;
             cursor: pointer;
         }
 
-        .wheel-container {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 300px;
-            height: 300px;
-        }
-
-        .wheel {
+        .header {
             width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            position: relative;
-            background-image: url('Picsart_24-11-20_02-55-22-285.png');
-            background-size: cover;
-            background-position: center;
-            transform: rotate(0deg);
-            transition: transform 3s ease-out;
+            padding: 15px;
+            background-color: lightgray;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .pointer {
-            width: 0;
-            height: 0;
-            border-left: 15px solid transparent;
-            border-right: 15px solid transparent;
-            border-bottom: 30px solid red;
-            position: absolute;
-            top: -40px;
-            left: 50%;
-            transform: translateX(-50%);
+        .header .left,
+        .header .right {
+            width: 120px;
+            height: 40px;
+            line-height: 40px;
+            background-color: lightgray;
+            border-radius: 20px;
+            text-align: center;
+            font-weight: bold;
         }
 
-        .spin-button {
-            position: absolute;
-            top: 75%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 150px;
-            height: 50px;
-            border-radius: 25px;
+        .hidden {
+            display: none;
+        }
+
+        .prizes-box {
+            margin: 20px auto;
+            background-color: lightgray;
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+        }
+
+        .back-button {
+            margin-top: 20px;
+            width: 300px;
+            height: 40px;
             background-color: blue;
             color: white;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
             border: none;
-        }
-
-        .result {
-            margin-top: 20px;
+            border-radius: 20px;
             font-size: 18px;
-            font-weight: bold;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <div class="header">بازی گردونه سفارشی</div>
 
-    <div class="oval left" id="user-info">کاربر</div>
-    <div class="oval right" onclick="showPrizes()">جوایز</div>
-
-    <div class="wheel-container">
-        <div class="pointer"></div>
-        <div class="wheel" id="wheel"></div>
+    <!-- صفحه ورود شناسه -->
+    <div id="login-page">
+        <div class="center-box">
+            <input type="text" id="user-id" placeholder="شناسه" maxlength="20">
+            <button onclick="saveUserId()">تایید</button>
+        </div>
     </div>
 
-    <button class="spin-button" id="spin-btn" onclick="spinWheel()">چرخاندن</button>
+    <!-- صفحه گردونه -->
+    <div id="wheel-page" class="hidden">
+        <div class="header">
+            <div class="left" id="user-display"></div>
+            <div class="right" onclick="showPrizes()">جوایز</div>
+        </div>
 
-    <div class="result" id="result"></div>
+        <div class="wheel-container">
+            <div class="pointer"></div>
+            <div class="wheel" id="wheel"></div>
+        </div>
+
+        <button class="spin-button" id="spin-btn" onclick="spinWheel()">چرخاندن</button>
+        <div class="result" id="result"></div>
+    </div>
+
+    <!-- صفحه جوایز -->
+    <div id="prizes-page" class="hidden">
+        <div class="header">صفحه جوایز</div>
+        <div id="prizes-container"></div>
+        <button class="back-button" onclick="backToWheel()">بازگشت</button>
+    </div>
 
     <script>
+        // مقداردهی اولیه
+        const userIdInput = document.getElementById('user-id');
+        const wheelPage = document.getElementById('wheel-page');
+        const loginPage = document.getElementById('login-page');
+        const prizesPage = document.getElementById('prizes-page');
+        const userDisplay = document.getElementById('user-display');
+        const prizesContainer = document.getElementById('prizes-container');
+
+        const wheel = document.getElementById('wheel');
+        const result = document.getElementById('result');
         let spinning = false;
+
         const prizeChances = [
-            { angle: 360, prize: 30, chance: 35 }, // 30 سکه، 35 درصد
-            { angle: 60, prize: 60, chance: 35 }, // 60 سکه، 35 درصد
-            { angle: 120, prize: 90, chance: 20 }, // 90 سکه، 20 درصد
-            { angle: 180, prize: 120, chance: 10 }, // 120 سکه، 10 درصد
-            { angle: 240, prize: 150, chance: 10 }, // 150 سکه، 10 درصد
-            { angle: 300, prize: 180, chance: 10 }, // 180 سکه، 10 درصد
+            { angle: 360, prize: 30, chance: 35 },
+            { angle: 60, prize: 60, chance: 35 },
+            { angle: 120, prize: 90, chance: 20 },
+            { angle: 180, prize: 120, chance: 10 },
+            { angle: 240, prize: 150, chance: 10 },
+            { angle: 300, prize: 180, chance: 10 },
         ];
 
+        // ذخیره شناسه و نمایش صفحه گردونه
+        function saveUserId() {
+            const userId = userIdInput.value.trim();
+            if (userId) {
+                localStorage.setItem('userId', userId);
+                loginPage.classList.add('hidden');
+                wheelPage.classList.remove('hidden');
+                userDisplay.textContent = userId;
+            }
+        }
+
+        // گردونه را بچرخانید
         function spinWheel() {
             if (spinning) return;
             spinning = true;
 
             const spinBtn = document.getElementById("spin-btn");
-            const wheel = document.getElementById("wheel");
-            const result = document.getElementById("result");
             result.textContent = "";
 
             spinBtn.disabled = true;
 
-            // انتخاب جایزه بر اساس شانس‌ها
             const selectedPrize = selectPrize();
             const randomSpin = selectedPrize.angle + 3600; // اضافه کردن چند دور کامل
             wheel.style.transform = `rotate(${randomSpin}deg)`;
 
             setTimeout(() => {
                 result.textContent = `شما ${selectedPrize.prize} سکه بردید!`;
+                savePrize(selectedPrize.prize);
                 spinBtn.disabled = false;
                 spinning = false;
             }, 3000);
         }
 
+        // انتخاب جایزه بر اساس شانس
         function selectPrize() {
             const random = Math.random() * 100;
             let cumulativeChance = 0;
@@ -170,7 +196,32 @@
                 }
             }
 
-            return prizeChances[0]; // پیش‌فرض، اگر هیچ جایزه‌ای انتخاب نشد
+            return prizeChances[0];
+        }
+
+        // ذخیره جایزه
+        function savePrize(prize) {
+            const prizes = JSON.parse(localStorage.getItem('prizes') || '[]');
+            const date = new Date().toLocaleDateString('fa-IR');
+            prizes.push({ prize, date });
+            localStorage.setItem('prizes', JSON.stringify(prizes));
+        }
+
+        // نمایش جوایز
+        function showPrizes() {
+            wheelPage.classList.add('hidden');
+            prizesPage.classList.remove('hidden');
+
+            const prizes = JSON.parse(localStorage.getItem('prizes') || '[]');
+            prizesContainer.innerHTML = prizes.length
+                ? prizes.map(p => `<div class="prizes-box">سکه: ${p.prize}<br>تاریخ: ${p.date}</div>`).join('')
+                : '<p>شما هنوز جایزه‌ای دریافت نکرده‌اید.</p>';
+        }
+
+        // بازگشت به گردونه
+        function backToWheel() {
+            prizesPage.classList.add('hidden');
+            wheelPage.classList.remove('hidden');
         }
     </script>
 </body>
