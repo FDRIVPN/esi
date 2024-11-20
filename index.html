@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سکه رایگان</title>
+    <title>بازی گردونه سفارشی</title>
     <style>
         * {
             margin: 0;
@@ -21,25 +21,24 @@
             height: 100vh;
         }
 
-        /* استایل بیضی برای نوارها */
         .input-container {
             position: absolute;
             top: 40%;
             left: 50%;
             transform: translateX(-50%);
-            width: 80%; /* عرض نوار توسی */
-            max-width: 400px; /* حداکثر عرض */
-            background-color: #d3d3d3; /* رنگ توسی */
+            width: 80%;
+            max-width: 400px;
+            background-color: #d3d3d3;
             padding: 20px;
-            border-radius: 50px; /* بیضی کردن نوار */
+            border-radius: 50px;
             text-align: center;
         }
 
         .input-box {
-            width: 100%; /* ورودی سفید رنگ */
+            width: 100%;
             padding: 10px;
             margin: 10px 0;
-            border-radius: 50px; /* بیضی کردن ورودی */
+            border-radius: 50px;
             border: 1px solid #ccc;
             background-color: white;
         }
@@ -50,20 +49,19 @@
             padding: 10px 20px;
             font-size: 18px;
             border: none;
-            border-radius: 50px; /* بیضی کردن دکمه تایید */
+            border-radius: 50px;
             cursor: pointer;
             width: 100%;
         }
 
-        /* بیضی برای دکمه چرخاندن گردونه */
         .spin-button {
             position: absolute;
-            bottom: 20px; /* تغییر موقعیت به پایین گردونه */
+            bottom: 70px;
             left: 50%;
             transform: translateX(-50%);
             width: 150px;
             height: 50px;
-            border-radius: 50px; /* بیضی کردن دکمه چرخاندن */
+            border-radius: 50px;
             font-size: 18px;
             font-weight: bold;
             text-align: center;
@@ -79,11 +77,10 @@
             background-color: darkgray;
         }
 
-        /* تایمر و استایل‌های گردونه */
         .timer {
             display: none;
             font-size: 18px;
-            color: black; /* تغییر رنگ تایمر به مشکی */
+            color: black;
         }
 
         .wheel-container {
@@ -119,7 +116,6 @@
             transform: translateX(-50%);
         }
 
-        /* بیضی برای نمایش سکه‌ها */
         .oval {
             position: absolute;
             width: 120px;
@@ -145,17 +141,6 @@
             margin-top: 20px;
             font-size: 18px;
             font-weight: bold;
-        }
-
-        /* تنظیمات کلی */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            direction: rtl;
-            text-align: center;
-            overflow: hidden;
-            position: relative;
-            height: 100vh;
         }
 
     </style>
@@ -185,12 +170,12 @@
     <script>
         let spinning = false;
         const prizeChances = [
-            { angle: 360, prize: 30, chance: 45 },
-            { angle: 60, prize: 60, chance: 45 },
-            { angle: 120, prize: 90, chance: 2.5 },
-            { angle: 180, prize: 120, chance: 2.5 },
-            { angle: 240, prize: 150, chance: 2.5 },
-            { angle: 300, prize: 180, chance: 2.5 },
+            { angle: 360, prize: 30, chance: 35 },
+            { angle: 60, prize: 60, chance: 35 },
+            { angle: 120, prize: 90, chance: 20 },
+            { angle: 180, prize: 120, chance: 10 },
+            { angle: 240, prize: 150, chance: 10 },
+            { angle: 300, prize: 180, chance: 10 },
         ];
 
         let lastSpinTime = localStorage.getItem('lastSpinTime');
@@ -263,7 +248,7 @@
             setTimeout(() => {
                 coins += selectedPrize.prize;
                 localStorage.setItem('coins', coins);
-                document.getElementById('coins-text').textContent = `${coins} سکه بردی`;
+                document.getElementById("coins-text").textContent = `${coins} سکه بردی`;
                 document.getElementById('result').textContent = `شما ${selectedPrize.prize} سکه بردید!`;
                 document.getElementById('result').style.display = 'block';
                 lastSpinTime = Date.now();
