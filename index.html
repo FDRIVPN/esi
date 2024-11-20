@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بازی گردونه سفارشی</title>
+    <title>سکه رایگان</title>
     <style>
-        /* استایل‌های جدید */
         * {
             margin: 0;
             padding: 0;
@@ -22,28 +21,7 @@
             height: 100vh;
         }
 
-        .oval {
-            position: absolute;
-            width: 120px;
-            height: 50px;
-            background-color: lightgray;
-            border-radius: 25px;
-            line-height: 50px;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        .oval.left {
-            top: 10px;
-            left: 20px;
-        }
-
-        .oval.right {
-            top: 10px;
-            right: 20px;
-        }
-
-        /* استایل نوار توسی رنگ در صفحه ثبت شناسه */
+        /* استایل بیضی برای نوارها */
         .input-container {
             position: absolute;
             top: 40%;
@@ -53,7 +31,7 @@
             max-width: 400px; /* حداکثر عرض */
             background-color: #d3d3d3; /* رنگ توسی */
             padding: 20px;
-            border-radius: 10px;
+            border-radius: 50px; /* بیضی کردن نوار */
             text-align: center;
         }
 
@@ -61,7 +39,7 @@
             width: 100%; /* ورودی سفید رنگ */
             padding: 10px;
             margin: 10px 0;
-            border-radius: 10px;
+            border-radius: 50px; /* بیضی کردن ورودی */
             border: 1px solid #ccc;
             background-color: white;
         }
@@ -72,9 +50,40 @@
             padding: 10px 20px;
             font-size: 18px;
             border: none;
-            border-radius: 10px;
+            border-radius: 50px; /* بیضی کردن دکمه تایید */
             cursor: pointer;
             width: 100%;
+        }
+
+        /* بیضی برای دکمه چرخاندن گردونه */
+        .spin-button {
+            position: absolute;
+            bottom: 20px; /* تغییر موقعیت به پایین گردونه */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 50px;
+            border-radius: 50px; /* بیضی کردن دکمه چرخاندن */
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            line-height: 50px;
+            background-color: gray;
+            color: white;
+            cursor: pointer;
+            border: none;
+            display: none;
+        }
+
+        .spin-button:hover {
+            background-color: darkgray;
+        }
+
+        /* تایمر و استایل‌های گردونه */
+        .timer {
+            display: none;
+            font-size: 18px;
+            color: black; /* تغییر رنگ تایمر به مشکی */
         }
 
         .wheel-container {
@@ -110,40 +119,26 @@
             transform: translateX(-50%);
         }
 
-        /* جابه‌جایی دکمه چرخاندن به پایین گردونه */
-        .spin-button {
+        /* بیضی برای نمایش سکه‌ها */
+        .oval {
             position: absolute;
-            bottom: 20px; /* تغییر موقعیت به پایین گردونه */
-            left: 50%;
-            transform: translateX(-50%);
-            width: 150px;
+            width: 120px;
             height: 50px;
+            background-color: lightgray;
             border-radius: 25px;
-            font-size: 18px;
+            line-height: 50px;
             font-weight: bold;
             text-align: center;
-            line-height: 50px;
-            background-color: gray;
-            color: white;
-            cursor: pointer;
-            border: none;
-            display: none;
         }
 
-        .spin-button:hover {
-            background-color: darkgray;
+        .oval.left {
+            top: 10px;
+            left: 20px;
         }
 
-        /* تایمر */
-        .timer {
-            display: none;
-            font-size: 18px;
-            color: black;
-            position: absolute;
-            bottom: -70px;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
+        .oval.right {
+            top: 10px;
+            right: 20px;
         }
 
         .result {
@@ -151,6 +146,18 @@
             font-size: 18px;
             font-weight: bold;
         }
+
+        /* تنظیمات کلی */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            direction: rtl;
+            text-align: center;
+            overflow: hidden;
+            position: relative;
+            height: 100vh;
+        }
+
     </style>
 </head>
 <body>
@@ -178,12 +185,12 @@
     <script>
         let spinning = false;
         const prizeChances = [
-            { angle: 360, prize: 30, chance: 35 },
-            { angle: 60, prize: 60, chance: 35 },
-            { angle: 120, prize: 90, chance: 20 },
-            { angle: 180, prize: 120, chance: 10 },
-            { angle: 240, prize: 150, chance: 10 },
-            { angle: 300, prize: 180, chance: 10 },
+            { angle: 360, prize: 30, chance: 45 },
+            { angle: 60, prize: 60, chance: 45 },
+            { angle: 120, prize: 90, chance: 2.5 },
+            { angle: 180, prize: 120, chance: 2.5 },
+            { angle: 240, prize: 150, chance: 2.5 },
+            { angle: 300, prize: 180, chance: 2.5 },
         ];
 
         let lastSpinTime = localStorage.getItem('lastSpinTime');
@@ -256,10 +263,13 @@
             setTimeout(() => {
                 coins += selectedPrize.prize;
                 localStorage.setItem('coins', coins);
-                document.getElementById("coins-text").textContent = `${coins} سکه بردی`;
-                localStorage.setItem('lastSpinTime', Date.now());
+                document.getElementById('coins-text').textContent = `${coins} سکه بردی`;
+                document.getElementById('result').textContent = `شما ${selectedPrize.prize} سکه بردید!`;
+                document.getElementById('result').style.display = 'block';
+                lastSpinTime = Date.now();
+                localStorage.setItem('lastSpinTime', lastSpinTime);
                 spinning = false;
-                location.reload(); // بروزرسانی صفحه
+                updateTimer();
             }, 3000);
         }
 
@@ -268,20 +278,21 @@
             const random = Math.random() * 100;
             let cumulativeChance = 0;
 
-            for (const prize of prizeChances) {
-                cumulativeChance += prize.chance;
-                if (random <= cumulativeChance) {
-                    return prize;
+            for (let i = 0; i < prizeChances.length; i++) {
+                cumulativeChance += prizeChances[i].chance;
+                if (random < cumulativeChance) {
+                    return prizeChances[i];
                 }
             }
 
-            return prizeChances[0];
+            return prizeChances[0]; // پیش‌فرض
         }
 
-        // بارگذاری گردونه در ورود
+        // بارگذاری صفحه گردونه در صورت ورود شناسه
         if (userId) {
             loadWheelPage();
         }
+
     </script>
 </body>
 </html>
