@@ -131,6 +131,12 @@
     </style>
 </head>
 <body>
+    <!-- بیضی‌ها و گردونه -->
+    <div class="oval left" id="user-info"></div>
+    <div class="oval right" id="coins-info">
+        <span id="coins-text">0 سکه بردی</span>
+    </div>
+
     <!-- صفحه ورود شناسه -->
     <div class="input-container" id="input-container">
         <input type="text" id="user-id" class="input-box" placeholder="شناسه خود را وارد کنید" />
@@ -139,20 +145,15 @@
 
     <!-- صفحه گردونه -->
     <div class="wheel-container" id="wheel-container" style="display: none;">
-        <div class="oval left" id="user-info"></div>
-        <div class="oval right" id="coins-info">
-            <span id="coins-text">0 سکه بردی</span>
-        </div>
         <div class="pointer"></div>
         <div class="wheel" id="wheel"></div>
-        <button class="spin-button" id="spin-btn" onclick="spinWheel()" style="display: none;">چرخاندن</button>
+        <button class="spin-button" id="spin-btn" onclick="spinWheel()">چرخاندن</button>
         <div class="result" id="result" style="display: none;"></div>
         <div class="timer" id="timer" style="display: none;"></div>
     </div>
 
     <script>
         let spinning = false;
-        let totalCoins = 0;
         const prizeChances = [
             { angle: 360, prize: 30, chance: 35 },
             { angle: 60, prize: 60, chance: 35 },
@@ -203,15 +204,16 @@
 
             if (remainingTime <= 0) {
                 timerElement.style.display = 'none';
-                document.getElementById('spin-btn').style.display = 'inline-block';
+                localStorage.setItem('coins', 0); // صفر کردن سکه‌ها
+                document.getElementById('coins-text').textContent = '0 سکه بردی';
                 document.getElementById('spin-btn').disabled = false;
             } else {
                 timerElement.style.display = 'block';
-                document.getElementById('spin-btn').style.display = 'none';
                 const hours = Math.floor(remainingTime / 3600000);
                 const minutes = Math.floor((remainingTime % 3600000) / 60000);
                 const seconds = Math.floor((remainingTime % 60000) / 1000);
                 timerElement.textContent = `${hours}:${minutes}:${seconds}`;
+                document.getElementById('spin-btn').disabled = true;
                 setTimeout(updateTimer, 1000);
             }
         }
@@ -233,12 +235,12 @@
             wheel.style.transform = `rotate(${randomSpin}deg)`;
 
             setTimeout(() => {
-                result.textContent = `شما ${selectedPrize.prize} سکه بردید!`;
-                totalCoins += selectedPrize.prize;
-                localStorage.setItem('coins', totalCoins);
+                coins += selectedPrize.prize;
+                localStorage.setItem('coins', coins);
+                document.getElementById("coins-text").textContent = `${coins} سکه بردی`;
                 localStorage.setItem('lastSpinTime', Date.now());
                 spinning = false;
-                updateTimer();
+                location.reload(); // بروزرسانی صفحه
             }, 3000);
         }
 
@@ -257,7 +259,7 @@
             return prizeChances[0];
         }
 
-        // بارگذاری صفحه در ورود
+        // بارگذاری گردونه در ورود
         if (userId) {
             loadWheelPage();
         }
