@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بازی گردونه سفارشی</title>
+    <title>سکه مجانی</title>
     <style>
         * {
             margin: 0;
@@ -23,7 +23,7 @@
 
         .input-container {
             position: absolute;
-            top: 30%;
+            top: 40%;
             left: 50%;
             transform: translateX(-50%);
             width: 80%;
@@ -56,11 +56,11 @@
 
         .spin-button {
             position: absolute;
-            bottom: 130px; /* تنظیم فاصله دکمه چرخاندن */
+            bottom: 70px;
             left: 50%;
             transform: translateX(-50%);
             width: 150px;
-            height: 50px;
+            height: 120px;
             border-radius: 50px;
             font-size: 18px;
             font-weight: bold;
@@ -167,22 +167,15 @@
         <div class="result" id="result" style="display: none;"></div>
     </div>
 
-    <!-- دریافت سکه و تایم -->
-    <div class="input-container" id="coin-time-container" style="display: none;">
-        <input type="number" id="coins-input" class="input-box" placeholder="تعداد سکه‌ها" />
-        <input type="number" id="time-input" class="input-box" placeholder="زمان چرخش (بر حسب ساعت)" />
-        <button class="confirm-button" onclick="saveCoinAndTime()">ذخیره</button>
-    </div>
-
     <script>
         let spinning = false;
         const prizeChances = [
-            { angle: 360, prize: 30, chance: 35 },
-            { angle: 60, prize: 60, chance: 35 },
-            { angle: 120, prize: 90, chance: 20 },
-            { angle: 180, prize: 120, chance: 10 },
-            { angle: 240, prize: 150, chance: 10 },
-            { angle: 300, prize: 180, chance: 10 },
+            { angle: 360, prize: 30, chance: 45 },
+            { angle: 60, prize: 60, chance: 45 },
+            { angle: 120, prize: 90, chance: 2.5 },
+            { angle: 180, prize: 120, chance: 2.5 },
+            { angle: 240, prize: 150, chance: 2.5 },
+            { angle: 300, prize: 180, chance: 2.5 },
         ];
 
         let lastSpinTime = localStorage.getItem('lastSpinTime');
@@ -215,7 +208,6 @@
                 document.getElementById('input-container').style.display = 'none';
                 document.getElementById('wheel-container').style.display = 'block';
                 updateTimer();
-                document.getElementById('coin-time-container').style.display = 'block';  // نمایش فیلد سکه و تایم
             }
         }
 
@@ -257,9 +249,12 @@
                 coins += selectedPrize.prize;
                 localStorage.setItem('coins', coins);
                 document.getElementById("coins-text").textContent = `${coins} سکه بردی`;
-                localStorage.setItem('lastSpinTime', Date.now());
+                document.getElementById('result').textContent = `شما ${selectedPrize.prize} سکه بردید!`;
+                document.getElementById('result').style.display = 'block';
+                lastSpinTime = Date.now();
+                localStorage.setItem('lastSpinTime', lastSpinTime);
                 spinning = false;
-                location.reload(); // بروزرسانی صفحه
+                updateTimer();
             }, 3000);
         }
 
@@ -278,21 +273,7 @@
             return prizeChances[0]; // پیش‌فرض
         }
 
-        // ذخیره سکه و تایم
-        function saveCoinAndTime() {
-            const coinsInput = document.getElementById('coins-input').value;
-            const timeInput = document.getElementById('time-input').value;
-
-            if (coinsInput && timeInput) {
-                localStorage.setItem('coins', coinsInput);
-                localStorage.setItem('lastSpinTime', Date.now() - (timeInput * 3600000)); // محاسبه زمان چرخش
-                loadWheelPage();
-            } else {
-                alert("لطفا همه اطلاعات را وارد کنید.");
-            }
-        }
-
-        // بارگذاری گردونه در ورود
+        // بارگذاری صفحه گردونه در صورت ورود شناسه
         if (userId) {
             loadWheelPage();
         }
