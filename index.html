@@ -236,9 +236,9 @@
 
             setTimeout(() => {
                 result.textContent = `شما ${selectedPrize.prize} سکه بردید!`;
-                coins += selectedPrize.prize;
-                localStorage.setItem('coins', coins);
-                document.getElementById("coins-text").textContent = `${coins} سکه بردی`;
+                totalCoins += selectedPrize.prize;
+                localStorage.setItem('coins', totalCoins);
+                document.getElementById("coins-text").textContent = `${totalCoins} سکه بردی`;
                 localStorage.setItem('lastSpinTime', Date.now());
                 spinning = false;
                 updateTimer();
