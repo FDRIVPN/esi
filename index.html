@@ -44,7 +44,6 @@
         }
 
         /* استایل نوار توسی رنگ در صفحه ثبت شناسه */
-               /* استایل نوار توسی رنگ در صفحه ثبت شناسه */
         .input-container {
             position: absolute;
             top: 40%;
@@ -54,7 +53,7 @@
             max-width: 400px; /* حداکثر عرض */
             background-color: #d3d3d3; /* رنگ توسی */
             padding: 20px;
-            border-radius: 50px; /* بیضی کردن نوار */
+            border-radius: 10px;
             text-align: center;
         }
 
@@ -62,7 +61,7 @@
             width: 100%; /* ورودی سفید رنگ */
             padding: 10px;
             margin: 10px 0;
-            border-radius: 50px; /* بیضی کردن ورودی */
+            border-radius: 10px;
             border: 1px solid #ccc;
             background-color: white;
         }
@@ -73,9 +72,42 @@
             padding: 10px 20px;
             font-size: 18px;
             border: none;
-            border-radius: 50px; /* بیضی کردن دکمه تایید */
+            border-radius: 10px;
             cursor: pointer;
             width: 100%;
+        }
+
+        .wheel-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            background-image: url('Picsart_24-11-20_02-55-22-285.png');
+            background-size: cover;
+            background-position: center;
+            transform: rotate(0deg);
+            transition: transform 3s ease-out;
+        }
+
+        .pointer {
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 30px solid red;
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
         }
 
         /* جابه‌جایی دکمه چرخاندن به پایین گردونه */
@@ -86,7 +118,7 @@
             transform: translateX(-50%);
             width: 150px;
             height: 50px;
-            border-radius: 50px; /* بیضی کردن دکمه چرخاندن */
+            border-radius: 25px;
             font-size: 18px;
             font-weight: bold;
             text-align: center;
@@ -100,8 +132,6 @@
 
         .spin-button:hover {
             background-color: darkgray;
-        }
-
         }
 
         /* تایمر */
