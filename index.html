@@ -21,17 +21,6 @@
             height: 100vh;
         }
 
-        .header {
-            background-color: black;
-            color: white;
-            padding: 15px 0;
-            font-size: 20px;
-            font-weight: bold;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
         .oval {
             position: absolute;
             width: 120px;
@@ -44,12 +33,12 @@
         }
 
         .oval.left {
-            top: 60px;
+            top: 10px;
             left: 20px;
         }
 
         .oval.right {
-            top: 60px;
+            top: 10px;
             right: 20px;
             cursor: pointer;
         }
@@ -163,14 +152,18 @@
     </style>
 </head>
 <body>
-    <!-- Initial Page -->
-    <div class="header" id="game-header">بازی گردونه سفارشی</div>
-    
+
+    <!-- Ovals for User Info and Prizes -->
+    <div class="oval left" id="user-info">کاربر</div>
+    <div class="oval right" onclick="openScorePage()">جوایز</div>
+
+    <!-- Input container to enter User ID -->
     <div class="input-container" id="input-container">
         <input type="text" id="user-id" class="input-box" placeholder="شناسه خود را وارد کنید" />
         <button class="confirm-button" onclick="confirmUserId()">تایید</button>
     </div>
     
+    <!-- Wheel and Spin Button (hidden initially) -->
     <div class="wheel-container" id="wheel-container" style="display: none;">
         <div class="pointer"></div>
         <div class="wheel" id="wheel"></div>
@@ -196,7 +189,7 @@
             const userId = document.getElementById('user-id').value.trim();
             if (userId) {
                 localStorage.setItem('userId', userId);
-                document.getElementById('game-header').textContent = `سلام، ${userId}`;
+                document.getElementById('user-info').textContent = userId;
                 document.getElementById('input-container').style.display = 'none';
                 document.getElementById('wheel-container').style.display = 'block';
                 document.getElementById('spin-btn').style.display = 'inline-block';
@@ -242,7 +235,7 @@
             return prizeChances[0]; // پیش‌فرض، اگر هیچ جایزه‌ای انتخاب نشد
         }
 
-        // Navigation to the score page
+        // Navigate to score page
         function openScorePage() {
             const userId = localStorage.getItem('userId');
             if (userId) {
@@ -257,8 +250,8 @@
             const params = new URLSearchParams(window.location.search);
             const userId = params.get('userId');
             if (userId) {
-                document.getElementById('game-header').textContent = `سلام، ${userId}`;
-                // You can also fetch user score here and display it
+                document.getElementById('user-info').textContent = `سلام، ${userId}`;
+                // You can fetch user score and Iranian date here
             }
         }
     </script>
