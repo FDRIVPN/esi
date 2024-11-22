@@ -143,11 +143,16 @@
             font-weight: bold;
         }
 
+        /* مخفی کردن بیضی‌ها */
+        .hidden {
+            display: none;
+        }
+
     </style>
 </head>
 <body>
-    <div class="oval left" id="user-info"></div>
-    <div class="oval right" id="coins-info">
+    <div class="oval left hidden" id="user-info"></div>
+    <div class="oval right hidden" id="coins-info">
         <span id="coins-text">0 سکه بردی</span>
     </div>
 
@@ -176,7 +181,7 @@
         ];
 
         let lastSpinTime = localStorage.getItem('lastSpinTime');
-        let coins = 0; // مقدار اولیه سکه‌ها همیشه صفر است
+        let coins = 0; 
         const userId = localStorage.getItem('userId');
 
         function confirmUserId() {
@@ -197,6 +202,8 @@
             if (userId) {
                 document.getElementById('user-info').textContent = userId;
                 document.getElementById('coins-text').textContent = `${coins} سکه بردی`;
+                document.getElementById('user-info').classList.remove('hidden');
+                document.getElementById('coins-info').classList.remove('hidden');
                 document.getElementById('input-container').style.display = 'none';
                 document.getElementById('wheel-container').style.display = 'block';
                 updateTimer();
@@ -214,7 +221,7 @@
                 spinBtn.style.display = 'block';
 
                 if (coins !== 0) {
-                    coins = 0; // ریست کردن مقدار سکه‌ها
+                    coins = 0; 
                     document.getElementById('coins-text').textContent = '0 سکه بردی';
                 }
             } else {
@@ -239,7 +246,7 @@
             wheel.style.transform = `rotate(${randomSpin}deg)`;
 
             setTimeout(() => {
-                coins = selectedPrize.prize; // مقدار جدید جایزه
+                coins = selectedPrize.prize;
                 document.getElementById("coins-text").textContent = `${coins} سکه بردی`;
                 document.getElementById('result').textContent = `شما ${selectedPrize.prize} سکه بردید!`;
                 document.getElementById('result').style.display = 'block';
@@ -260,7 +267,6 @@
                     return prizeChances[i];
                 }
             }
-
             return prizeChances[0];
         }
 
