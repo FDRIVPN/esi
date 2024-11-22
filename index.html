@@ -146,19 +146,16 @@
     </style>
 </head>
 <body>
-    <!-- بیضی‌ها و گردونه -->
     <div class="oval left" id="user-info"></div>
     <div class="oval right" id="coins-info">
         <span id="coins-text">0 سکه بردی</span>
     </div>
 
-    <!-- صفحه ورود شناسه -->
     <div class="input-container" id="input-container">
         <input type="text" id="user-id" class="input-box" placeholder="شناسه خود را وارد کنید" />
         <button class="confirm-button" onclick="confirmUserId()">تایید</button>
     </div>
 
-    <!-- صفحه گردونه -->
     <div class="wheel-container" id="wheel-container" style="display: none;">
         <div class="pointer"></div>
         <div class="wheel" id="wheel"></div>
@@ -179,15 +176,13 @@
         ];
 
         let lastSpinTime = localStorage.getItem('lastSpinTime');
-        let coins = parseInt(localStorage.getItem('coins')) || 0;
+        let coins = 0; // مقدار اولیه سکه‌ها همیشه صفر است
         const userId = localStorage.getItem('userId');
 
-        // تایید شناسه
         function confirmUserId() {
             const inputUserId = document.getElementById('user-id').value.trim();
             if (inputUserId && !userId) {
                 localStorage.setItem('userId', inputUserId);
-                localStorage.setItem('coins', 0);
                 localStorage.setItem('lastSpinTime', null);
                 loadWheelPage();
             } else if (!inputUserId) {
@@ -197,11 +192,8 @@
             }
         }
 
-        // بارگذاری صفحه گردونه
         function loadWheelPage() {
             const userId = localStorage.getItem('userId');
-            const coins = parseInt(localStorage.getItem('coins')) || 0;
-
             if (userId) {
                 document.getElementById('user-info').textContent = userId;
                 document.getElementById('coins-text').textContent = `${coins} سکه بردی`;
@@ -211,7 +203,6 @@
             }
         }
 
-        // به‌روزرسانی تایمر
         function updateTimer() {
             const now = Date.now();
             const remainingTime = lastSpinTime ? 86400000 - (now - lastSpinTime) : 0;
@@ -221,20 +212,22 @@
             if (remainingTime <= 0) {
                 timerElement.style.display = 'none';
                 spinBtn.style.display = 'block';
-                localStorage.setItem('coins', 0); // صفر کردن سکه‌ها
-                document.getElementById('coins-text').textContent = '0 سکه بردی';
+
+                if (coins !== 0) {
+                    coins = 0; // ریست کردن مقدار سکه‌ها
+                    document.getElementById('coins-text').textContent = '0 سکه بردی';
+                }
             } else {
                 timerElement.style.display = 'block';
                 spinBtn.style.display = 'none';
-                const hours = Math.floor(remainingTime / 3600000);
-                const minutes = Math.floor((remainingTime % 3600000) / 60000);
-                const seconds = Math.floor((remainingTime % 60000) / 1000);
+                const hours = String(Math.floor(remainingTime / 3600000)).padStart(2, '0');
+                const minutes = String(Math.floor((remainingTime % 3600000) / 60000)).padStart(2, '0');
+                const seconds = String(Math.floor((remainingTime % 60000) / 1000)).padStart(2, '0');
                 timerElement.textContent = `${hours}:${minutes}:${seconds}`;
                 setTimeout(updateTimer, 1000);
             }
         }
 
-        // چرخاندن گردونه
         function spinWheel() {
             if (spinning) return;
             spinning = true;
@@ -246,8 +239,7 @@
             wheel.style.transform = `rotate(${randomSpin}deg)`;
 
             setTimeout(() => {
-                coins += selectedPrize.prize;
-                localStorage.setItem('coins', coins);
+                coins = selectedPrize.prize; // مقدار جدید جایزه
                 document.getElementById("coins-text").textContent = `${coins} سکه بردی`;
                 document.getElementById('result').textContent = `شما ${selectedPrize.prize} سکه بردید!`;
                 document.getElementById('result').style.display = 'block';
@@ -258,7 +250,6 @@
             }, 3000);
         }
 
-        // انتخاب جایزه
         function selectPrize() {
             const random = Math.random() * 100;
             let cumulativeChance = 0;
@@ -270,14 +261,12 @@
                 }
             }
 
-            return prizeChances[0]; // پیش‌فرض
+            return prizeChances[0];
         }
 
-        // بارگذاری صفحه گردونه در صورت ورود شناسه
         if (userId) {
             loadWheelPage();
         }
-
     </script>
 </body>
 </html>
