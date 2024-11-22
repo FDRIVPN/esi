@@ -182,20 +182,24 @@
     </style>
 </head>
 <body>
+    <!-- صفحه بارگذاری -->
     <div id="loading-screen">
         <div class="spinner"></div>
     </div>
 
+    <!-- بیضی‌ها و گردونه -->
     <div class="oval left hidden" id="user-info"></div>
     <div class="oval right hidden" id="coins-info">
         <span id="coins-text">0 سکه بردی</span>
     </div>
 
+    <!-- صفحه ورود شناسه -->
     <div class="input-container" id="input-container">
         <input type="text" id="user-id" class="input-box" placeholder="شناسه خود را وارد کنید" />
         <button class="confirm-button" onclick="confirmUserId()">تایید</button>
     </div>
 
+    <!-- صفحه گردونه -->
     <div class="wheel-container" id="wheel-container" style="display: none;">
         <div class="pointer"></div>
         <div class="wheel" id="wheel"></div>
@@ -216,13 +220,14 @@
         ];
 
         let lastSpinTime = localStorage.getItem('lastSpinTime');
-        let coins = 0;
+        let coins = parseInt(localStorage.getItem('coins')) || 0;
         const userId = localStorage.getItem('userId');
 
         function confirmUserId() {
             const inputUserId = document.getElementById('user-id').value.trim();
             if (inputUserId && !userId) {
                 localStorage.setItem('userId', inputUserId);
+                localStorage.setItem('coins', 0);
                 localStorage.setItem('lastSpinTime', null);
                 showLoadingScreen();
                 setTimeout(loadWheelPage, 2000); // تأخیر 2 ثانیه‌ای
@@ -241,6 +246,7 @@
             document.getElementById('loading-screen').style.display = 'none';
         }
 
+        // بارگذاری صفحه گردونه
         function loadWheelPage() {
             hideLoadingScreen();
             const userId = localStorage.getItem('userId');
@@ -255,9 +261,59 @@
             }
         }
 
+        function updateTimer() {
+            const now = Date.now();
+            const remainingTime = lastSpinTime ? 86400000 - (now - lastSpinTime) : 0;
+            const timerElement = document.getElementById('timer');
+            const spinBtn = document.getElementById('spin-btn');
+
+            if (remainingTime <= 0) {
+                timerElement.style.display = 'none';
+                spinBtn.style.display = 'block';
+                localStorage.setItem('coins', 0); // صفر کردن سکه‌ها
+                document.getElementById('coins-text').textContent = '0 سکه بردی';
+            } else {
+                timerElement.style.display = 'block';
+                spinBtn.style.display = 'none';
+                const hours = Math.floor(remainingTime / 3600000);
+                const minutes = Math.floor((remainingTime % 3600000) / 60000);
+                const seconds = Math.floor((remainingTime % 60000) / 1000);
+                timerElement.textContent = `زمان باقی‌مانده: ${hours}:${minutes}:${seconds}`;
+            }
+        }
+
         if (userId) {
             showLoadingScreen();
             setTimeout(loadWheelPage, 2000); // نمایش صفحه بارگذاری قبل از گردونه
+        }
+
+        function spinWheel() {
+            if (spinning) return;
+            spinning = true;
+            const spinValue = Math.random() * 360;
+            const winningPrize = getPrizeForSpin(spinValue);
+            const wheel = document.getElementById('wheel');
+            wheel.style.transform = `rotate(${3600 + spinValue}deg)`;
+
+            setTimeout(() => {
+                alert(`شما برنده ${winningPrize.prize} سکه شده‌اید!`);
+                coins += winningPrize.prize;
+                localStorage.setItem('coins', coins);
+                document.getElementById('coins-text').textContent = `${coins} سکه بردی`;
+                spinning = false;
+                lastSpinTime = Date.now();
+                localStorage.setItem('lastSpinTime', lastSpinTime);
+                updateTimer();
+            }, 3000); // مدت زمان چرخش
+        }
+
+        function getPrizeForSpin(angle) {
+            for (const prize of prizeChances) {
+                if (angle >= prize.angle && angle < prize.angle + prize.chance) {
+                    return prize;
+                }
+            }
+            return prizeChances[0];
         }
     </script>
 </body>
