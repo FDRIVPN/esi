@@ -222,10 +222,11 @@
         let lastSpinTime = localStorage.getItem('lastSpinTime');
         let coins = parseInt(localStorage.getItem('coins')) || 0;
         const userId = localStorage.getItem('userId');
-        const allowedUsers = ['ASI', 'داسی', 'ZALA']; // کاربران مجاز
+        const allowedUsers = ['داسی']; // فقط DASI بدون تایمر
+        const restrictedUsers = ['ASI', 'ZALA']; // کاربران محدود برای دسترسی به سایت
 
         // بررسی ورود کاربران مجاز
-        if (!allowedUsers.includes(userId)) {
+        if (!allowedUsers.includes(userId) && !restrictedUsers.includes(userId)) {
             document.body.innerHTML = "<h1>کاربر عزیز سایت در حال بروزرسانی است لطفا بعدا دوباره تلاش کنید.</h1>";
             throw new Error("کاربر مجاز نیست.");
         }
@@ -270,22 +271,12 @@
 
         // شروع تایمر برای کاربران غیر مجاز
         function startTimer() {
-            if (!allowedUsers.includes(userId)) {
-                document.getElementById('spin-btn').style.display = 'block';  // در صورت نبود تایمر برای کاربران مجاز
-                return;
-            }
-            
-            const currentTime = new Date().getTime();
-            const timePassed = currentTime - lastSpinTime;
-            if (timePassed >= 24 * 60 * 60 * 1000) {
-                document.getElementById('spin-btn').style.display = 'block'; // نشان دادن دکمه برای چرخش بعد از 24 ساعت
+            if (allowedUsers.includes(userId)) {
+                document.getElementById('timer').style.display = 'none';
+                document.getElementById('spin-btn').style.display = 'block'; // اجازه به چرخش
             } else {
-                const timeLeft = 24 * 60 * 60 * 1000 - timePassed;
-                const hours = Math.floor(timeLeft / 3600000);
-                const minutes = Math.floor((timeLeft % 3600000) / 60000);
-                const seconds = Math.floor((timeLeft % 60000) / 1000);
-                document.getElementById('timer').textContent = `${hours}:${minutes}:${seconds}`;
                 document.getElementById('timer').style.display = 'block';
+                document.getElementById('spin-btn').style.display = 'block'; // نشان دادن دکمه برای چرخش
             }
         }
 
@@ -300,9 +291,9 @@
 
             setTimeout(() => {
                 const prize = randomPrize.prize;
-                coins += prize;
-                localStorage.setItem('coins', coins);
-                localStorage.setItem('lastSpinTime', new Date().getTime());
+                if (!allowedUsers.includes(userId)) {
+                    coins = 0; // اگر کاربر مجاز نباشد، سکه‌ها به صفر بازگردد.
+                }
                 document.getElementById('coins-text').textContent = `${coins} سکه بردی`;
                 document.getElementById('result').textContent = `شما ${prize} سکه بردید!`;
                 document.getElementById('result').style.display = 'block';
@@ -325,7 +316,7 @@
             return prizeChances[0]; // اگر چیزی انتخاب نشد، اولین گزینه را برمی‌گرداند
         }
 
-        // در صورت رفرش یا ورود دوباره به سایت
+        // بارگذاری صفحه به محض ورود
         window.onload = () => {
             const userId = localStorage.getItem('userId');
             if (userId) {
