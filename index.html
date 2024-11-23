@@ -209,32 +209,28 @@
     </div>
 
     <script>
-        const allowedUsers = ["اسی", "داسی"];
         let spinning = false;
         const prizeChances = [
-            { angle: 360, prize: 30 },
-            { angle: 60, prize: 60 },
-            { angle: 120, prize: 90 },
-            { angle: 180, prize: 120 },
-            { angle: 240, prize: 150 },
-            { angle: 300, prize: 180 },
+            { angle: 360, prize: 30, chance: 55 },
+            { angle: 60, prize: 60, chance: 35 },
+            { angle: 120, prize: 90, chance: 2.5 },
+            { angle: 180, prize: 120, chance: 2.5 },
+            { angle: 240, prize: 150, chance: 2.5 },
+            { angle: 300, prize: 180, chance: 2.5 },
         ];
 
         let lastSpinTime = localStorage.getItem('lastSpinTime');
+        let coins1 = parseInt(localStorage.getItem('coins')) || 0;
         const userId = localStorage.getItem('userId');
 
         function confirmUserId() {
             const inputUserId = document.getElementById('user-id').value.trim();
             if (inputUserId && !userId) {
-                if (!allowedUsers.includes(inputUserId)) {
-                    alert("دسترسی به سایت برای شما ممکن نیست.");
-                    return;
-                }
                 localStorage.setItem('userId', inputUserId);
-                localStorage.setItem('coins', 0);
+                localStorage.setItem('coins1', 0);
                 localStorage.setItem('lastSpinTime', null);
                 showLoadingScreen();
-                setTimeout(loadWheelPage, 2000);
+                setTimeout(loadWheelPage, 2000); // تأخیر 2 ثانیه‌ای
             } else if (!inputUserId) {
                 alert("لطفا شناسه خود را وارد کنید.");
             } else {
@@ -250,23 +246,18 @@
             document.getElementById('loading-screen').style.display = 'none';
         }
 
+        // بارگذاری صفحه گردونه
         function loadWheelPage() {
             hideLoadingScreen();
             const userId = localStorage.getItem('userId');
             if (userId) {
                 document.getElementById('user-info').textContent = userId;
-                document.getElementById('coins-text').textContent = `0 سکه بردی`;
+                document.getElementById('coins-text').textContent = `${coins1} سکه بردی`;
                 document.getElementById('user-info').classList.remove('hidden');
                 document.getElementById('coins-info').classList.remove('hidden');
                 document.getElementById('input-container').style.display = 'none';
                 document.getElementById('wheel-container').style.display = 'block';
-
-                if (!allowedUsers.includes(userId)) {
-                    updateTimer();
-                } else {
-                    document.getElementById('timer').style.display = 'none';
-                    document.getElementById('spin-btn').style.display = 'block';
-                }
+                updateTimer();
             }
         }
 
@@ -279,7 +270,7 @@
             if (remainingTime <= 0) {
                 timerElement.style.display = 'none';
                 spinBtn.style.display = 'block';
-                localStorage.setItem('coins', 0);
+                localStorage.setItem('coins', 0); // صفر کردن سکه‌ها
                 document.getElementById('coins-text').textContent = '0 سکه بردی';
             } else {
                 timerElement.style.display = 'block';
@@ -287,8 +278,13 @@
                 const hours = Math.floor(remainingTime / 3600000);
                 const minutes = Math.floor((remainingTime % 3600000) / 60000);
                 const seconds = Math.floor((remainingTime % 60000) / 1000);
-                timerElement.textContent = `${hours}:${minutes}:${seconds}`;
+                timerElement.textContent = ` ${hours}:${minutes}:${seconds}`;
             }
+        }
+
+        if (userId) {
+            showLoadingScreen();
+            setTimeout(loadWheelPage, 2000); // نمایش صفحه بارگذاری قبل از گردونه
         }
 
         function spinWheel() {
@@ -301,36 +297,23 @@
 
             setTimeout(() => {
                 alert(`شما برنده ${winningPrize.prize} سکه شده‌اید!`);
-                localStorage.setItem('coins', winningPrize.prize);
-                document.getElementById('coins-text').textContent = `${winningPrize.prize} سکه بردی`;
+                coins1 += winningPrize.prize;
+                localStorage.setItem('coins', coins1);
+                document.getElementById('coins-text').textContent = `${coins1} سکه بردی`;
                 spinning = false;
                 lastSpinTime = Date.now();
                 localStorage.setItem('lastSpinTime', lastSpinTime);
-                if (!allowedUsers.includes(userId)) {
-                    updateTimer();
-                }
-            }, 3000);
+                updateTimer();
+            }, 3000); // مدت زمان چرخش
         }
 
         function getPrizeForSpin(angle) {
-            let totalChance = 0;
-            prizeChances.forEach((prize) => (totalChance += prize.chance || 0));
-            let random = Math.random() * totalChance;
-
             for (const prize of prizeChances) {
-                if (random < (prize.chance || 0)) return prize;
-                random -= prize.chance || 0;
+                if (angle >= prize.angle && angle < prize.angle + prize.chance) {
+                    return prize;
+                }
             }
             return prizeChances[0];
-        }
-
-        if (userId) {
-            if (!allowedUsers.includes(userId)) {
-                alert("دسترسی به سایت برای شما ممکن نیست.");
-                return;
-            }
-            showLoadingScreen();
-            setTimeout(loadWheelPage, 2000);
         }
     </script>
 </body>
