@@ -211,8 +211,8 @@
     <script>
         let spinning = false;
         const prizeChances = [
-            { angle: 360, prize: 30, chance: 55 },
-            { angle: 60, prize: 60, chance: 35 },
+            { angle: 360, prize: 30, chance: 70 },
+            { angle: 60, prize: 60, chance: 15 },
             { angle: 120, prize: 90, chance: 2.5 },
             { angle: 180, prize: 120, chance: 2.5 },
             { angle: 240, prize: 150, chance: 2.5 },
@@ -269,20 +269,24 @@
             }
         }
 
-        // شروع تایمر برای کاربران غیر مجاز
         function startTimer() {
-            if (allowedUsers.includes(userId)) {
-                document.getElementById('timer').style.display = 'none';
-                document.getElementById('spin-btn').style.display = 'block'; // اجازه به چرخش
-            } else {
-                document.getElementById('timer').style.display = 'block';
-                document.getElementById('spin-btn').style.display = 'block'; // نشان دادن دکمه برای چرخش
+            if (!allowedUsers.includes(userId)) {
+                const now = Date.now();
+                const elapsedTime = now - lastSpinTime;
+                const timeLeft = 24 * 60 * 60 * 1000 - elapsedTime;
+                if (timeLeft > 0) {
+                    document.getElementById('timer').textContent = `زمان باقی‌مانده: ${Math.floor(timeLeft / 1000)} ثانیه`;
+                    document.getElementById('timer').style.display = 'block';
+                } else {
+                    document.getElementById('spin-btn').disabled = false;
+                    document.getElementById('spin-btn').style.display = 'block';
+                    localStorage.setItem('lastSpinTime', now);
+                }
             }
         }
 
-        // چرخاندن گردونه
         function spinWheel() {
-            if (spinning) return;
+            if (spinning || allowedUsers.includes(userId)) return; // اجازه چرخش
             spinning = true;
             document.getElementById('spin-btn').disabled = true;
             const randomPrize = getRandomPrize();
@@ -291,19 +295,17 @@
 
             setTimeout(() => {
                 const prize = randomPrize.prize;
-                if (!allowedUsers.includes(userId)) {
-                    coins = 0; // اگر کاربر مجاز نباشد، سکه‌ها به صفر بازگردد.
+                if (allowedUsers.includes(userId)) {
+                    coins += prize;
                 }
                 document.getElementById('coins-text').textContent = `${coins} سکه بردی`;
                 document.getElementById('result').textContent = `شما ${prize} سکه بردید!`;
                 document.getElementById('result').style.display = 'block';
                 spinning = false;
                 document.getElementById('spin-btn').disabled = false;
-                document.getElementById('spin-btn').style.display = 'none';
             }, 3000);
         }
 
-        // انتخاب جایزه تصادفی
         function getRandomPrize() {
             const randomNum = Math.random() * 100;
             let cumulativeChance = 0;
@@ -313,18 +315,8 @@
                     return prize;
                 }
             }
-            return prizeChances[0]; // اگر چیزی انتخاب نشد، اولین گزینه را برمی‌گرداند
+            return prizeChances[0]; 
         }
-
-        // بارگذاری صفحه به محض ورود
-        window.onload = () => {
-            const userId = localStorage.getItem('userId');
-            if (userId) {
-                loadWheelPage();
-            } else {
-                document.getElementById('input-container').style.display = 'block';
-            }
-        };
     </script>
 </body>
 </html>
