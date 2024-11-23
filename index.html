@@ -278,14 +278,13 @@
                 const hours = Math.floor(remainingTime / 3600000);
                 const minutes = Math.floor((remainingTime % 3600000) / 60000);
                 const seconds = Math.floor((remainingTime % 60000) / 1000);
-                timerElement.textContent = ` ${hours}:${minutes}:${seconds}`;
-                updatetimer()
+                timerElement.textContent = `زمان باقی‌مانده: ${hours}:${minutes}:${seconds}`;
             }
         }
 
         if (userId) {
             showLoadingScreen();
-            setTimeout(loadWheelPage, 2000); // نمایش صفحه بارگذاری قباز گردونه
+            setTimeout(loadWheelPage, 2000); // نمایش صفحه بارگذاری قبل از گردونه
         }
 
         function spinWheel() {
