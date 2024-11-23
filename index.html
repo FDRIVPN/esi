@@ -179,20 +179,6 @@
         .hidden {
             display: none;
         }
-
-        .maintenance {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            color: red;
-        }
     </style>
 </head>
 <body>
@@ -222,12 +208,7 @@
         <div class="result" id="result" style="display: none;"></div>
     </div>
 
-    <div id="maintenance-message" class="maintenance hidden">
-        کاربر عزیز، سایت در حال بروزرسانی است. لطفا بعدا دوباره تلاش کنید.
-    </div>
-
     <script>
-        const authorizedUsers = ['ASI', 'DASI', 'ZALA'];
         let spinning = false;
         const prizeChances = [
             { angle: 360, prize: 30, chance: 55 },
@@ -241,14 +222,12 @@
         let lastSpinTime = localStorage.getItem('lastSpinTime');
         let coins = parseInt(localStorage.getItem('coins')) || 0;
         const userId = localStorage.getItem('userId');
+        const allowedUsers = ['ASI', 'داسی', 'ZALA']; // کاربران مجاز
 
-        function checkAccess() {
-            if (!authorizedUsers.includes(userId)) {
-                document.getElementById('maintenance-message').classList.remove('hidden');
-                document.body.style.overflow = 'hidden'; // Prevent scrolling
-                return false;
-            }
-            return true;
+        // بررسی ورود کاربران مجاز
+        if (!allowedUsers.includes(userId)) {
+            document.body.innerHTML = "<h1>کاربر عزیز سایت در حال بروزرسانی است لطفا بعدا دوباره تلاش کنید.</h1>";
+            throw new Error("کاربر مجاز نیست.");
         }
 
         function confirmUserId() {
@@ -276,36 +255,35 @@
 
         // بارگذاری صفحه گردونه
         function loadWheelPage() {
-            if (!checkAccess()) return; // Check if user is authorized
-
             hideLoadingScreen();
             const userId = localStorage.getItem('userId');
             if (userId) {
                 document.getElementById('user-info').textContent = userId;
                 document.getElementById('coins-text').textContent = `${coins} سکه بردی`;
                 document.getElementById('user-info').classList.remove('hidden');
-                               document.getElementById('coins-info').classList.remove('hidden');
-                startTimer();
+                document.getElementById('coins-info').classList.remove('hidden');
+                document.getElementById('input-container').style.display = 'none';
                 document.getElementById('wheel-container').style.display = 'block';
+                startTimer();
             }
         }
 
-        // تابع شروع تایمر
+        // شروع تایمر برای کاربران غیر مجاز
         function startTimer() {
-            if (!lastSpinTime) return; // اگر زمان چرخش قبلی وجود نداشت، هیچ تایمری فعال نخواهد بود
+            if (!allowedUsers.includes(userId)) {
+                document.getElementById('spin-btn').style.display = 'block';  // در صورت نبود تایمر برای کاربران مجاز
+                return;
+            }
+            
             const currentTime = new Date().getTime();
             const timePassed = currentTime - lastSpinTime;
-
-            // اگر زمان بیشتر از 24 ساعت گذشت، تایمر فعال باشد
             if (timePassed >= 24 * 60 * 60 * 1000) {
-                document.getElementById('spin-btn').style.display = 'block';
-                return;
+                document.getElementById('spin-btn').style.display = 'block'; // نشان دادن دکمه برای چرخش بعد از 24 ساعت
             } else {
                 const timeLeft = 24 * 60 * 60 * 1000 - timePassed;
                 const hours = Math.floor(timeLeft / 3600000);
                 const minutes = Math.floor((timeLeft % 3600000) / 60000);
                 const seconds = Math.floor((timeLeft % 60000) / 1000);
-
                 document.getElementById('timer').textContent = `${hours}:${minutes}:${seconds}`;
                 document.getElementById('timer').style.display = 'block';
             }
@@ -356,8 +334,6 @@
                 document.getElementById('input-container').style.display = 'block';
             }
         };
-
     </script>
 </body>
 </html>
-
