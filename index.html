@@ -179,6 +179,20 @@
         .hidden {
             display: none;
         }
+
+        .maintenance {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: red;
+        }
     </style>
 </head>
 <body>
@@ -208,7 +222,12 @@
         <div class="result" id="result" style="display: none;"></div>
     </div>
 
+    <div id="maintenance-message" class="maintenance hidden">
+        کاربر عزیز، سایت در حال بروزرسانی است. لطفا بعدا دوباره تلاش کنید.
+    </div>
+
     <script>
+        const authorizedUsers = ['ASI', 'DASI', 'ZALA'];
         let spinning = false;
         const prizeChances = [
             { angle: 360, prize: 30, chance: 55 },
@@ -220,14 +239,23 @@
         ];
 
         let lastSpinTime = localStorage.getItem('lastSpinTime');
-        let coins1 = parseInt(localStorage.getItem('coins')) || 0;
+        let coins = parseInt(localStorage.getItem('coins')) || 0;
         const userId = localStorage.getItem('userId');
+
+        function checkAccess() {
+            if (!authorizedUsers.includes(userId)) {
+                document.getElementById('maintenance-message').classList.remove('hidden');
+                document.body.style.overflow = 'hidden'; // Prevent scrolling
+                return false;
+            }
+            return true;
+        }
 
         function confirmUserId() {
             const inputUserId = document.getElementById('user-id').value.trim();
             if (inputUserId && !userId) {
                 localStorage.setItem('userId', inputUserId);
-                localStorage.setItem('coins1', 0);
+                localStorage.setItem('coins', 0);
                 localStorage.setItem('lastSpinTime', null);
                 showLoadingScreen();
                 setTimeout(loadWheelPage, 2000); // تأخیر 2 ثانیه‌ای
@@ -248,73 +276,88 @@
 
         // بارگذاری صفحه گردونه
         function loadWheelPage() {
+            if (!checkAccess()) return; // Check if user is authorized
+
             hideLoadingScreen();
             const userId = localStorage.getItem('userId');
             if (userId) {
                 document.getElementById('user-info').textContent = userId;
-                document.getElementById('coins-text').textContent = `${coins1} سکه بردی`;
+                document.getElementById('coins-text').textContent = `${coins} سکه بردی`;
                 document.getElementById('user-info').classList.remove('hidden');
-                document.getElementById('coins-info').classList.remove('hidden');
-                document.getElementById('input-container').style.display = 'none';
+                               document.getElementById('coins-info').classList.remove('hidden');
+                startTimer();
                 document.getElementById('wheel-container').style.display = 'block';
-                updateTimer();
             }
         }
 
-        function updateTimer() {
-            const now = Date.now();
-            const remainingTime = lastSpinTime ? 86400000 - (now - lastSpinTime) : 0;
-            const timerElement = document.getElementById('timer');
-            const spinBtn = document.getElementById('spin-btn');
+        // تابع شروع تایمر
+        function startTimer() {
+            if (!lastSpinTime) return; // اگر زمان چرخش قبلی وجود نداشت، هیچ تایمری فعال نخواهد بود
+            const currentTime = new Date().getTime();
+            const timePassed = currentTime - lastSpinTime;
 
-            if (remainingTime <= 0) {
-                timerElement.style.display = 'none';
-                spinBtn.style.display = 'block';
-                localStorage.setItem('coins', 0); // صفر کردن سکه‌ها
-                document.getElementById('coins-text').textContent = '0 سکه بردی';
+            // اگر زمان بیشتر از 24 ساعت گذشت، تایمر فعال باشد
+            if (timePassed >= 24 * 60 * 60 * 1000) {
+                document.getElementById('spin-btn').style.display = 'block';
+                return;
             } else {
-                timerElement.style.display = 'block';
-                spinBtn.style.display = 'none';
-                const hours = Math.floor(remainingTime / 3600000);
-                const minutes = Math.floor((remainingTime % 3600000) / 60000);
-                const seconds = Math.floor((remainingTime % 60000) / 1000);
-                timerElement.textContent = ` ${hours}:${minutes}:${seconds}`;
+                const timeLeft = 24 * 60 * 60 * 1000 - timePassed;
+                const hours = Math.floor(timeLeft / 3600000);
+                const minutes = Math.floor((timeLeft % 3600000) / 60000);
+                const seconds = Math.floor((timeLeft % 60000) / 1000);
+
+                document.getElementById('timer').textContent = `${hours}:${minutes}:${seconds}`;
+                document.getElementById('timer').style.display = 'block';
             }
         }
 
-        if (userId) {
-            showLoadingScreen();
-            setTimeout(loadWheelPage, 2000); // نمایش صفحه بارگذاری قبل از گردونه
-        }
-
+        // چرخاندن گردونه
         function spinWheel() {
             if (spinning) return;
             spinning = true;
-            const spinValue = Math.random() * 360;
-            const winningPrize = getPrizeForSpin(spinValue);
-            const wheel = document.getElementById('wheel');
-            wheel.style.transform = `rotate(${3600 + spinValue}deg)`;
+            document.getElementById('spin-btn').disabled = true;
+            const randomPrize = getRandomPrize();
+            const spinAngle = randomPrize.angle + Math.floor(Math.random() * 360);
+            document.getElementById('wheel').style.transform = `rotate(${spinAngle}deg)`;
 
             setTimeout(() => {
-                alert(`شما برنده ${winningPrize.prize} سکه شده‌اید!`);
-                coins1 += winningPrize.prize;
-                localStorage.setItem('coins', coins1);
-                document.getElementById('coins-text').textContent = `${coins1} سکه بردی`;
+                const prize = randomPrize.prize;
+                coins += prize;
+                localStorage.setItem('coins', coins);
+                localStorage.setItem('lastSpinTime', new Date().getTime());
+                document.getElementById('coins-text').textContent = `${coins} سکه بردی`;
+                document.getElementById('result').textContent = `شما ${prize} سکه بردید!`;
+                document.getElementById('result').style.display = 'block';
                 spinning = false;
-                lastSpinTime = Date.now();
-                localStorage.setItem('lastSpinTime', lastSpinTime);
-                updateTimer();
-            }, 3000); // مدت زمان چرخش
+                document.getElementById('spin-btn').disabled = false;
+                document.getElementById('spin-btn').style.display = 'none';
+            }, 3000);
         }
 
-        function getPrizeForSpin(angle) {
+        // انتخاب جایزه تصادفی
+        function getRandomPrize() {
+            const randomNum = Math.random() * 100;
+            let cumulativeChance = 0;
             for (const prize of prizeChances) {
-                if (angle >= prize.angle && angle < prize.angle + prize.chance) {
+                cumulativeChance += prize.chance;
+                if (randomNum < cumulativeChance) {
                     return prize;
                 }
             }
-            return prizeChances[0];
+            return prizeChances[0]; // اگر چیزی انتخاب نشد، اولین گزینه را برمی‌گرداند
         }
+
+        // در صورت رفرش یا ورود دوباره به سایت
+        window.onload = () => {
+            const userId = localStorage.getItem('userId');
+            if (userId) {
+                loadWheelPage();
+            } else {
+                document.getElementById('input-container').style.display = 'block';
+            }
+        };
+
     </script>
 </body>
 </html>
+
