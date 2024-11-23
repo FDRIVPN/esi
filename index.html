@@ -220,14 +220,14 @@
         ];
 
         let lastSpinTime = localStorage.getItem('lastSpinTime');
-        let coins = parseInt(localStorage.getItem('coins')) || 0;
+        let coins1 = parseInt(localStorage.getItem('coins')) || 0;
         const userId = localStorage.getItem('userId');
 
         function confirmUserId() {
             const inputUserId = document.getElementById('user-id').value.trim();
             if (inputUserId && !userId) {
                 localStorage.setItem('userId', inputUserId);
-                localStorage.setItem('coins', 0);
+                localStorage.setItem('coins1', 0);
                 localStorage.setItem('lastSpinTime', null);
                 showLoadingScreen();
                 setTimeout(loadWheelPage, 2000); // تأخیر 2 ثانیه‌ای
