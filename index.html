@@ -184,31 +184,27 @@
         let coins = parseInt(localStorage.getItem('coins')) || 0;
         let userId = localStorage.getItem('userId');
 
+        // چک کردن شناسه کاربر
+        if (userId) {
+            loadWheelPage();
+        } else {
+            // اگر شناسه ذخیره نشده باشد، صفحه ورود نمایش داده می‌شود
+            document.getElementById('input-container').style.display = 'block';
+            document.getElementById('wheel-container').style.display = 'none';
+        }
+
         // تابع تایید شناسه
         function confirmUserId() {
             const inputUserId = document.getElementById('user-id').value.trim();
 
-            // اگر شناسه وارد نشده و ذخیره نباشد
-            if (inputUserId && !userId) {
-                localStorage.setItem('userId', inputUserId);
-                localStorage.setItem('coins', 0);
-                loadWheelPage();
-            } else if (!inputUserId && !userId) {
-                alert("لطفا شناسه خود را وارد کنید.");
-            } else if (userId) {
-                alert("شما قبلاً شناسه وارد کرده‌اید.");
-                loadWheelPage();
+            // اگر شناسه وارد شده باشد
+            if (inputUserId) {
+                localStorage.setItem('userId', inputUserId); // ذخیره شناسه
+                localStorage.setItem('coins', 0); // مقدار سکه‌ها به 0 تنظیم می‌شود
+                loadWheelPage(); // هدایت به صفحه گردونه
             } else {
-                alert("شناسه وارد شده نامعتبر است.");
+                alert("لطفا شناسه خود را وارد کنید.");
             }
-        }
-
-        // اگر شناسه ذخیره شده باشد، در ورودی نمایش داده می‌شود اما تغییر آن امکان‌پذیر نخواهد بود.
-        if (userId) {
-            document.getElementById('user-id').value = userId;
-            document.getElementById('user-id').disabled = true;
-            document.querySelector('.confirm-button').style.display = 'none'; // مخفی کردن دکمه تایید
-            loadWheelPage();
         }
 
         // بارگذاری صفحه گردونه
