@@ -69,7 +69,6 @@
             right: 20px;
         }
 
-        /* آیکون منو */
         .menu-icon {
             position: fixed;
             top: 10px;
@@ -110,7 +109,6 @@
             background-color: #ddd;
         }
 
-        /* نمایش شناسه و سکه */
         .hidden {
             display: none;
         }
@@ -147,6 +145,23 @@
             cursor: pointer;
             width: 100%;
         }
+
+        #chart {
+            width: 300px;
+            height: 200px;
+            margin: 20px auto;
+            background-color: #e0e0e0;
+            position: relative;
+        }
+
+        .chart-bar {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background-color: #4CAF50;
+            height: 100%;
+            transition: height 1s ease;
+        }
     </style>
 </head>
 <body>
@@ -161,6 +176,12 @@
         <div class="pointer"></div>
         <div class="wheel" id="wheel"></div>
     </div>
+
+    <!-- نمایش چارت -->
+    <div id="chart">
+        <div id="chart-bar" class="chart-bar"></div>
+    </div>
+    <h3>قیمت کنونی: <span id="current-price">10000</span> تومان</h3>
 
     <!-- بیضی‌ها -->
     <div class="oval right hidden" id="coins-info">
@@ -184,13 +205,25 @@
     <script>
         let coins = parseInt(localStorage.getItem('coins')) || 0;
         let userId = localStorage.getItem('userId');
-        let canChangeId = localStorage.getItem('canChangeId') === 'true'; // بررسی اینکه آیا شناسه قابل تغییر است
+        let currentPrice = 10000; // قیمت اولیه
+        let canSpin = true;
+        let spinning = false;
+        let prevPrice = currentPrice;
 
-        // چک کردن شناسه کاربر
-        if (userId) {
-            loadWheelPage();
-        } else {
-            document.getElementById('input-container').style.display = 'block';
+        // شبیه‌سازی تغییرات قیمت بیت‌کوین
+        function updatePrice() {
+            let randomChange = (Math.random() - 0.5) * 1000; // تغییر تصادفی قیمت
+            currentPrice += randomChange;
+            if (currentPrice < 0) currentPrice = 0; // جلوگیری از قیمت منفی
+            document.getElementById('current-price').textContent = Math.round(currentPrice);
+            animateChart();
+        }
+
+        // انیمیشن چارت قیمت
+        function animateChart() {
+            const chartBar = document.getElementById('chart-bar');
+            const height = (currentPrice / 20000) * 100; // حداکثر قیمت 20000 تومان
+            chartBar.style.height = `${height}%`;
         }
 
         // تایید شناسه
@@ -200,7 +233,7 @@
             if (inputUserId) {
                 localStorage.setItem('userId', inputUserId);
                 localStorage.setItem('coins', 0);
-                localStorage.setItem('canChangeId', 'false'); // دیگر نمی‌توان شناسه را تغییر داد
+                localStorage.setItem('canChangeId', 'false');
                 loadWheelPage();
             } else {
                 alert("لطفاً شناسه خود را وارد کنید.");
@@ -213,6 +246,7 @@
             document.getElementById('wheel-container').style.display = 'block';
             document.getElementById('coins-info').textContent = coins + " سکه";
             document.getElementById('coins-info').classList.remove('hidden');
+            setInterval(updatePrice, 3000); // به‌روزرسانی قیمت هر 3 ثانیه
         }
 
         // چرخاندن گردونه
@@ -221,7 +255,7 @@
             spinning = true;
             const prize = getRandomPrize();
             const spinAngle = prize.angle + Math.random() * 360;
-            wheel.style.transform = `rotate(${spinAngle}deg)`;
+            document.getElementById('wheel').style.transform = `rotate(${spinAngle}deg)`;
 
             setTimeout(() => {
                 alert(`شما ${prize.prize} بردید!`);
