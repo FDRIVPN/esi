@@ -28,6 +28,7 @@
             transform: translate(-50%, -50%);
             width: 300px;
             height: 300px;
+            display: none;
         }
 
         .wheel {
@@ -147,6 +148,49 @@
             cursor: pointer;
             width: 100%;
         }
+
+        .bet-container {
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 400px;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .bet-button {
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 18px;
+            width: 100%;
+        }
+
+        .bet-button.green {
+            background-color: green;
+            color: white;
+        }
+
+        .bet-button.red {
+            background-color: red;
+            color: white;
+        }
+
+        .back-button {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background-color: gray;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -156,25 +200,24 @@
         <button class="confirm-button" onclick="confirmUserId()">تایید</button>
     </div>
 
-    <!-- گردونه -->
+    <!-- صفحه گردونه -->
     <div class="wheel-container" id="wheel-container" style="display: none;">
         <div class="pointer"></div>
         <div class="wheel" id="wheel"></div>
-        <button id="spin-button" class="confirm-button" onclick="spinWheel()">چرخاندن گردونه</button>
     </div>
 
-    <!-- بیضی‌ها -->
-    <div class="oval right hidden" id="coins-info">
-        <span id="coins-text">0 سکه بردی</span>
+    <!-- بخش شرط بندی -->
+    <div class="bet-container" id="bet-container" style="display: none;">
+        <h2>مبلغ شرط بندی</h2>
+        <div class="bet-button green" onclick="placeBet('up')">بالا می‌رود</div>
+        <div class="bet-button red" onclick="placeBet('down')">پایین می‌رود</div>
+        <button class="back-button" onclick="goBack()">برگشت</button>
     </div>
-
-    <!-- آیکون منو -->
-    <div class="menu-icon" id="menu-icon" onclick="toggleMenu()"></div>
 
     <!-- منو -->
     <div class="menu" id="menu">
-        <div class="menu-option" onclick="openGamesPage()">بازی‌ها</div>
-        <div class="menu-option" onclick="openCoinsInfo()">سکه‌هایم</div>
+        <div class="menu-option" onclick="goToGamesPage()">بازی‌ها</div>
+        <div class="menu-option" onclick="viewCoins()">سکه‌هایم</div>
         <div class="menu-option" onclick="addUserName()">اضافه اسم</div>
         <div class="menu-option" onclick="changeUserId()">تغییر شناسه (یک بار)</div>
         <div class="menu-option">کمک‌گیری</div>
@@ -185,105 +228,78 @@
     <script>
         let coins = parseInt(localStorage.getItem('coins')) || 0;
         let userId = localStorage.getItem('userId');
-        let canChangeId = localStorage.getItem('canChangeId') === 'true'; // بررسی اینکه آیا شناسه قابل تغییر است
+        let canChangeId = localStorage.getItem('canChangeId') === 'true'; 
 
-        // چک کردن شناسه کاربر
         if (userId) {
             loadWheelPage();
         } else {
             document.getElementById('input-container').style.display = 'block';
         }
 
-        // تایید شناسه
         function confirmUserId() {
             const inputUserId = document.getElementById('user-id').value.trim();
-
             if (inputUserId) {
                 localStorage.setItem('userId', inputUserId);
                 localStorage.setItem('coins', 0);
-                localStorage.setItem('canChangeId', 'false'); // دیگر نمی‌توان شناسه را تغییر داد
+                localStorage.setItem('canChangeId', 'false');
                 loadWheelPage();
             } else {
                 alert("لطفاً شناسه خود را وارد کنید.");
             }
         }
 
-        // بارگذاری صفحه گردونه
         function loadWheelPage() {
             document.getElementById('input-container').style.display = 'none';
             document.getElementById('wheel-container').style.display = 'block';
-            document.getElementById('coins-info').textContent = coins + " سکه";
-            document.getElementById('coins-info').classList.remove('hidden');
         }
 
-        // چرخاندن گردونه
-        let spinning = false;
-        function spinWheel() {
-            if (spinning) return;
-            spinning = true;
-            const prize = getRandomPrize();
-            const spinAngle = prize.angle + Math.random() * 360;
-            document.getElementById('wheel').style.transform = `rotate(${spinAngle}deg)`;
-
-            setTimeout(() => {
-                alert(`شما ${prize.prize} سکه بردید!`);
-                coins += prize.prize;
-                localStorage.setItem('coins', coins);
-                document.getElementById('coins-info').textContent = coins + " سکه";
-                spinning = false;
-            }, 3000);
-        }
-
-        // دریافت یک جایزه تصادفی
-        function getRandomPrize() {
-            const prizeChances = [
-                { angle: 0, prize: 30 },
-                { angle: 45, prize: 60 },
-                { angle: 90, prize: 90 },
-                { angle: 135, prize: 120 },
-                { angle: 180, prize: 150 },
-                { angle: 225, prize: 180 },
-                { angle: 270, prize: 200 },
-                { angle: 315, prize: 250 }
-            ];
-            const randomNum = Math.random() * 100;
-            let cumulativeChance = 0;
-            for (const prize of prizeChances) {
-                cumulativeChance += 10;
-                if (randomNum < cumulativeChance) {
-                    return prize;
-                }
-            }
-            return prizeChances[0]; // اگر به هیچ کدام نرسید، اولین گزینه را انتخاب می‌کنیم.
-        }
-
-        // تغییرات منو
         function toggleMenu() {
             const menu = document.getElementById('menu');
-            menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
         }
 
-        // باز کردن صفحه بازی‌ها
-        function openGamesPage() {
-            alert("باز شدن صفحه بازی‌ها");
+        function placeBet(direction) {
+            if (coins < 10) {
+                alert("موجودی ناکافی!");
+                return;
+            }
+
+            localStorage.setItem('coins', coins - 10); // کسر سکه
+            alert(`شرط بندی شما ثبت شد: ${direction}`);
+            document.getElementById('bet-container').style.display = 'none';
         }
 
-        // نمایش سکه‌ها
-        function openCoinsInfo() {
-            alert(`سکه‌های شما: ${coins}`);
+        function goToGamesPage() {
+            document.getElementById('wheel-container').style.display = 'none';
+            document.getElementById('bet-container').style.display = 'block';
         }
 
-        // اضافه کردن نام کاربری
+        function goBack() {
+            document.getElementById('bet-container').style.display = 'none';
+            document.getElementById('wheel-container').style.display = 'block';
+        }
+
+        function viewCoins() {
+            alert("موجودی سکه شما: " + coins + " سکه");
+        }
+
         function addUserName() {
-            alert("اضافه کردن نام کاربری");
+            const newUserName = prompt("نام جدید خود را وارد کنید:");
+            if (newUserName) {
+                localStorage.setItem('userName', newUserName);
+                alert("نام شما با موفقیت تغییر کرد.");
+            }
         }
 
-        // تغییر شناسه کاربری
         function changeUserId() {
             if (canChangeId) {
-                alert("تغییر شناسه کاربری امکان پذیر است.");
+                const newUserId = prompt("شناسه جدید خود را وارد کنید:");
+                if (newUserId) {
+                    localStorage.setItem('userId', newUserId);
+                    alert("شناسه شما تغییر کرد.");
+                }
             } else {
-                alert("تغییر شناسه کاربری فقط یک بار ممکن است.");
+                alert("شما فقط یک بار قادر به تغییر شناسه خود هستید.");
             }
         }
     </script>
