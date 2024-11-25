@@ -182,21 +182,36 @@
         ];
 
         let coins = parseInt(localStorage.getItem('coins')) || 0;
-        const userId = localStorage.getItem('userId');
+        let userId = localStorage.getItem('userId');
 
+        // تابع تایید شناسه
         function confirmUserId() {
             const inputUserId = document.getElementById('user-id').value.trim();
+
+            // اگر شناسه وارد نشده و ذخیره نباشد
             if (inputUserId && !userId) {
                 localStorage.setItem('userId', inputUserId);
                 localStorage.setItem('coins', 0);
                 loadWheelPage();
-            } else if (!inputUserId) {
+            } else if (!inputUserId && !userId) {
                 alert("لطفا شناسه خود را وارد کنید.");
-            } else {
+            } else if (userId) {
                 alert("شما قبلاً شناسه وارد کرده‌اید.");
+                loadWheelPage();
+            } else {
+                alert("شناسه وارد شده نامعتبر است.");
             }
         }
 
+        // اگر شناسه ذخیره شده باشد، در ورودی نمایش داده می‌شود اما تغییر آن امکان‌پذیر نخواهد بود.
+        if (userId) {
+            document.getElementById('user-id').value = userId;
+            document.getElementById('user-id').disabled = true;
+            document.querySelector('.confirm-button').style.display = 'none'; // مخفی کردن دکمه تایید
+            loadWheelPage();
+        }
+
+        // بارگذاری صفحه گردونه
         function loadWheelPage() {
             document.getElementById('input-container').style.display = 'none';
             document.getElementById('wheel-container').style.display = 'block';
@@ -204,6 +219,7 @@
             updateUserInfo();
         }
 
+        // بروزرسانی اطلاعات کاربر
         function updateUserInfo() {
             document.getElementById('user-info').textContent = "کاربر: " + localStorage.getItem('userId');
             document.getElementById('coins-info').textContent = coins + " سکه";
@@ -211,6 +227,7 @@
             document.getElementById('coins-info').classList.remove('hidden');
         }
 
+        // چرخاندن گردونه
         function spinWheel() {
             if (spinning) return;
             spinning = true;
