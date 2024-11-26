@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سکه مجانی</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            direction: rtl;
+            text-align: center;
+            overflow: hidden;
+            position: relative;
+            height: 100vh;
+        }
+
+        .wheel-container, .betting-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            display: none;
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-image: url('wheel.png');
+            background-size: cover;
+            background-position: center;
+            transform: rotate(0deg);
+            transition: transform 3s ease-out;
+        }
+
+        .pointer {
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 30px solid red;
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .oval {
+            position: absolute;
+            width: 120px;
+            height: 50px;
+            background-color: lightgray;
+            border-radius: 25px;
+            line-height: 50px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .green {
+            background-color: green;
+            color: white;
+        }
+
+        .red {
+            background-color: red;
+            color: white;
+        }
+
+        .betting-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px;
+        }
+
+        .betting-button {
+            width: 45%;
+            height: 50px;
+            border-radius: 25px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .bet-button {
+            margin-top: 20px;
+            background-color: blue;
+            color: white;
+            width: 100%;
+            padding: 10px;
+            border-radius: 50px;
+        }
+
+        /* Hide elements by default */
+        .hidden {
+            display: none;
+        }
+
+        .input-container {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 400px;
+            background-color: #d3d3d3;
+            padding: 20px;
+            border-radius: 50px;
+            text-align: center;
+        }
+
+        .input-box {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 50px;
+            border: 1px solid #ccc;
+            background-color: white;
+        }
+
+        .confirm-button {
+            background-color: green;
+            color: white;
+            padding: 10px 20px;
+            font-size: 18px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="input-container" id="input-container" style="display: none;">
+        <input type="text" id="user-id" class="input-box" placeholder="شناسه خود را وارد کنید" />
+        <button class="confirm-button" onclick="confirmUserId()">تایید</button>
+    </div>
+
+    <div class="wheel-container" id="wheel-container">
+        <div class="pointer"></div>
+        <div class="wheel" id="wheel"></div>
+        <button onclick="spinWheel()" class="bet-button">چرخاندن گردونه</button>
+    </div>
+
+    <div class="betting-container" id="betting-container">
+        <input type="number" id="bet-amount" class="input-box" placeholder="مبلغ شرط بندی" />
+        <div class="betting-buttons">
+            <button class="betting-button green" onclick="placeBet('up')">بالا</button>
+            <button class="betting-button red" onclick="placeBet('down')">پایین</button>
+        </div>
+        <button onclick="confirmBet()" class="bet-button">شرط بندی میکنم</button>
+    </div>
+
+    <div class="menu-icon" id="menu-icon" onclick="toggleMenu()"></div>
+    <div class="menu" id="menu">
+        <div class="menu-option" onclick="loadWheelPage()">بازی‌ها</div>
+        <div class="menu-option">سکه‌هایم</div>
+        <div class="menu-option">اضافه اسم</div>
+        <div class="menu-option">تغییر شناسه</div>
+        <div class="menu-option">کمک‌گیری</div>
+    </div>
+
+    <script>
+        let coins = 1000; // موجودی سکه‌های کاربر
+        let userId = localStorage.getItem('userId');
+        let betAmount = 0;
+        let lastSpinTime = localStorage.getItem('lastSpinTime') || 0;
+
+        // چک کردن شناسه کاربر
+        if (userId) {
+            loadWheelPage();
+        } else {
+            document.getElementById('input-container').style.display = 'block';
+        }
+
+        function confirmUserId() {
+            const inputUserId = document.getElementById('user-id').value.trim();
+            if (inputUserId) {
+                localStorage.setItem('userId', inputUserId);
+                localStorage.setItem('coins', 1000); // مقدار اولیه سکه
+                localStorage.setItem('lastSpinTime', Date.now());
+                loadWheelPage();
+            } else {
+                alert("لطفاً شناسه خود را وارد کنید.");
+            }
+        }
+
+        function loadWheelPage() {
+            document.getElementById('input-container').style.display = 'none';
+            document.getElementById('wheel-container').style.display = 'block';
+        }
+
+        function spinWheel() {
+            // Implement wheel spinning logic here.
+        }
+
+        function toggleMenu() {
+            const menu = document.getElementById('menu');
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function placeBet(direction) {
+            betAmount = parseInt(document.getElementById('bet-amount').value);
+            // Check for balance and proceed with the bet
+            if (betAmount > coins) {
+                alert("موجودی ناکافی");
+            } else {
+                // Continue with the bet
+                alert(`شما روی ${direction} شرط بسته‌اید.`);
+            }
+        }
+
+        function confirmBet() {
+            if (betAmount > coins) {
+                alert("موجودی ناکافی");
+            } else {
+                // Confirm the bet and proceed with the game logic
+                alert(`شرط بندی تایید شد. شما ${betAmount} سکه شرط بسته‌اید.`);
+            }
+        }
+    </script>
+</body>
+</html>
