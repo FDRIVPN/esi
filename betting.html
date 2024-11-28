@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>صفحه شرط بندی</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f4f4f4;
+    }
+    .container {
+      text-align: center;
+    }
+    .input-field {
+      margin: 20px 0;
+    }
+    .button {
+      background-color: blue;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>مبلغ شرط بندی خود را وارد کنید</h1>
+    <div class="input-field">
+      <input type="number" id="betAmount" placeholder="مبلغ شرط (حداکثر 1000)" min="1" />
+    </div>
+    <button class="button" onclick="startGame()">تایید و شروع بازی</button>
+    <p id="error" style="color: red; display: none;">مبلغ شرط باید کمتر یا مساوی موجودی شما باشد.</p>
+  </div>
+
+  <script>
+    const currentBalance = 1000; // یا از localStorage بگیر
+    const betAmountInput = document.getElementById('betAmount');
+    const errorElement = document.getElementById('error');
+
+    function startGame() {
+      const betAmount = parseInt(betAmountInput.value);
+      if (betAmount <= currentBalance && betAmount > 0) {
+        localStorage.setItem('betAmount', betAmount);
+        localStorage.setItem('balance', currentBalance - betAmount);
+        window.location.href = '/game.html'; // هدایت به صفحه بازی
+      } else {
+        errorElement.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>
