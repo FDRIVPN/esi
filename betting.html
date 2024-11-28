@@ -40,7 +40,7 @@
   </div>
 
   <script>
-    const currentBalance = 1000; // یا از localStorage بگیر
+    const currentBalance = 1000; // موجودی اولیه، این مقدار می‌تواند از localStorage گرفته شود
     const betAmountInput = document.getElementById('betAmount');
     const errorElement = document.getElementById('error');
 
@@ -48,10 +48,10 @@
       const betAmount = parseInt(betAmountInput.value);
       if (betAmount <= currentBalance && betAmount > 0) {
         localStorage.setItem('betAmount', betAmount);
-        localStorage.setItem('balance', currentBalance - betAmount);
+        localStorage.setItem('balance', currentBalance - betAmount); // به روزرسانی موجودی پس از ثبت شرط
         window.location.href = 'game.html'; // هدایت به صفحه بازی
       } else {
-        errorElement.style.display = 'block';
+        errorElement.style.display = 'block'; // نمایش پیام خطا
       }
     }
   </script>
