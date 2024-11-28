@@ -72,16 +72,32 @@
     let currentPlayer = human;
     let gameOver = false;
     let betAmount = parseInt(localStorage.getItem('betAmount')) || 0;
-    let userId = localStorage.getItem('userId'); // Get user ID
-    let currentBalance = 1000; // Default balance
+   let userId = localStorage.getItem('userId'); // دریافت شناسه کاربری
+let currentBalance = parseInt(localStorage.getItem(userId + '_balance')) || 1000; // بارگذاری موجودی از localStorage یا مقدار پیش‌فرض 1000
 
-    // Check if userId is 'DASI' and set the balance accordingly
-    if (userId === 'داسی') {
-      currentBalance = 6000; // Set balance to 6000 for DASI
-    } else {
-      // Load user-specific balance from localStorage
-      currentBalance = parseInt(localStorage.getItem(userId + '_balance')) || 1000; // Default to 1000 if no balance is saved
-    }
+// اگر شناسه کاربری DASI باشد، موجودی آن را 6000 تنظیم کنیم
+if (userId === 'داسی') {
+  currentBalance = 6000; // تنظیم موجودی 6000 برای DASI
+}
+
+// بارگذاری موجودی در صفحه
+balanceElement.textContent = currentBalance;
+
+// ذخیره موجودی جدید در localStorage پس از هر تغییر
+function updateBalance(won) {
+  if (won) {
+    currentBalance += betAmount * 10; // در صورت برد، 10 برابر مبلغ شرط به موجودی افزوده می‌شود
+  } else {
+    currentBalance -= betAmount; // در صورت باخت، مبلغ شرط از موجودی کم می‌شود
+  }
+  
+  // ذخیره موجودی جدید در localStorage
+  localStorage.setItem(userId + '_balance', currentBalance);
+  
+  // به‌روزرسانی نمایش موجودی در صفحه
+  balanceElement.textContent = currentBalance;
+}
+
 
     const boardElement = document.getElementById("board");
     const statusElement = document.getElementById("status");
