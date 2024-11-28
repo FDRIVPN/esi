@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>بازی دوز</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f4f4f4;
+    }
+    .game-container {
+      position: relative;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-gap: 5px;
+      position: relative;
+    }
+    .cell {
+      width: 100px;
+      height: 100px;
+      background: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 36px;
+      font-weight: bold;
+      cursor: pointer;
+      border: 2px solid #ccc;
+    }
+    .cell.taken {
+      cursor: not-allowed;
+    }
+    .line {
+      position: absolute;
+      background-color: red;
+      height: 5px;
+      width: 0;
+      transform-origin: left;
+    }
+    .status {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <div class="board" id="board"></div>
+    <div class="status" id="status">نوبت شماست (X)</div>
+    <div class="line" id="line"></div>
+  </div>
+  <script>
+    const board = Array(9).fill(null);
+    const human = "X";
+    const ai = "O";
+    let currentPlayer = human;
+    let gameOver = false;
+
+    const boardElement = document.getElementById("board");
+    const statusElement = document.getElementById("status");
+    const lineElement = document.getElementById("line");
+
+    const winPatterns = [
+      [0, 1, 2], // سطر اول
+      [3, 4, 5], // سطر دوم
+      [6, 7, 8], // سطر سوم
+      [0, 3, 6], // ستون اول
+      [1, 4, 7], // ستون دوم
+      [2, 5, 8], // ستون سوم
+      [0, 4, 8], // قطر اول
+      [2, 4, 6], // قطر دوم
+    ];
+
+    function renderBoard() {
+      boardElement.innerHTML = '';
+      board.forEach((cell, index) => {
+        const cellElement = document.createElement('div');
+        cellElement.classList.add('cell');
+        if (cell) {
+          cellElement.textContent = cell;
+          cellElement.classList.add('taken');
+        }
+        cellElement.addEventListener('click', () => handleMove(index), { once: true });
+        boardElement.appendChild(cellElement);
+      });
+    }
+
+    function handleMove(index) {
+      if (board[index] || gameOver) return;
+      board[index] = currentPlayer;
+      renderBoard();
+
+      const winnerPattern = checkWinner(currentPlayer);
+      if (winnerPattern) {
+        drawLine(winnerPattern);
+        statusElement.textContent = currentPlayer === human ? 'شما برنده شدید!' : 'کامپیوتر برنده شد!';
+        gameOver = true;
+        return;
+      }
+
+      if (board.every(cell => cell)) {
+        statusElement.textContent = 'بازی مساوی شد!';
+        return;
+      }
+
+      currentPlayer = currentPlayer === human ? ai : human;
+      statusElement.textContent = `نوبت ${currentPlayer === human ? 'شما' : 'کامپیوتر'} (${currentPlayer})`;
+
+      if (currentPlayer === ai) {
+        setTimeout(aiMove, 500);
+      }
+    }
+
+    function aiMove() {
+      const bestMove = minimax(board, ai).index;
+      board[bestMove] = ai;
+      renderBoard();
+
+      const winnerPattern = checkWinner(ai);
+      if (winnerPattern) {
+        drawLine(winnerPattern);
+        statusElement.textContent = 'کامپیوتر برنده شد!';
+        gameOver = true;
+        return;
+      }
+
+      currentPlayer = human;
+      statusElement.textContent = 'نوبت شماست (X)';
+    }
+
+    function minimax(newBoard, player) {
+      const availableMoves = getAvailableMoves(newBoard);
+
+      if (checkWinner(human, newBoard)) return { score: -10 };
+      if (checkWinner(ai, newBoard)) return { score: 10 };
+      if (availableMoves.length === 0) return { score: 0 };
+
+      const moves = [];
+      availableMoves.forEach(index => {
+        const boardCopy = [...newBoard];
+        boardCopy[index] = player;
+
+        const result = minimax(boardCopy, player === ai ? human : ai);
+        moves.push({ index, score: result.score });
+      });
+
+      return player === ai
+        ? moves.reduce((best, move) => (move.score > best.score ? move : best), { score: -Infinity })
+        : moves.reduce((best, move) => (move.score < best.score ? move : best), { score: Infinity });
+    }
+
+    function getAvailableMoves(board) {
+      return board.map((cell, index) => (cell === null ? index : null)).filter(index => index !== null);
+    }
+
+    function checkWinner(player, boardState = board) {
+      return winPatterns.find(pattern => pattern.every(index => boardState[index] === player)) || null;
+    }
+
+    function drawLine(pattern) {
+      const positions = [
+        [10, 10], [110, 10], [210, 10],
+        [10, 110], [110, 110], [210, 110],
+        [10, 210], [110, 210], [210, 210],
+      ];
+
+      const [start, middle, end] = pattern.map(index => positions[index]);
+      const x1 = start[0];
+      const y1 = start[1];
+      const x2 = end[0];
+      const y2 = end[1];
+
+      lineElement.style.left = `${x1}px`;
+      lineElement.style.top = `${y1}px`;
+      lineElement.style.width = `${Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)}px`;
+      lineElement.style.transform = `rotate(${Math.atan2(y2 - y1, x2 - x1)}rad)`;
+      lineElement.style.visibility = 'visible';
+    }
+
+    renderBoard();
+  </script>
+</body>
+</html>
