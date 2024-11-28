@@ -72,7 +72,8 @@
     let currentPlayer = human;
     let gameOver = false;
     let betAmount = parseInt(localStorage.getItem('betAmount')) || 0;
-    let currentBalance = parseInt(localStorage.getItem('balance')) || 1000;
+    let userId = localStorage.getItem('userId'); // Get user ID
+    let currentBalance = 1000; // Default balance, will update per user
 
     const boardElement = document.getElementById("board");
     const statusElement = document.getElementById("status");
@@ -85,6 +86,22 @@
       [0, 3, 6], [1, 4, 7], [2, 5, 8],
       [0, 4, 8], [2, 4, 6],
     ];
+
+    // Check if user ID exists, if not redirect to entry page
+    if (!userId) {
+      alert("شناسه کاربری وارد نشده است.");
+      window.location.href = "id_entry_page.html"; // Redirect to ID entry page
+    } else {
+      // Load user-specific balance
+      currentBalance = parseInt(localStorage.getItem(userId + '_balance')) || 1000; // Fetch balance based on user ID
+    }
+
+    const loadGameData = () => {
+      // Display user balance and bet amount
+      balanceElement.textContent = currentBalance;
+      betAmountElement.textContent = betAmount;
+      renderBoard();
+    };
 
     function renderBoard() {
       boardElement.innerHTML = '';
@@ -191,15 +208,16 @@
     function updateBalance(won) {
       if (won) {
         currentBalance += betAmount * 10; // برد = 10 برابر مبلغ شرط
+      } else {
+        currentBalance -= betAmount; // کم شدن موجودی در صورت باخت
       }
-      localStorage.setItem('balance', currentBalance);
+      // Save the updated balance for the current user
+      localStorage.setItem(userId + '_balance', currentBalance);
       balanceElement.textContent = currentBalance;
     }
 
-    // نمایش موجودی و مبلغ شرط
-    betAmountElement.textContent = betAmount;
-
-    renderBoard();
+    // Load the game data (balance, bet amount, etc.)
+    loadGameData();
   </script>
 </body>
 </html>
