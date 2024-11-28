@@ -49,7 +49,7 @@
       if (betAmount <= currentBalance && betAmount > 0) {
         localStorage.setItem('betAmount', betAmount);
         localStorage.setItem('balance', currentBalance - betAmount);
-        window.location.href = 'esi/game.html'; // هدایت به صفحه بازی
+        window.location.href = 'game.html'; // هدایت به صفحه بازی
       } else {
         errorElement.style.display = 'block';
       }
