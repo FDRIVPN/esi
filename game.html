@@ -72,32 +72,8 @@
     let currentPlayer = human;
     let gameOver = false;
     let betAmount = parseInt(localStorage.getItem('betAmount')) || 0;
-   let userId = localStorage.getItem('userId'); // دریافت شناسه کاربری
-let currentBalance = parseInt(localStorage.getItem(userId + '_balance')) || 1000; // بارگذاری موجودی از localStorage یا مقدار پیش‌فرض 1000
-
-// اگر شناسه کاربری DASI باشد، موجودی آن را 6000 تنظیم کنیم
-if (userId === 'داسی') {
-  currentBalance = 6000; // تنظیم موجودی 6000 برای DASI
-}
-
-// بارگذاری موجودی در صفحه
-balanceElement.textContent = currentBalance;
-
-// ذخیره موجودی جدید در localStorage پس از هر تغییر
-function updateBalance(won) {
-  if (won) {
-    currentBalance += betAmount * 10; // در صورت برد، 10 برابر مبلغ شرط به موجودی افزوده می‌شود
-  } else {
-    currentBalance -= betAmount; // در صورت باخت، مبلغ شرط از موجودی کم می‌شود
-  }
-  
-  // ذخیره موجودی جدید در localStorage
-  localStorage.setItem(userId + '_balance', currentBalance);
-  
-  // به‌روزرسانی نمایش موجودی در صفحه
-  balanceElement.textContent = currentBalance;
-}
-
+    let userId = localStorage.getItem('userId'); // دریافت شناسه کاربری
+    let currentBalance = 1000; // مقدار پیش‌فرض موجودی
 
     const boardElement = document.getElementById("board");
     const statusElement = document.getElementById("status");
@@ -111,14 +87,16 @@ function updateBalance(won) {
       [0, 4, 8], [2, 4, 6],
     ];
 
-    // Check if user ID exists, if not redirect to entry page
-    if (!userId) {
-      alert("شناسه کاربری وارد نشده است.");
-      window.location.href = "id_entry_page.html"; // Redirect to ID entry page
+    // اگر شناسه کاربری DASI باشد، موجودی آن را 6000 تنظیم کنیم
+    if (userId === 'داسی' . "اسی") {
+      currentBalance = 6000; // تنظیم موجودی 6000 برای DASI
+    } else {
+      // اگر شناسه کاربری موجود نباشد، از localStorage موجودی کاربر را بارگذاری می‌کنیم
+      currentBalance = parseInt(localStorage.getItem(userId + '_balance')) || 1000; 
     }
 
     const loadGameData = () => {
-      // Display user balance and bet amount
+      // نمایش موجودی و مبلغ شرط
       balanceElement.textContent = currentBalance;
       betAmountElement.textContent = betAmount;
       renderBoard();
@@ -228,17 +206,21 @@ function updateBalance(won) {
 
     function updateBalance(won) {
       if (won) {
-        currentBalance += betAmount * 10; // برد = 10 برابر مبلغ شرط
+        currentBalance += betAmount * 10; // در صورت برد، 10 برابر مبلغ شرط به موجودی افزوده می‌شود
       } else {
-        currentBalance -= betAmount; // کم شدن موجودی در صورت باخت
+        currentBalance -= betAmount; // در صورت باخت، مبلغ شرط از موجودی کم می‌شود
       }
-      // Save the updated balance for the current user in localStorage
+      
+      // ذخیره موجودی جدید در localStorage
       localStorage.setItem(userId + '_balance', currentBalance);
+
+      // به‌روزرسانی نمایش موجودی در صفحه
       balanceElement.textContent = currentBalance;
     }
 
-    // Load the game data (balance, bet amount, etc.)
+    // بارگذاری داده‌های بازی (موجودی، مبلغ شرط، و ... )
     loadGameData();
+
   </script>
 </body>
 </html>
