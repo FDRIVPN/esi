@@ -92,7 +92,7 @@
       alert("شناسه کاربری وارد نشده است.");
       window.location.href = "id_entry_page.html"; // Redirect to ID entry page
     } else {
-      // Load user-specific balance
+      // Load user-specific balance from localStorage
       currentBalance = parseInt(localStorage.getItem(userId + '_balance')) || 1000; // Fetch balance based on user ID
     }
 
@@ -197,7 +197,7 @@
         [10, 210], [110, 210], [210, 210],
       ];
       const [start, middle, end] = pattern.map(index => positions[index]);
-      const x1 = start[0], y1 = start[1], x2 = end[0], y2 = end[1];
+            const x1 = start[0], y1 = start[1], x2 = end[0], y2 = end[1];
       lineElement.style.left = `${x1}px`;
       lineElement.style.top = `${y1}px`;
       lineElement.style.width = `${Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)}px`;
@@ -211,7 +211,7 @@
       } else {
         currentBalance -= betAmount; // کم شدن موجودی در صورت باخت
       }
-      // Save the updated balance for the current user
+      // Save the updated balance for the current user in localStorage
       localStorage.setItem(userId + '_balance', currentBalance);
       balanceElement.textContent = currentBalance;
     }
@@ -221,3 +221,4 @@
   </script>
 </body>
 </html>
+
