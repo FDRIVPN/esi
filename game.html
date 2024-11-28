@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -50,6 +50,17 @@
       text-align: center;
       font-size: 20px;
     }
+    .return-button {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: blue;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -57,27 +68,26 @@
     <div class="board" id="board"></div>
     <div class="status" id="status">نوبت شماست (X)</div>
     <div class="line" id="line"></div>
+    <button class="return-button" onclick="returnToWheel()">بازگشت به گردونه</button>
   </div>
+
   <script>
     const board = Array(9).fill(null);
     const human = "X";
     const ai = "O";
     let currentPlayer = human;
     let gameOver = false;
+    let betAmount = parseInt(localStorage.getItem('betAmount')) || 0;
+    let currentBalance = 1000 - betAmount; // موجودی بعد از شرط
 
     const boardElement = document.getElementById("board");
     const statusElement = document.getElementById("status");
     const lineElement = document.getElementById("line");
 
     const winPatterns = [
-      [0, 1, 2], // سطر اول
-      [3, 4, 5], // سطر دوم
-      [6, 7, 8], // سطر سوم
-      [0, 3, 6], // ستون اول
-      [1, 4, 7], // ستون دوم
-      [2, 5, 8], // ستون سوم
-      [0, 4, 8], // قطر اول
-      [2, 4, 6], // قطر دوم
+      [0, 1, 2], [3, 4, 5], [6, 7, 8],
+      [0, 3, 6], [1, 4, 7], [2, 5, 8],
+      [0, 4, 8], [2, 4, 6],
     ];
 
     function renderBoard() {
@@ -104,11 +114,13 @@
         drawLine(winnerPattern);
         statusElement.textContent = currentPlayer === human ? 'شما برنده شدید!' : 'کامپیوتر برنده شد!';
         gameOver = true;
+        updateBalance(currentPlayer === human);
         return;
       }
 
       if (board.every(cell => cell)) {
         statusElement.textContent = 'بازی مساوی شد!';
+        updateBalance(false);
         return;
       }
 
@@ -130,6 +142,7 @@
         drawLine(winnerPattern);
         statusElement.textContent = 'کامپیوتر برنده شد!';
         gameOver = true;
+        updateBalance(false);
         return;
       }
 
@@ -139,7 +152,6 @@
 
     function minimax(newBoard, player) {
       const availableMoves = getAvailableMoves(newBoard);
-
       if (checkWinner(human, newBoard)) return { score: -10 };
       if (checkWinner(ai, newBoard)) return { score: 10 };
       if (availableMoves.length === 0) return { score: 0 };
@@ -148,7 +160,6 @@
       availableMoves.forEach(index => {
         const boardCopy = [...newBoard];
         boardCopy[index] = player;
-
         const result = minimax(boardCopy, player === ai ? human : ai);
         moves.push({ index, score: result.score });
       });
@@ -172,18 +183,24 @@
         [10, 110], [110, 110], [210, 110],
         [10, 210], [110, 210], [210, 210],
       ];
-
       const [start, middle, end] = pattern.map(index => positions[index]);
-      const x1 = start[0];
-      const y1 = start[1];
-      const x2 = end[0];
-      const y2 = end[1];
-
+      const x1 = start[0], y1 = start[1], x2 = end[0], y2 = end[1];
       lineElement.style.left = `${x1}px`;
       lineElement.style.top = `${y1}px`;
       lineElement.style.width = `${Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)}px`;
       lineElement.style.transform = `rotate(${Math.atan2(y2 - y1, x2 - x1)}rad)`;
       lineElement.style.visibility = 'visible';
+    }
+
+    function updateBalance(won) {
+      if (won) {
+        currentBalance += betAmount * 10; // برد = 10 برابر مبلغ شرط
+      }
+      localStorage.setItem('balance', currentBalance);
+    }
+
+    function returnToWheel() {
+      window.location.href = 'wheel.html'; // به صفحه گردونه برگرداندن
     }
 
     renderBoard();
