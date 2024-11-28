@@ -73,7 +73,15 @@
     let gameOver = false;
     let betAmount = parseInt(localStorage.getItem('betAmount')) || 0;
     let userId = localStorage.getItem('userId'); // Get user ID
-    let currentBalance = 1000; // Default balance, will update per user
+    let currentBalance = 1000; // Default balance
+
+    // Check if userId is 'DASI' and set the balance accordingly
+    if (userId === 'داسی') {
+      currentBalance = 6000; // Set balance to 6000 for DASI
+    } else {
+      // Load user-specific balance from localStorage
+      currentBalance = parseInt(localStorage.getItem(userId + '_balance')) || 1000; // Default to 1000 if no balance is saved
+    }
 
     const boardElement = document.getElementById("board");
     const statusElement = document.getElementById("status");
@@ -91,9 +99,6 @@
     if (!userId) {
       alert("شناسه کاربری وارد نشده است.");
       window.location.href = "id_entry_page.html"; // Redirect to ID entry page
-    } else {
-      // Load user-specific balance from localStorage
-      currentBalance = parseInt(localStorage.getItem(userId + '_balance')) || 1000; // Fetch balance based on user ID
     }
 
     const loadGameData = () => {
@@ -197,7 +202,7 @@
         [10, 210], [110, 210], [210, 210],
       ];
       const [start, middle, end] = pattern.map(index => positions[index]);
-            const x1 = start[0], y1 = start[1], x2 = end[0], y2 = end[1];
+      const x1 = start[0], y1 = start[1], x2 = end[0], y2 = end[1];
       lineElement.style.left = `${x1}px`;
       lineElement.style.top = `${y1}px`;
       lineElement.style.width = `${Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)}px`;
@@ -221,4 +226,3 @@
   </script>
 </body>
 </html>
-
