@@ -21,7 +21,7 @@
             height: 100vh;
         }
 
-        .wheel-container, .betting-container {
+        .wheel-container, .betting-container, .menu-container {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -98,7 +98,6 @@
             border-radius: 50px;
         }
 
-        /* Hide elements by default */
         .hidden {
             display: none;
         }
@@ -135,6 +134,41 @@
             cursor: pointer;
             width: 100%;
         }
+
+        /* Menu styles */
+        .menu-container {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            width: 250px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: none;
+            z-index: 1000;
+        }
+
+        .menu-option {
+            margin: 10px 0;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 25px;
+            text-align: center;
+        }
+
+        .menu-option.active {
+            background-color: #f0f0f0;
+        }
+
+        .close-menu {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
     </style>
 </head>
 <body>
@@ -158,13 +192,11 @@
         <button onclick="confirmBet()" class="bet-button">شرط بندی میکنم</button>
     </div>
 
-    <div class="menu-icon" id="menu-icon" onclick="toggleMenu()"></div>
-    <div class="menu" id="menu">
-        <div class="menu-option" onclick="loadWheelPage()">بازی‌ها</div>
-        <div class="menu-option">سکه‌هایم</div>
-        <div class="menu-option">اضافه اسم</div>
-        <div class="menu-option">تغییر شناسه</div>
-        <div class="menu-option">کمک‌گیری</div>
+    <div class="menu-container" id="menu">
+        <div class="close-menu" onclick="toggleMenu()">✖</div>
+        <div class="menu-option" onclick="loadBettingPage()">بازی‌ها</div>
+        <div class="menu-option" onclick="loadBettingPage()">شرط بندی</div>
+        <div class="menu-option" onclick="changeUsername()">تغییر شناسه</div>
     </div>
 
     <script>
@@ -199,6 +231,11 @@
 
         function spinWheel() {
             // Implement wheel spinning logic here.
+            // Assuming a random prize from a set of values.
+            let prize = Math.floor(Math.random() * 100); // Random value from 0 to 99
+            alert(`شما ${prize} سکه بردید!`);
+            coins += prize;
+            localStorage.setItem('coins', coins);
         }
 
         function toggleMenu() {
@@ -206,13 +243,16 @@
             menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
         }
 
+        function loadBettingPage() {
+            // Navigate to betting page
+            alert("به صفحه شرط بندی منتقل شدید.");
+        }
+
         function placeBet(direction) {
             betAmount = parseInt(document.getElementById('bet-amount').value);
-            // Check for balance and proceed with the bet
             if (betAmount > coins) {
                 alert("موجودی ناکافی");
             } else {
-                // Continue with the bet
                 alert(`شما روی ${direction} شرط بسته‌اید.`);
             }
         }
@@ -221,7 +261,6 @@
             if (betAmount > coins) {
                 alert("موجودی ناکافی");
             } else {
-                // Confirm the bet and proceed with the game logic
                 alert(`شرط بندی تایید شد. شما ${betAmount} سکه شرط بسته‌اید.`);
             }
         }
