@@ -203,8 +203,6 @@
     <div class="menu-container" id="menu">
         <div class="close-menu" onclick="toggleMenu()">✖</div>
         <div class="menu-option" onclick="loadBettingPage()">بازی‌ها</div>
-        <div class="menu-option" onclick="loadBettingPage()">شرط بندی</div>
-        <div class="menu-option" onclick="changeUsername()">تغییر شناسه</div>
     </div>
 
     <div class="input-container" id="input-container" style="display: none;">
@@ -258,7 +256,6 @@
         }
 
         function spinWheel() {
-            // Implement wheel spinning logic here.
             let prize = Math.floor(Math.random() * 100); // Random value from 0 to 99
             alert(`شما ${prize} سکه بردید!`);
             coins += prize;
@@ -271,13 +268,7 @@
         }
 
         function loadBettingPage() {
-            // Navigate to betting page
-            alert("به صفحه شرط بندی منتقل شدید.");
-        }
-
-        function changeUsername() {
-            // Navigate to username change page
-            alert("صفحه تغییر شناسه");
+            window.location.href = 'game.html'; // Redirect to game.html
         }
 
         function placeBet(direction) {
