@@ -54,6 +54,24 @@
     .bet-status {
       margin-top: 10px;
       font-size: 18px;
+      display: flex;
+      justify-content: space-between;
+      width: 300px;
+      margin: 0 auto;
+    }
+    .ellipse {
+      display: inline-block;
+      width: 100px;
+      height: 40px;
+      background-color: #ccc;
+      border-radius: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .ellipse-text {
+      font-size: 16px;
+      color: white;
     }
   </style>
 </head>
@@ -61,7 +79,16 @@
   <div class="game-container">
     <div class="board" id="board"></div>
     <div class="status" id="status">نوبت شماست (X)</div>
-    <div class="bet-status" id="betStatus">موجودی شما: <span id="balance">1000</span> | مبلغ شرط: <span id="betAmount"></span></div>
+    <div class="bet-status">
+      <div class="ellipse" id="balanceEllipse">
+        <span class="ellipse-text">موجودی</span>
+        <span id="balance">1000</span>
+      </div>
+      <div class="ellipse" id="betEllipse">
+        <span class="ellipse-text">مبلغ شرط</span>
+        <span id="betAmount">0</span>
+      </div>
+    </div>
     <div class="line" id="line"></div>
   </div>
 
@@ -118,6 +145,13 @@
 
     function handleMove(index) {
       if (board[index] || gameOver) return;
+
+      // بررسی اینکه آیا شرط قابل قبول است
+      if (betAmount > currentBalance) {
+        alert("مبلغ شرط بیشتر از موجودی شما است!");
+        return; // اگر شرط بیشتر از موجودی بود، بازی انجام نمی‌شود
+      }
+
       board[index] = currentPlayer;
       renderBoard();
 
@@ -210,7 +244,7 @@
       } else {
         currentBalance -= betAmount; // در صورت باخت، مبلغ شرط از موجودی کم می‌شود
       }
-      
+
       // ذخیره موجودی جدید در localStorage
       localStorage.setItem(userId + '_balance', currentBalance);
 
