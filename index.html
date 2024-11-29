@@ -265,46 +265,34 @@
                 let hours = Math.floor(remainingTime / (1000 * 60 * 60));
                 let minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
                 let seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
-                document.getElementById('timer').innerText = `${hours}:${minutes}:${seconds}`;
+                document.getElementById('timer').textContent = `${hours}:${minutes}:${seconds}`;
                 document.getElementById('timer-container').style.display = 'block';
+                document.getElementById('spin-button').disabled = true;
             } else {
-                document.getElementById('timer-container').style.display = 'none';
+                document.getElementById('spin-button').disabled = false;
             }
         }
 
         function spinWheel() {
-            let spinResult = Math.floor(Math.random() * coinValues.length);
-            let winningAmount = coinValues[spinResult];
+            let randomIndex = Math.floor(Math.random() * coinValues.length);
+            let winningAmount = coinValues[randomIndex];
             coins += winningAmount;
-
             localStorage.setItem('coins', coins);
-            localStorage.setItem('lastSpinTime', Date.now());
-            updateResult(winningAmount);
-            rotateWheel();
-        }
-
-        function rotateWheel() {
-            let wheel = document.getElementById('wheel');
-            wheel.style.transform = `rotate(${Math.floor(Math.random() * 360)}deg)`;
-        }
-
-        function updateResult(winningAmount) {
-            document.getElementById('coins-won').innerText = winningAmount;
+            document.getElementById('coins-won').textContent = winningAmount;
             document.getElementById('result-container').style.display = 'block';
             setTimeout(() => {
                 document.getElementById('result-container').style.display = 'none';
-            }, 5000); // Hide the result after 5 seconds
+                checkSpinCooldown(); // Refresh the cooldown timer after the spin
+            }, 3000);
         }
 
-        // Toggle menu visibility
         function toggleMenu() {
             const menu = document.getElementById('menu');
             const hamburgerIcon = document.getElementById('hamburger-icon');
-            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+            menu.classList.toggle('hidden');
             hamburgerIcon.classList.toggle('open');
         }
 
-        // Load pages when menu options are clicked
         function loadBettingPage() {
             window.location.href = 'game.html';
         }
