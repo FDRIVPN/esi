@@ -77,7 +77,7 @@
         // بازیابی داده‌ها از localStorage
         let userid = localStorage.getItem('userid');  // شناسه کاربری از صفحه index.html
         let coins = localStorage.getItem('coins');    // موجودی گردونه از صفحه index.html
-        let currentBalance = 300; // فرضی: مقدار موجودی بازی‌ها، این رو می‌تونید از سرور بگیرید
+        let _balance = localStorage.getItem('_balance'); // فرضی: مقدار موجودی بازی‌ها، این رو می‌تونید از سرور بگیرید
 
         // قرار دادن داده‌ها در المان‌ها
         document.getElementById('user-id').innerText = userid;
