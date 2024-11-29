@@ -18,16 +18,22 @@
             align-items: center;
         }
         .ellipse {
-            border-radius: 50%;
+            border-radius: 60px; /* ایجاد بیضی کشیده */
             display: inline-block;
             margin: 20px;
             padding: 20px;
-            background-color: #f8c8c8;
+            background: linear-gradient(45deg, #ff9a9e, #fad0c4); /* گرادینت رنگی */
+            color: #fff;
             font-size: 18px;
             width: 250px;
             height: 120px;
             text-align: center;
             vertical-align: middle;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* سایه */
+            transition: transform 0.3s ease-in-out; /* انیمیشن هنگام حرکت موس */
+        }
+        .ellipse:hover {
+            transform: scale(1.05); /* بزرگ‌کردن بیضی هنگام hover */
         }
         .ellipse-container {
             display: flex;
@@ -35,42 +41,41 @@
             justify-content: center;
             align-items: center;
         }
-        .ellipse-top {
-            margin-bottom: 40px;
-        }
         .ellipse-title {
             font-size: 14px;
             margin-bottom: 10px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <div class="ellipse-container">
         <!-- بیضی‌های بالایی (شناسه کاربری و خالی) -->
-        <div class="ellipse-top">
-            <div class="ellipse">
-                <div class="ellipse-title">شناسه کاربری</div>
-                <div id="user-id">userid</div>
-            </div>
-            <div class="ellipse">
-                <div class="ellipse-title">خالی</div>
-                <div id="empty"></div>
-            </div>
+        <div class="ellipse">
+            <div class="ellipse-title">شناسه کاربری</div>
+            <div id="user-id">شناسه کاربری</div>
+        </div>
+        <div class="ellipse">
+            <div class="ellipse-title">خالی</div>
+            <div id="empty"></div>
         </div>
 
         <!-- بیضی‌های پایینی (موجودی گردونه و بازی‌ها) -->
         <div class="ellipse">
             <div class="ellipse-title">موجودی گردونه</div>
-            <div id="wheel-coin">"coins"</div>
+            <div id="wheel-coin">0</div>
         </div>
         <div class="ellipse">
             <div class="ellipse-title">موجودی بازی‌ها</div>
-            <div id="game-balance">"currentBalance"</div>
+            <div id="game-balance">0</div>
         </div>
     </div>
 
     <script>
-        
+        // داده‌های فرضی برای تست
+        let userid = "DASI";  // شناسه کاربری
+        let coins = 500;  // موجودی گردونه
+        let currentBalance = 300;  // موجودی بازی‌ها
 
         // قرار دادن داده‌ها در المان‌ها
         document.getElementById('user-id').innerText = userid;
