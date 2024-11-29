@@ -252,25 +252,25 @@
         function loadWheelPage() {
             document.getElementById('input-container').style.display = 'none';
             document.getElementById('wheel-container').style.display = 'block';
-            coins = parseInt(localStorage.getItem('coins')); // Get coins from localStorage
             checkSpinCooldown();
         }
 
         function checkSpinCooldown() {
-            let currentTime = Date.now();
-            let timeDifference = currentTime - lastSpinTime;
-
-            if (timeDifference < SPIN_COOLDOWN) {
-                let remainingTime = SPIN_COOLDOWN - timeDifference;
-                let hours = Math.floor(remainingTime / (1000 * 60 * 60));
-                let minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
-                let seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+            const remainingTime = SPIN_COOLDOWN - (Date.now() - lastSpinTime);
+            if (remainingTime > 0) {
+                const secondsRemaining = Math.floor(remainingTime / 1000);
+                const hours = Math.floor(secondsRemaining / 3600);
+                const minutes = Math.floor((secondsRemaining % 3600) / 60);
+                const seconds = secondsRemaining % 60;
                 document.getElementById('timer').textContent = `${hours}:${minutes}:${seconds}`;
                 document.getElementById('timer-container').style.display = 'block';
                 document.getElementById('spin-button').disabled = true;
             } else {
                 document.getElementById('spin-button').disabled = false;
             }
+
+            // Update timer every second
+            setTimeout(checkSpinCooldown, 1000);
         }
 
         function spinWheel() {
@@ -278,6 +278,7 @@
             let winningAmount = coinValues[randomIndex];
             coins += winningAmount;
             localStorage.setItem('coins', coins);
+            localStorage.setItem('lastSpinTime', Date.now()); // Update last spin time
             document.getElementById('coins-won').textContent = winningAmount;
             document.getElementById('result-container').style.display = 'block';
             setTimeout(() => {
@@ -294,7 +295,7 @@
         }
 
         function loadBettingPage() {
-            window.location.href = 'game.html';
+            window.location.href = 'games.html'; // Redirect to games.html
         }
 
         function loadCoinsPage() {
