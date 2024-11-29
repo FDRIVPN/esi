@@ -14,7 +14,10 @@
       margin: 0;
       background-color: #f4f4f4;
     }
-    .container {
+    .outer-ellipse {
+      background-color: #28a745; /* رنگ سبز */
+      border-radius: 50px;
+      padding: 40px 60px;
       text-align: center;
     }
     .input-field {
@@ -41,16 +44,20 @@
     .button:hover {
       background-color: darkblue;
     }
+    #error {
+      color: red;
+      display: none;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="outer-ellipse">
     <h1>مبلغ شرط بندی خود را وارد کنید</h1>
     <div class="input-field">
       <input type="number" id="betAmount" placeholder="مبلغ شرط (حداکثر 1000)" min="1" />
     </div>
     <button class="button" onclick="startGame()">تایید و شروع بازی</button>
-    <p id="error" style="color: red; display: none;">مبلغ شرط باید کمتر یا مساوی موجودی شما باشد.</p>
+    <p id="error">مبلغ شرط باید کمتر یا مساوی موجودی شما باشد.</p>
   </div>
 
   <script>
