@@ -197,6 +197,8 @@
     <div class="menu-container" id="menu">
         <div class="close-menu" onclick="toggleMenu()">✖</div>
         <div class="menu-option" onclick="loadBettingPage()">بازی‌ها</div>
+        <div class="menu-option" onclick="loadCoinsPage()">سکه‌ها</div>
+        <div class="menu-option" onclick="loadChangeUsernamePage()">تغییر شناسه</div>
     </div>
 
     <div class="input-container" id="input-container" style="display: none;">
@@ -260,61 +262,59 @@
 
             if (timeDifference < SPIN_COOLDOWN) {
                 let remainingTime = SPIN_COOLDOWN - timeDifference;
-                let hoursLeft = Math.floor(remainingTime / 3600000);
-                let minutesLeft = Math.floor((remainingTime % 3600000) / 60000);
-                let secondsLeft = Math.floor((remainingTime % 60000) / 1000);
-
-                updateTimer(hoursLeft, minutesLeft, secondsLeft);
-                document.getElementById('spin-button').disabled = true;
+                let hours = Math.floor(remainingTime / (1000 * 60 * 60));
+                let minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+                let seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+                document.getElementById('timer').innerText = `${hours}:${minutes}:${seconds}`;
                 document.getElementById('timer-container').style.display = 'block';
             } else {
-                document.getElementById('spin-button').disabled = false;
                 document.getElementById('timer-container').style.display = 'none';
             }
         }
 
-        function updateTimer(hoursLeft, minutesLeft, secondsLeft) {
-            const timerElement = document.getElementById('timer');
-            timerElement.textContent = `${String(hoursLeft).padStart(2, '0')}:${String(minutesLeft).padStart(2, '0')}:${String(secondsLeft).padStart(2, '0')}`;
-        }
-
         function spinWheel() {
-            const randomIndex = Math.floor(Math.random() * coinValues.length);
-            const winningCoins = coinValues[randomIndex];
-            const rotationDegrees = randomIndex * 45 + 30; // Adding 30 degrees for each coin
+            let spinResult = Math.floor(Math.random() * coinValues.length);
+            let winningAmount = coinValues[spinResult];
+            coins += winningAmount;
 
-            // Rotate wheel
-            const wheel = document.getElementById('wheel');
-            wheel.style.transform = `rotate(${rotationDegrees + 3600}deg)`; // Add rotations for smooth animation
-
-            // Show the result after the spin
-            setTimeout(function () {
-                coins += winningCoins;
-                localStorage.setItem('coins', coins); // Update the localStorage with the new coin count
-                document.getElementById('coins-won').textContent = coins;
-                document.getElementById('result-container').style.display = 'block';
-            }, 3000); // Wait for the wheel to finish spinning
-
-            // Update the spin time
+            localStorage.setItem('coins', coins);
             localStorage.setItem('lastSpinTime', Date.now());
-            checkSpinCooldown();
+            updateResult(winningAmount);
+            rotateWheel();
         }
 
+        function rotateWheel() {
+            let wheel = document.getElementById('wheel');
+            wheel.style.transform = `rotate(${Math.floor(Math.random() * 360)}deg)`;
+        }
+
+        function updateResult(winningAmount) {
+            document.getElementById('coins-won').innerText = winningAmount;
+            document.getElementById('result-container').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('result-container').style.display = 'none';
+            }, 5000); // Hide the result after 5 seconds
+        }
+
+        // Toggle menu visibility
         function toggleMenu() {
             const menu = document.getElementById('menu');
             const hamburgerIcon = document.getElementById('hamburger-icon');
-            
-            if (menu.style.display === 'block') {
-                menu.style.display = 'none';
-                hamburgerIcon.classList.remove('open');
-            } else {
-                menu.style.display = 'block';
-                hamburgerIcon.classList.add('open');
-            }
+            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+            hamburgerIcon.classList.toggle('open');
         }
 
+        // Load pages when menu options are clicked
         function loadBettingPage() {
-            window.location.href = 'games.html'; // Redirect to betting page
+            window.location.href = 'game.html';
+        }
+
+        function loadCoinsPage() {
+            window.location.href = 'coin.html';
+        }
+
+        function loadChangeUsernamePage() {
+            window.location.href = 'log.html';
         }
     </script>
 </body>
