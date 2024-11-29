@@ -146,6 +146,23 @@
             height: 5px;
             background-color: black;
             margin: 5px 0;
+            transition: 0.3s;
+        }
+
+        .hamburger-icon.open div:nth-child(1) {
+            transform: rotate(45deg);
+            position: relative;
+            top: 10px;
+        }
+
+        .hamburger-icon.open div:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger-icon.open div:nth-child(3) {
+            transform: rotate(-45deg);
+            position: relative;
+            top: -10px;
         }
 
         .close-menu {
@@ -247,12 +264,11 @@
                 let minutesLeft = Math.floor((remainingTime % 3600000) / 60000);
                 let secondsLeft = Math.floor((remainingTime % 60000) / 1000);
 
-                // Display the timer countdown
-                document.getElementById('timer-container').style.display = 'block';
                 updateTimer(hoursLeft, minutesLeft, secondsLeft);
-                document.querySelector('.bet-button').disabled = true;
+                document.getElementById('spin-button').disabled = true;
+                document.getElementById('timer-container').style.display = 'block';
             } else {
-                document.querySelector('.bet-button').disabled = false;
+                document.getElementById('spin-button').disabled = false;
                 document.getElementById('timer-container').style.display = 'none';
             }
         }
@@ -282,6 +298,23 @@
             // Update the spin time
             localStorage.setItem('lastSpinTime', Date.now());
             checkSpinCooldown();
+        }
+
+        function toggleMenu() {
+            const menu = document.getElementById('menu');
+            const hamburgerIcon = document.getElementById('hamburger-icon');
+            
+            if (menu.style.display === 'block') {
+                menu.style.display = 'none';
+                hamburgerIcon.classList.remove('open');
+            } else {
+                menu.style.display = 'block';
+                hamburgerIcon.classList.add('open');
+            }
+        }
+
+        function loadBettingPage() {
+            window.location.href = 'betting.html'; // Redirect to betting page
         }
     </script>
 </body>
