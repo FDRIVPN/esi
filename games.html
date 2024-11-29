@@ -23,12 +23,12 @@
             height: 100%;
         }
 
-        /* بیضی بزرگتر و در گوشه چپ بالا */
-        .ellipse {
-            width: 90px; /* 50px بیشتر از قبل */
-            height: 110px; /* 50px بیشتر از قبل */
+        /* مربع با گوشه‌های گرد */
+        .square {
+            width: 90px; /* ابعاد مربع */
+            height: 90px; /* ابعاد مربع */
             background-color: #ddd;
-            border-radius: 55px;
+            border-radius: 15px; /* گوشه‌های گرد */
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -40,14 +40,14 @@
         }
 
         .image {
-            width: 72px; /* 36px بیشتر از قبل */
-            height: 72px; /* 36px بیشتر از قبل */
+            width: 72px; /* اندازه تصویر */
+            height: 72px; /* اندازه تصویر */
         }
 
         .text {
             font-family: "Courier New", Courier, monospace;
             margin-top: 5px;
-            font-size: 18px; /* اندازه بزرگتر */
+            font-size: 18px; /* اندازه بزرگتر متن */
             color: #333;
         }
 
@@ -79,8 +79,8 @@
 <body>
 
     <div class="container">
-        <!-- بیضی بزرگتر با عکس و متن -->
-        <div class="ellipse">
+        <!-- مربع با گوشه‌های گرد و عکس و متن -->
+        <div class="square">
             <img src="دوز.png" alt="Image" class="image">
             <p class="text">دوز</p>
         </div>
@@ -95,8 +95,8 @@
 
     <script>
         // رویداد کلیک برای هدایت به صفحه getting.html
-        document.querySelector('.ellipse').addEventListener('click', function() {
-            window.location.href = 'betting.html';
+        document.querySelector('.square').addEventListener('click', function() {
+            window.location.href = 'getting.html';
         });
     </script>
 
