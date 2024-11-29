@@ -155,6 +155,19 @@
             font-size: 20px;
             cursor: pointer;
         }
+
+        .result-container {
+            margin-top: 20px;
+            font-size: 20px;
+            color: green;
+        }
+
+        .timer-container {
+            margin-top: 20px;
+            font-size: 16px;
+            color: red;
+        }
+
     </style>
 </head>
 <body>
@@ -177,11 +190,19 @@
     <div class="wheel-container" id="wheel-container">
         <div class="pointer"></div>
         <div class="wheel" id="wheel"></div>
-        <button onclick="spinWheel()" class="bet-button">چرخاندن گردونه</button>
+        <button onclick="spinWheel()" class="bet-button" id="spin-button">چرخاندن گردونه</button>
+    </div>
+
+    <div class="result-container" id="result-container" style="display: none;">
+        <p>شما برنده شدی! سکه‌های شما: <span id="coins-won">0</span></p>
+    </div>
+
+    <div class="timer-container" id="timer-container" style="display: none;">
+        <p>زمان باقی‌مانده برای چرخش بعدی: <span id="timer">00:00:00</span></p>
     </div>
 
     <script>
-        let coins = 0; // Initial coins
+        let coins = 0; // Initial coins set to 0
         let userId = localStorage.getItem('userId');
         let lastSpinTime = localStorage.getItem('lastSpinTime') || 0;
 
@@ -201,7 +222,7 @@
             const inputUserId = document.getElementById('user-id').value.trim();
             if (inputUserId) {
                 localStorage.setItem('userId', inputUserId);
-                localStorage.setItem('coins', 0); // Default coin balance
+                localStorage.setItem('coins', 0); // Set initial coin balance to 0
                 localStorage.setItem('lastSpinTime', Date.now());
                 loadWheelPage();
             } else {
@@ -213,7 +234,6 @@
             document.getElementById('input-container').style.display = 'none';
             document.getElementById('wheel-container').style.display = 'block';
             coins = parseInt(localStorage.getItem('coins')); // Get coins from localStorage
-
             checkSpinCooldown();
         }
 
@@ -226,49 +246,42 @@
                 let hoursLeft = Math.floor(remainingTime / 3600000);
                 let minutesLeft = Math.floor((remainingTime % 3600000) / 60000);
                 let secondsLeft = Math.floor((remainingTime % 60000) / 1000);
-                
-                // Display a countdown timer for the user
-                alert(` ${hoursLeft}: ${minutesLeft}: ${secondsLeft} .`);
+
+                // Display the timer countdown
+                document.getElementById('timer-container').style.display = 'block';
+                updateTimer(hoursLeft, minutesLeft, secondsLeft);
                 document.querySelector('.bet-button').disabled = true;
             } else {
                 document.querySelector('.bet-button').disabled = false;
+                document.getElementById('timer-container').style.display = 'none';
             }
+        }
+
+        function updateTimer(hoursLeft, minutesLeft, secondsLeft) {
+            const timerElement = document.getElementById('timer');
+            timerElement.textContent = `${String(hoursLeft).padStart(2, '0')}:${String(minutesLeft).padStart(2, '0')}:${String(secondsLeft).padStart(2, '0')}`;
         }
 
         function spinWheel() {
-            let currentTime = Date.now();
-            let timeDifference = currentTime - lastSpinTime;
+            const randomIndex = Math.floor(Math.random() * coinValues.length);
+            const winningCoins = coinValues[randomIndex];
+            const rotationDegrees = randomIndex * 45 + 30; // Adding 30 degrees for each coin
 
-            // Check if the user is within the 24-hour cooldown period
-            if (timeDifference < SPIN_COOLDOWN) {
-                alert("شما هنوز نمی‌توانید دوباره چرخاندن گردونه را امتحان کنید.");
-                return;
-            }
+            // Rotate wheel
+            const wheel = document.getElementById('wheel');
+            wheel.style.transform = `rotate(${rotationDegrees + 3600}deg)`; // Add rotations for smooth animation
 
-            // Randomly select a position (0-7, each representing a different coin reward)
-            let position = Math.floor(Math.random() * 8); // Random number from 0 to 7
-            let prize = coinValues[position];
+            // Show the result after the spin
+            setTimeout(function () {
+                coins += winningCoins;
+                localStorage.setItem('coins', coins); // Update the localStorage with the new coin count
+                document.getElementById('coins-won').textContent = coins;
+                document.getElementById('result-container').style.display = 'block';
+            }, 3000); // Wait for the wheel to finish spinning
 
-            // Rotate the wheel by a random amount between 0 and 360 degrees
-            let rotation = Math.floor(Math.random() * 360);
-
-            // Update the wheel's rotation and coins
-            document.getElementById('wheel').style.transform = `rotate(${rotation + (position * 45)}deg)`;
-            coins += prize;
-            localStorage.setItem('coins', coins); // Save the updated coin balance
-            localStorage.setItem('lastSpinTime', Date.now()); // Save the last spin time
-
-            // Alert user of the prize
-            alert(`شما ${prize} سکه بردید!`);
-        }
-
-        function toggleMenu() {
-            const menu = document.getElementById('menu');
-            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-        }
-
-        function loadBettingPage() {
-            window.location.href = 'betting.html'; // Redirect to betting page
+            // Update the spin time
+            localStorage.setItem('lastSpinTime', Date.now());
+            checkSpinCooldown();
         }
     </script>
 </body>
