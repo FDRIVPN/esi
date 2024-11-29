@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صفحه اصلی</title>
+    <style>
+        body {
+            font-family: Tahoma, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            position: relative;
+        }
+
+        .ellipse {
+            width: 40px;
+            height: 60px;
+            background-color: #ddd;
+            border-radius: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .image {
+            width: 36px;
+            height: 36px;
+        }
+
+        .text {
+            font-family: "Courier New", Courier, monospace;
+            margin-top: 5px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            text-decoration: none;
+        }
+
+        .circle {
+            width: 30px;
+            height: 30px;
+            background-color: #ff4d4d;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .close-text {
+            font-size: 18px;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- بیضی با عکس و متن -->
+        <div class="ellipse">
+            <img src="دوز.png" alt="Image" class="image">
+            <p class="text">دوز</p>
+        </div>
+
+        <!-- ایکس در دایره برای رفتن به صفحه index.html -->
+        <a href="index.html" class="close-btn">
+            <div class="circle">
+                <span class="close-text">X</span>
+            </div>
+        </a>
+    </div>
+
+    <script>
+        // رویداد کلیک برای هدایت به صفحه getting.html
+        document.querySelector('.ellipse').addEventListener('click', function() {
+            window.location.href = 'getting.html';
+        });
+    </script>
+
+</body>
+</html>
