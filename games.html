@@ -14,36 +14,44 @@
             align-items: center;
             height: 100vh;
             background-color: #f4f4f4;
+            position: relative;
         }
 
         .container {
             position: relative;
+            width: 100%;
+            height: 100%;
         }
 
+        /* بیضی بزرگتر و در گوشه چپ بالا */
         .ellipse {
-            width: 40px;
-            height: 60px;
+            width: 90px; /* 50px بیشتر از قبل */
+            height: 110px; /* 50px بیشتر از قبل */
             background-color: #ddd;
-            border-radius: 30px;
+            border-radius: 55px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             cursor: pointer;
+            position: absolute;
+            top: 10px; /* فاصله از بالا */
+            left: 10px; /* فاصله از چپ */
         }
 
         .image {
-            width: 36px;
-            height: 36px;
+            width: 72px; /* 36px بیشتر از قبل */
+            height: 72px; /* 36px بیشتر از قبل */
         }
 
         .text {
             font-family: "Courier New", Courier, monospace;
             margin-top: 5px;
-            font-size: 14px;
+            font-size: 18px; /* اندازه بزرگتر */
             color: #333;
         }
 
+        /* دکمه برگشت در گوشه بالا دست راست */
         .close-btn {
             position: absolute;
             top: 10px;
@@ -71,7 +79,7 @@
 <body>
 
     <div class="container">
-        <!-- بیضی با عکس و متن -->
+        <!-- بیضی بزرگتر با عکس و متن -->
         <div class="ellipse">
             <img src="دوز.png" alt="Image" class="image">
             <p class="text">دوز</p>
