@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صفحه کاربر</title>
+    <style>
+        body {
+            font-family: Tahoma, Arial, sans-serif;
+            text-align: center;
+            direction: rtl;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+        .ellipse {
+            border-radius: 50%;
+            display: inline-block;
+            padding: 20px;
+            margin: 20px;
+            background-color: #f8c8c8;
+            font-size: 20px;
+        }
+        .ellipse-large {
+            width: 300px;
+            height: 150px;
+        }
+        .ellipse-small {
+            width: 200px;
+            height: 100px;
+        }
+        .ellipse-top {
+            margin-top: 20px;
+        }
+        .ellipse-container {
+            margin-top: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="ellipse-top">
+        <!-- بیضی بالایی برای شناسه کاربری و خالی -->
+        <div class="ellipse ellipse-small" id="user-id">شناسه کاربری</div>
+        <div class="ellipse ellipse-small" id="empty"></div>
+    </div>
+
+    <div class="ellipse-container">
+        <!-- بیضی‌های موجودی گردونه و بازی‌ها -->
+        <div class="ellipse ellipse-large" id="wheel-coin">موجودی گردونه: 0</div>
+        <div class="ellipse ellipse-large" id="game-balance">موجودی بازی‌ها: 0</div>
+    </div>
+
+    <script>
+        // داده‌های فرضی برای تست
+        let userid = "DASI";  // شناسه کاربری
+        let coins = 500;  // موجودی گردونه
+        let _balance = 300;  // موجودی بازی‌ها
+
+        // قرار دادن داده‌ها در المان‌ها
+        document.getElementById('user-id').innerText = `شناسه کاربری: ${userid}`;
+        document.getElementById('wheel-coin').innerText = `موجودی گردونه: ${coins}`;
+        document.getElementById('game-balance').innerText = `موجودی بازی‌ها: ${_balance}`;
+    </script>
+</body>
+</html>
