@@ -54,41 +54,6 @@
             transform: translateX(-50%);
         }
 
-        .oval {
-            position: absolute;
-            width: 120px;
-            height: 50px;
-            background-color: lightgray;
-            border-radius: 25px;
-            line-height: 50px;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        .green {
-            background-color: green;
-            color: white;
-        }
-
-        .red {
-            background-color: red;
-            color: white;
-        }
-
-        .betting-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin: 10px;
-        }
-
-        .betting-button {
-            width: 45%;
-            height: 50px;
-            border-radius: 25px;
-            font-size: 18px;
-            cursor: pointer;
-        }
-
         .bet-button {
             margin-top: 20px;
             background-color: blue;
@@ -135,7 +100,6 @@
             width: 100%;
         }
 
-        /* Menu styles */
         .menu-container {
             position: absolute;
             top: 50%;
@@ -216,22 +180,17 @@
         <button onclick="spinWheel()" class="bet-button">چرخاندن گردونه</button>
     </div>
 
-    <div class="betting-container" id="betting-container">
-        <input type="number" id="bet-amount" class="input-box" placeholder="مبلغ شرط بندی" />
-        <div class="betting-buttons">
-            <button class="betting-button green" onclick="placeBet('up')">بالا</button>
-            <button class="betting-button red" onclick="placeBet('down')">پایین</button>
-        </div>
-        <button onclick="confirmBet()" class="bet-button">شرط بندی میکنم</button>
-    </div>
-
     <script>
-        let coins = 1000; // موجودی سکه‌های کاربر
+        let coins = 0; // Initial coins
         let userId = localStorage.getItem('userId');
-        let betAmount = 0;
         let lastSpinTime = localStorage.getItem('lastSpinTime') || 0;
 
-        // چک کردن شناسه کاربر
+        // The coin values for the wheel
+        const coinValues = [15, 30, 45, 60, 90, 120, 150, 180];
+
+        const SPIN_COOLDOWN = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+        // Check user ID
         if (userId) {
             loadWheelPage();
         } else {
@@ -242,7 +201,7 @@
             const inputUserId = document.getElementById('user-id').value.trim();
             if (inputUserId) {
                 localStorage.setItem('userId', inputUserId);
-                localStorage.setItem('coins', 1000); // مقدار اولیه سکه
+                localStorage.setItem('coins', 0); // Default coin balance
                 localStorage.setItem('lastSpinTime', Date.now());
                 loadWheelPage();
             } else {
@@ -253,13 +212,54 @@
         function loadWheelPage() {
             document.getElementById('input-container').style.display = 'none';
             document.getElementById('wheel-container').style.display = 'block';
+            coins = parseInt(localStorage.getItem('coins')); // Get coins from localStorage
+
+            checkSpinCooldown();
+        }
+
+        function checkSpinCooldown() {
+            let currentTime = Date.now();
+            let timeDifference = currentTime - lastSpinTime;
+
+            if (timeDifference < SPIN_COOLDOWN) {
+                let remainingTime = SPIN_COOLDOWN - timeDifference;
+                let hoursLeft = Math.floor(remainingTime / 3600000);
+                let minutesLeft = Math.floor((remainingTime % 3600000) / 60000);
+                let secondsLeft = Math.floor((remainingTime % 60000) / 1000);
+                
+                // Display a countdown timer for the user
+                alert(` ${hoursLeft}: ${minutesLeft}: ${secondsLeft} .`);
+                document.querySelector('.bet-button').disabled = true;
+            } else {
+                document.querySelector('.bet-button').disabled = false;
+            }
         }
 
         function spinWheel() {
-            let prize = Math.floor(Math.random() * 100); // Random value from 0 to 99
-            alert(`شما ${prize} سکه بردید!`);
+            let currentTime = Date.now();
+            let timeDifference = currentTime - lastSpinTime;
+
+            // Check if the user is within the 24-hour cooldown period
+            if (timeDifference < SPIN_COOLDOWN) {
+                alert("شما هنوز نمی‌توانید دوباره چرخاندن گردونه را امتحان کنید.");
+                return;
+            }
+
+            // Randomly select a position (0-7, each representing a different coin reward)
+            let position = Math.floor(Math.random() * 8); // Random number from 0 to 7
+            let prize = coinValues[position];
+
+            // Rotate the wheel by a random amount between 0 and 360 degrees
+            let rotation = Math.floor(Math.random() * 360);
+
+            // Update the wheel's rotation and coins
+            document.getElementById('wheel').style.transform = `rotate(${rotation + (position * 45)}deg)`;
             coins += prize;
-            localStorage.setItem('coins', coins);
+            localStorage.setItem('coins', coins); // Save the updated coin balance
+            localStorage.setItem('lastSpinTime', Date.now()); // Save the last spin time
+
+            // Alert user of the prize
+            alert(`شما ${prize} سکه بردید!`);
         }
 
         function toggleMenu() {
@@ -268,24 +268,7 @@
         }
 
         function loadBettingPage() {
-            window.location.href = 'betting.html'; // Redirect to game.html
-        }
-
-        function placeBet(direction) {
-            betAmount = parseInt(document.getElementById('bet-amount').value);
-            if (betAmount > coins) {
-                alert("موجودی ناکافی");
-            } else {
-                alert(`شما روی ${direction} شرط بسته‌اید.`);
-            }
-        }
-
-        function confirmBet() {
-            if (betAmount > coins) {
-                alert("موجودی ناکافی");
-            } else {
-                alert(`شرط بندی تایید شد. شما ${betAmount} سکه شرط بسته‌اید.`);
-            }
+            window.location.href = 'betting.html'; // Redirect to betting page
         }
     </script>
 </body>
