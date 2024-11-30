@@ -13,10 +13,11 @@
       height: 100vh;
       margin: 0;
       background-color: #f4f4f4;
+      position: relative;
     }
     .game-container {
-      position: relative;
       text-align: center;
+      position: relative;
     }
     .board {
       display: grid;
@@ -35,32 +36,26 @@
       font-weight: bold;
       cursor: pointer;
       border: 2px solid #ccc;
-      background-image: url('go.png');
-      background-size: cover;
-    }
-    .cell.taken {
-      cursor: not-allowed;
     }
     .status {
       margin-top: 20px;
-      text-align: center;
       font-size: 20px;
     }
-    .bet-status {
-      margin-top: 10px;
-      font-size: 18px;
-    }
-    .balance, .bet {
-      background-color: #fff;
-      border: 1px solid #ccc;
+    .ellipse {
+      position: absolute;
+      top: 10px;
       padding: 10px;
+      border-radius: 50%;
+      background-color: rgba(0, 0, 0, 0.3);
+      color: white;
       font-size: 18px;
+      font-weight: bold;
     }
-    .balance {
-      color: black;
+    .ellipse-left {
+      left: 10px;
     }
-    .bet {
-      color: #2f4f4f;
+    .ellipse-right {
+      right: 10px;
     }
     .line {
       position: absolute;
@@ -69,31 +64,15 @@
       width: 0;
       transform-origin: left;
     }
-    .ellipse {
-      position: absolute;
-      top: 10px;
-      background-color: rgba(0, 0, 0, 0.5);
-      color: white;
-      border-radius: 50%;
-      padding: 10px 20px;
-    }
-    .ellipse.left {
-      left: 10px;
-    }
-    .ellipse.right {
-      right: 10px;
-    }
   </style>
 </head>
 <body>
   <div class="game-container">
-    <div class="ellipse left">
-      <div>موجودی:</div>
-      <div id="balance"></div>
+    <div class="ellipse ellipse-left">
+      موجودی: <span id="balance">0</span>
     </div>
-    <div class="ellipse right">
-      <div>مبلغ شرط:</div>
-      <div id="betAmount"></div>
+    <div class="ellipse ellipse-right">
+      مبلغ شرط: <span id="betAmount">0</span>
     </div>
     <div class="board" id="board"></div>
     <div class="status" id="status">نوبت شماست (X)</div>
@@ -107,7 +86,7 @@
     let currentPlayer = human;
     let gameOver = false;
     let betAmount = parseInt(localStorage.getItem('betAmount')) || 0;
-    let userId = localStorage.getItem('userId');
+    let userId = localStorage.getItem('userId'); // دریافت شناسه کاربری
     let dozbalance = parseInt(localStorage.getItem(userId + '_balance')) || 0;
 
     const boardElement = document.getElementById("board");
@@ -116,18 +95,21 @@
     const betAmountElement = document.getElementById("betAmount");
     const lineElement = document.getElementById("line");
 
-    if (dozbalance < betAmount) {
-      alert("موجودی ناکافی! برای ادامه بازی موجودی شما باید بیشتر از مبلغ شرط باشد.");
-      window.location.href = "betting.html"; // انتقال به صفحه betting.html
-    } else {
-      loadGameData();
-    }
-
     const winPatterns = [
       [0, 1, 2], [3, 4, 5], [6, 7, 8],
       [0, 3, 6], [1, 4, 7], [2, 5, 8],
       [0, 4, 8], [2, 4, 6],
     ];
+
+    if (userId === 'داسی') {
+      dozbalance = 6000; // تنظیم موجودی 6000 برای DASI
+    }
+    if (userId === '55') {
+      dozbalance = 60000000; // تنظیم موجودی 6000 برای DASI
+    }
+    if (userId === 'اسی') {
+      dozbalance = 999999999; // تنظیم موجودی 6000 برای DASI
+    }
 
     const loadGameData = () => {
       balanceElement.textContent = dozbalance;
@@ -141,9 +123,7 @@
         const cellElement = document.createElement('div');
         cellElement.classList.add('cell');
         if (cell) {
-          const imageSrc = cell === "X" ? 'x.png' : (cell === "O" ? 'o.png' : 'go.png');
-          cellElement.style.backgroundImage = `url(${imageSrc})`;
-          cellElement.classList.add('taken');
+          cellElement.textContent = cell; // نمایش X یا O به عنوان متن
         }
         cellElement.addEventListener('click', () => handleMove(index), { once: true });
         boardElement.appendChild(cellElement);
@@ -152,6 +132,12 @@
 
     function handleMove(index) {
       if (board[index] || gameOver) return;
+
+      if (dozbalance < betAmount) {
+        alert("موجودی ناکافی! برای ادامه بازی موجودی شما باید بیشتر از مبلغ شرط باشد.");
+        window.location.href = "betting.html"; // انتقال به صفحه betting.html
+        return;
+      }
 
       board[index] = currentPlayer;
       renderBoard();
@@ -241,14 +227,18 @@
 
     function updateBalance(won) {
       if (won) {
-        dozbalance += betAmount * 1.25;
+        dozbalance += betAmount * 1.25; // اگر کاربر برنده شد
       } else {
-        dozbalance -= betAmount;
+        dozbalance -= betAmount; // اگر باخت
       }
+
       if (dozbalance < 0) dozbalance = 0;
-      localStorage.setItem(userId + '_balance', dozbalance);
+
+      localStorage.setItem(userId + '_balance', dozbalance); // ذخیره موجودی جدید
       loadGameData();
     }
+
+    loadGameData();
   </script>
 </body>
 </html>
