@@ -115,7 +115,6 @@
             text-align: right;
             display: flex;
             flex-direction: column;
-            pointer-events: none; /* Disables interaction when the menu is hidden */
         }
 
         .menu-option {
@@ -271,24 +270,21 @@
         }
 
         function loadBettingPage() {
-            // Handle betting page logic here
             alert("بازی‌ها در دست توسعه است.");
         }
 
         function loadCoinsPage() {
-            // Handle coins page logic here
             alert("سکه‌ها در دست توسعه است.");
         }
 
         function loadChangeUsernamePage() {
-            // Handle change username logic here
             alert("تغییر شناسه در دست توسعه است.");
         }
 
         function toggleMenu() {
             const menu = document.getElementById('menu');
-            const hamburgerIcon = document.getElementById('hamburger-icon');
             menu.classList.toggle('hidden');
+            const hamburgerIcon = document.getElementById('hamburger-icon');
             hamburgerIcon.classList.toggle('open');
         }
 
@@ -321,7 +317,6 @@
         }
 
         function spinWheel() {
-            // Simulate spinning the wheel
             const totalWeight = coinValues.reduce((sum, segment) => sum + segment.weight, 0);
             const randomWeight = Math.random() * totalWeight;
             let accumulatedWeight = 0;
