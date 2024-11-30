@@ -269,17 +269,16 @@
 
             if (timeDifference < SPIN_COOLDOWN) {
                 let remainingTime = SPIN_COOLDOWN - timeDifference;
+                startTimer(remainingTime);
                 document.getElementById('spin-button').disabled = true;
                 document.getElementById('timer-container').style.display = 'block';
-                startTimer(remainingTime);
             } else {
                 document.getElementById('spin-button').disabled = false;
-                document.getElementById('timer-container').style.display = 'none';
             }
         }
 
         function startTimer(time) {
-            let hours = Math.floor(time / (1000 * 60 * 60));
+            let hours = Math.floor((time / (1000 * 60 * 60)));
             let minutes = Math.floor((time % (1000 * 60 * 60)) / (1000 * 60));
             let seconds = Math.floor((time % (1000 * 60)) / 1000);
 
