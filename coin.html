@@ -13,7 +13,6 @@
       height: 100vh;
       margin: 0;
       background-color: #f4f4f4;
-      position: relative;
     }
     .game-container {
       text-align: center;
@@ -105,7 +104,8 @@
         cellElement.classList.add('cell');
         if (cell) {
           // تغییر تصویر بر اساس X یا O
-          cellElement.style.backgroundImage = `url('${cell === "X" ? "x.png" : "o.png"}')`;
+          const imageSrc = cell === "X" ? "x.png" : "o.png";
+          cellElement.style.backgroundImage = `url('${imageSrc}')`;
         }
         cellElement.addEventListener('click', () => handleMove(index), { once: true });
         boardElement.appendChild(cellElement);
