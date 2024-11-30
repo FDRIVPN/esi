@@ -1,205 +1,97 @@
 <!DOCTYPE html>
 <html lang="fa">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>بازی دوز</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      background-color: #f4f4f4;
-    }
-    .game-container {
-      text-align: center;
-      position: relative;
-    }
-    .board {
-      display: grid;
-      grid-template-columns: repeat(3, 100px);
-      grid-gap: 5px;
-      margin-bottom: 20px;
-    }
-    .cell {
-      width: 100px;
-      height: 100px;
-      background-image: url('go.png'); /* تصویر پیش‌فرض */
-      background-size: cover;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      border: 2px solid #ccc;
-    }
-    .ellipse {
-      position: absolute;
-      top: 10px;
-      padding: 10px;
-      border-radius: 50%;
-      background-color: rgba(0, 0, 0, 0.3);
-      color: white;
-      font-size: 18px;
-      font-weight: bold;
-    }
-    .ellipse-left {
-      left: 10px;
-    }
-    .ellipse-right {
-      right: 10px;
-    }
-    .status {
-      margin-top: 20px;
-      font-size: 20px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صفحه بازی</title>
+    <style>
+        body {
+            font-family: Tahoma, Arial, sans-serif;
+            text-align: center;
+            direction: rtl;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            overflow-y: auto; /* امکان اسکرول صفحه */
+        }
+        .ellipse {
+            border-radius: 60px;
+            display: inline-block;
+            margin: 20px;
+            padding: 20px;
+            background: linear-gradient(45deg, #ff9a9e, #fad0c4); /* گرادینت رنگی */
+            color: #fff;
+            font-size: 18px;
+            width: 250px;
+            height: 120px;
+            text-align: center;
+            vertical-align: middle;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease-in-out; /* انیمیشن هنگام hover */
+        }
+        .ellipse:hover {
+            transform: scale(1.05); /* بزرگ‌کردن بیضی هنگام hover */
+        }
+        .ellipse-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+        .ellipse-title {
+            font-size: 14px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .ellipse-top {
+            margin-bottom: 40px;
+        }
+    </style>
 </head>
 <body>
-  <div class="game-container">
-    <!-- بیضی‌ها -->
-    <div class="ellipse ellipse-left">
-      موجودی: <span id="balance">0</span>
+    <div class="ellipse-container">
+        <!-- بیضی‌های بالایی (شناسه کاربری و موجودی گردونه) -->
+        <div class="ellipse">
+            <div class="ellipse-title">شناسه کاربری</div>
+            <div id="user-id">شناسه کاربری</div>
+        </div>
+        <div class="ellipse">
+            <div class="ellipse-title">موجودی گردونه</div>
+            <div id="wheel-coin">0</div>
+        </div>
+        <!-- بیضی‌های پایینی (موجودی بازی‌ها) -->
+        <div class="ellipse">
+            <div class="ellipse-title">موجودی بازی‌ها</div>
+            <div id="game-balance">0</div>
+        </div>
     </div>
-    <div class="ellipse ellipse-right">
-      مبلغ شرط: <span id="betAmount">0</span>
-    </div>
-    <!-- جدول بازی -->
-    <div class="board" id="board"></div>
-    <div class="status" id="status">نوبت شماست (X)</div>
-  </div>
+    <script>
+        // بازیابی داده‌ها از localStorage
+        let userid = localStorage.getItem('userId');  // شناسه کاربری از صفحه index.html
+        let coins = localStorage.getItem('coins');    // موجودی گردونه از صفحه index.html
+        let dozbalance = localStorage.getItem('dozbalance'); // فرضی: مقدار موجودی بازی‌ها، این رو می‌تونید از سرور بگیرید
 
-  <script>
-    const board = Array(9).fill(null);
-    const human = "X";
-    const ai = "O";
-    let currentPlayer = human;
-    let gameOver = false;
-    let betAmount = 500; // مبلغ شرط بندی
-    let dozbalance = 1000; // موجودی اولیه کاربر
-
-    const boardElement = document.getElementById("board");
-    const statusElement = document.getElementById("status");
-    const balanceElement = document.getElementById("balance");
-    const betAmountElement = document.getElementById("betAmount");
-
-    const winPatterns = [
-      [0, 1, 2], [3, 4, 5], [6, 7, 8],
-      [0, 3, 6], [1, 4, 7], [2, 5, 8],
-      [0, 4, 8], [2, 4, 6],
-    ];
-
-    const loadGameData = () => {
-      balanceElement.textContent = dozbalance;
-      betAmountElement.textContent = betAmount;
-      renderBoard();
-    };
-
-    function renderBoard() {
-      boardElement.innerHTML = '';
-      board.forEach((cell, index) => {
-        const cellElement = document.createElement('div');
-        cellElement.classList.add('cell');
-        if (cell) {
-          // تغییر تصویر بر اساس X یا O
-          const imageSrc = cell === "X" ? "x.png" : "o.png";
-          cellElement.style.backgroundImage = `url('${imageSrc}')`;
+        // بررسی و جایگزینی مقدار null با مقدار پیش‌فرض
+        if (!userid) {
+            userid = 'شناسه نامعتبر';
         }
-        cellElement.addEventListener('click', () => handleMove(index), { once: true });
-        boardElement.appendChild(cellElement);
-      });
-    }
+        if (!coins) {
+            coins = '0';
+        }
+        if (!dozbalance) {
+            dozbalance = '0';
+        }
 
-    function handleMove(index) {
-      if (board[index] || gameOver || dozbalance < betAmount) return;
-
-      // کسر مبلغ شرط از موجودی
-      dozbalance -= betAmount;
-      balanceElement.textContent = dozbalance;
-
-      board[index] = currentPlayer;
-      renderBoard();
-
-      const winnerPattern = checkWinner(currentPlayer);
-      if (winnerPattern) {
-        statusElement.textContent = currentPlayer === human ? 'شما برنده شدید!' : 'کامپیوتر برنده شد!';
-        gameOver = true;
-        updateBalance(currentPlayer === human);
-        return;
-      }
-
-      if (board.every(cell => cell)) {
-        statusElement.textContent = 'بازی مساوی شد!';
-        updateBalance(false);
-        return;
-      }
-
-      currentPlayer = currentPlayer === human ? ai : human;
-      statusElement.textContent = `نوبت ${currentPlayer === human ? 'شما' : 'کامپیوتر'} (${currentPlayer})`;
-
-      if (currentPlayer === ai) {
-        setTimeout(aiMove, 500);
-      }
-    }
-
-    function aiMove() {
-      const bestMove = minimax(board, ai).index;
-      board[bestMove] = ai;
-      renderBoard();
-
-      const winnerPattern = checkWinner(ai);
-      if (winnerPattern) {
-        statusElement.textContent = 'کامپیوتر برنده شد!';
-        gameOver = true;
-        updateBalance(false);
-        return;
-      }
-
-      currentPlayer = human;
-      statusElement.textContent = 'نوبت شماست (X)';
-    }
-
-    function minimax(newBoard, player) {
-      const availableMoves = getAvailableMoves(newBoard);
-      if (checkWinner(human, newBoard)) return { score: -5 };
-      if (checkWinner(ai, newBoard)) return { score: 5 };
-      if (availableMoves.length === 0) return { score: 0 };
-
-      const moves = [];
-      availableMoves.forEach(index => {
-        const boardCopy = [...newBoard];
-        boardCopy[index] = player;
-        const result = minimax(boardCopy, player === ai ? human : ai);
-        moves.push({ index, score: result.score });
-      });
-
-      return player === ai
-        ? moves.reduce((best, move) => (move.score > best.score ? move : best), { score: -Infinity })
-        : moves.reduce((best, move) => (move.score < best.score ? move : best), { score: Infinity });
-    }
-
-    function getAvailableMoves(board) {
-      return board.map((cell, index) => (cell === null ? index : null)).filter(index => index !== null);
-    }
-
-    function checkWinner(player) {
-      return winPatterns.find(pattern => pattern.every(index => board[index] === player)) || null;
-    }
-
-    function updateBalance(won) {
-      if (won) {
-        dozbalance += betAmount * 10; // اگر کاربر برنده شد
-      } else {
-        dozbalance -= betAmount; // اگر باخت
-      }
-
-      if (dozbalance < 0) dozbalance = 0;
-      loadGameData();
-    }
-
-    loadGameData();
-  </script>
+        // قرار دادن داده‌ها در المان‌ها
+        document.getElementById('user-id').innerText = userid;
+        document.getElementById('wheel-coin').innerText = coins;
+        document.getElementById('game-balance').innerText = dozbalance;
+    </script>
 </body>
 </html>
