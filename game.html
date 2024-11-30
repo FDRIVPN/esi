@@ -21,7 +21,7 @@
     .board {
       display: grid;
       grid-template-columns: repeat(3, 100px);
-      grid-gap: 0; /* حذف فاصله بین تصاویر */
+      grid-gap: 5px;
       position: relative;
     }
     .cell {
@@ -35,8 +35,6 @@
       font-weight: bold;
       cursor: pointer;
       border: 2px solid #ccc;
-      background-image: url('go.png'); /* تصویر پیشفرض */
-      background-size: cover; /* تصاویر به اندازه کامل سلولها نمایش داده می شوند */
     }
     .cell.taken {
       cursor: not-allowed;
@@ -113,6 +111,7 @@
     if (userId === 'اسی') {
       dozbalance = 999999999; // تنظیم موجودی 6000 برای DASI
     }
+
     const loadGameData = () => {
       balanceElement.textContent = dozbalance;
       betAmountElement.textContent = betAmount;
@@ -125,9 +124,12 @@
         const cellElement = document.createElement('div');
         cellElement.classList.add('cell');
         if (cell) {
-          // وقتی بازی شروع می‌شود، عکسی که برای X و O انتخاب شده است
-          const imageSrc = cell === "X" ? 'x.png' : (cell === "O" ? 'o.png' : 'go.png');
-          cellElement.style.backgroundImage = `url(${imageSrc})`;
+          const img = document.createElement('img');
+          img.src = cell === "X" ? 'x.png' : (cell === "O" ? 'o.png' : 'go.png');
+          img.style.width = '80px';
+          img.style.height = '80px';
+          cellElement.appendChild(img);
+          cellElement.classList.add('taken');
         }
         cellElement.addEventListener('click', () => handleMove(index), { once: true });
         boardElement.appendChild(cellElement);
@@ -136,6 +138,15 @@
 
     function handleMove(index) {
       if (board[index] || gameOver) return;
+
+      // بررسی موجودی کاربر
+      if (dozbalance < betAmount) {
+        alert("موجودی ناکافی! برای ادامه بازی موجودی شما باید بیشتر از مبلغ شرط باشد.");
+        window.location.href = "betting.html"; // انتقال به صفحه betting.html
+        return;
+      }
+
+      // ادامه بازی اگر موجودی کافی باشد
       board[index] = currentPlayer;
       renderBoard();
 
@@ -224,14 +235,14 @@
 
     function updateBalance(won) {
       if (won) {
-        dozbalance += betAmount * 1.25;
+        dozbalance += betAmount * 1.25; // اگر کاربر برنده شد
       } else {
-        dozbalance -= betAmount;
+        dozbalance -= betAmount; // اگر باخت
       }
 
       if (dozbalance < 0) dozbalance = 0;
 
-      localStorage.setItem(userId + '_balance', dozbalance);
+      localStorage.setItem(userId + '_balance', dozbalance); // ذخیره موجودی جدید
       loadGameData();
     }
 
