@@ -273,19 +273,49 @@
             setTimeout(checkSpinCooldown, 1000);
         }
 
-        function spinWheel() {
-            let randomIndex = Math.floor(Math.random() * coinValues.length);
-            let winningAmount = coinValues[randomIndex];
-            coins += winningAmount;
-            localStorage.setItem('coins', coins);
-            localStorage.setItem('lastSpinTime', Date.now()); // Update last spin time
-            document.getElementById('coins-won').textContent = winningAmount;
-            document.getElementById('result-container').style.display = 'block';
-            setTimeout(() => {
-                document.getElementById('result-container').style.display = 'none';
-                checkSpinCooldown(); // Refresh the cooldown timer after the spin
-            }, 3000);
+       // وزن‌های هر بخش گردونه
+const sections = [
+    { value: 15, weight: 1 },   // 15 سکه
+    { value: 30, weight: 2 },   // 30 سکه
+    { value: 45, weight: 3 },   // 45 سکه
+    { value: 60, weight: 4 },   // 60 سکه
+    { value: 90, weight: 6 },   // 90 سکه (شانس بیشتر)
+    { value: 120, weight: 3 },  // 120 سکه
+    { value: 150, weight: 2 },  // 150 سکه
+    { value: 180, weight: 1 },  // 180 سکه
+];
+
+// تابع برای انتخاب تصادفی با در نظر گرفتن وزن‌ها
+function getRandomSection() {
+    // ایجاد آرایه‌ای از مقادیر به تعداد وزن‌ها
+    const weightedArray = [];
+    sections.forEach(section => {
+        for (let i = 0; i < section.weight; i++) {
+            weightedArray.push(section.value);
         }
+    });
+
+    // انتخاب تصادفی از آرایه وزنی
+    const randomIndex = Math.floor(Math.random() * weightedArray.length);
+    return weightedArray[randomIndex];
+}
+
+function spinWheel() {
+    // انتخاب یک بخش تصادفی با در نظر گرفتن وزن‌ها
+    const winningAmount = getRandomSection();
+    
+    coins += winningAmount;
+    localStorage.setItem('coins', coins);
+    localStorage.setItem('lastSpinTime', Date.now()); // بروزرسانی زمان آخرین چرخش
+
+    document.getElementById('coins-won').textContent = winningAmount;
+    document.getElementById('result-container').style.display = 'block';
+    setTimeout(() => {
+        document.getElementById('result-container').style.display = 'none';
+        checkSpinCooldown(); // بروزرسانی تایمر بعد از چرخش
+    }, 3000);
+}
+
 
         function toggleMenu() {
             const menu = document.getElementById('menu');
