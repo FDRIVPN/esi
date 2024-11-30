@@ -115,6 +115,7 @@
             text-align: right;
             display: flex;
             flex-direction: column;
+            pointer-events: none; /* Disables interaction when the menu is hidden */
         }
 
         .menu-option {
@@ -165,6 +166,14 @@
             top: -10px;
         }
 
+        .close-menu {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
         .result-container {
             margin-top: 20px;
             font-size: 20px;
@@ -176,6 +185,7 @@
             font-size: 16px;
             color: red;
         }
+
     </style>
 </head>
 <body>
@@ -186,6 +196,7 @@
     </div>
 
     <div class="menu-container" id="menu">
+        <div class="close-menu" onclick="toggleMenu()">✖</div>
         <div class="menu-option" onclick="loadBettingPage()">بازی‌ها</div>
         <div class="menu-option" onclick="loadCoinsPage()">سکه‌ها</div>
         <div class="menu-option" onclick="loadChangeUsernamePage()">تغییر شناسه</div>
@@ -217,6 +228,7 @@
 
         // The coin values for the wheel
         const coinValues = [15, 30, 45, 60, 90, 120, 150, 180];
+
         const SPIN_COOLDOWN = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
         // Check user ID
@@ -251,59 +263,69 @@
 
             if (timeDifference < SPIN_COOLDOWN) {
                 let remainingTime = SPIN_COOLDOWN - timeDifference;
-                let hours = Math.floor(remainingTime / (1000 * 60 * 60));
-                let minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
-                let seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
-                document.getElementById('timer').innerText = `${hours}:${minutes}:${seconds}`;
-                document.getElementById('timer-container').style.display = 'block';
+                startTimer(remainingTime);
             } else {
+                document.getElementById('spin-button').disabled = false;
                 document.getElementById('timer-container').style.display = 'none';
             }
         }
 
+        function startTimer(time) {
+            let hours = Math.floor(time / (1000 * 60 * 60));
+            let minutes = Math.floor((time % (1000 * 60 * 60)) / (1000 * 60));
+            let seconds = Math.floor((time % (1000 * 60)) / 1000);
+            let timer = `${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)}`;
+            document.getElementById('timer').textContent = timer;
+
+            if (time > 0) {
+                setTimeout(() => {
+                    startTimer(time - 1000);
+                }, 1000);
+            } else {
+                document.getElementById('spin-button').disabled = false;
+                document.getElementById('timer-container').style.display = 'none';
+            }
+        }
+
+        function padZero(value) {
+            return value < 10 ? '0' + value : value;
+        }
+
         function spinWheel() {
             let spinResult = Math.floor(Math.random() * coinValues.length);
-            let winningAmount = coinValues[spinResult];
-            coins += winningAmount;
-
+            let coinsWon = coinValues[spinResult];
+            coins += coinsWon;
             localStorage.setItem('coins', coins);
-            localStorage.setItem('lastSpinTime', Date.now());
-            updateResult(winningAmount);
-            rotateWheel();
-        }
+            localStorage.setItem('lastSpinTime', Date.now()); // Reset spin time after spin
 
-        function rotateWheel() {
-            let wheel = document.getElementById('wheel');
-            wheel.style.transform = `rotate(${Math.floor(Math.random() * 360)}deg)`;
-        }
-
-        function updateResult(winningAmount) {
-            document.getElementById('coins-won').innerText = winningAmount;
+            document.getElementById('coins-won').textContent = coinsWon;
             document.getElementById('result-container').style.display = 'block';
-            setTimeout(() => {
-                document.getElementById('result-container').style.display = 'none';
-            }, 5000); // Hide the result after 5 seconds
         }
 
-        // Toggle menu visibility
         function toggleMenu() {
             const menu = document.getElementById('menu');
-            const hamburgerIcon = document.getElementById('hamburger-icon');
-            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
-            hamburgerIcon.classList.toggle('open');
+            const hamburger = document.getElementById('hamburger-icon');
+            if (menu.style.display === 'block') {
+                menu.style.display = 'none';
+                hamburger.classList.remove('open');
+                menu.style.pointerEvents = 'none';
+            } else {
+                menu.style.display = 'block';
+                hamburger.classList.add('open');
+                menu.style.pointerEvents = 'auto';
+            }
         }
 
-        // Load pages when menu options are clicked
         function loadBettingPage() {
-            window.location.href = 'game.html';
+            window.location.href = 'games.html'; // Redirect to games page
         }
 
         function loadCoinsPage() {
-            window.location.href = 'coin.html';
+            window.location.href = 'coin.html'; // Redirect to coins page
         }
 
         function loadChangeUsernamePage() {
-            window.location.href = 'log.html';
+            window.location.href = 'log.html'; // Redirect to change username page
         }
     </script>
 </body>
