@@ -110,11 +110,12 @@
             border-radius: 15px;
             width: 250px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            display: none; /* Menu hidden by default */
+            display: none; /* منو به‌طور پیش‌فرض مخفی است */
             z-index: 1000;
             text-align: right;
             display: flex;
             flex-direction: column;
+            pointer-events: none; /* غیرفعال کردن تعامل تا منو نمایان شود */
         }
 
         .menu-option {
@@ -184,6 +185,7 @@
             font-size: 16px;
             color: red;
         }
+
     </style>
 </head>
 <body>
@@ -195,7 +197,7 @@
     </div>
 
     <!-- Menu -->
-    <div class="menu-container" id="menu">
+    <div class="menu-container hidden" id="menu">
         <div class="close-menu" onclick="toggleMenu()">✖</div>
         <div class="menu-option" onclick="loadBettingPage()">بازی‌ها</div>
         <div class="menu-option" onclick="loadCoinsPage()">سکه‌ها</div>
@@ -226,21 +228,12 @@
     </div>
 
     <script>
-        let coin = 0; // Initial coins set to 0
+        let coins = 0; // Initial coins set to 0
         let userId = localStorage.getItem('userId');
         let lastSpinTime = localStorage.getItem('lastSpinTime') || 0;
 
-        // The coin values for the wheel with adjusted odds
-        const coinValues = [
-            { value: 15, weight: 50 },  // 15 coins
-            { value: 30, weight: 40 },  // 30 coins
-            { value: 45, weight: 30 },  // 45 coins
-            { value: 60, weight: 20 },  // 60 coins
-            { value: 90, weight: 15 },  // 90 coins
-            { value: 120, weight: 10 }, // 120 coins
-            { value: 150, weight: 5 },  // 150 coins
-            { value: 180, weight: 3 }   // 180 coins
-        ];
+        // The coin values for the wheel
+        const coinValues = [15, 30, 45, 60, 90, 120, 150, 180];
 
         const SPIN_COOLDOWN = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
@@ -255,61 +248,48 @@
             const inputUserId = document.getElementById('user-id').value.trim();
             if (inputUserId) {
                 localStorage.setItem('userId', inputUserId);
-                localStorage.setItem('coin', 0); // Set initial coin balance to 0
+                localStorage.setItem('coins', 0); // Set initial coin balance to 0
                 localStorage.setItem('lastSpinTime', Date.now());
                 loadWheelPage();
             } else {
-                alert("لطفا شناسه را وارد کنید.");
+                alert("لطفاً شناسه خود را وارد کنید.");
             }
         }
 
         function loadWheelPage() {
             document.getElementById('input-container').style.display = 'none';
             document.getElementById('wheel-container').style.display = 'block';
-            checkCooldown();
+            coins = parseInt(localStorage.getItem('coins')); // Get coins from localStorage
+            checkSpinCooldown();
         }
 
-        function loadBettingPage() {
-            alert("بازی‌ها در دست توسعه است.");
-        }
+        function checkSpinCooldown() {
+            let currentTime = Date.now();
+            let timeDifference = currentTime - lastSpinTime;
 
-        function loadCoinsPage() {
-            alert("سکه‌ها در دست توسعه است.");
-        }
-
-        function loadChangeUsernamePage() {
-            alert("تغییر شناسه در دست توسعه است.");
-        }
-
-        function toggleMenu() {
-            const menu = document.getElementById('menu');
-            menu.classList.toggle('hidden');
-            const hamburgerIcon = document.getElementById('hamburger-icon');
-            hamburgerIcon.classList.toggle('open');
-        }
-
-        function checkCooldown() {
-            const currentTime = Date.now();
-            const timeDiff = currentTime - lastSpinTime;
-            if (timeDiff < SPIN_COOLDOWN) {
-                const remainingTime = SPIN_COOLDOWN - timeDiff;
-                document.getElementById('timer-container').style.display = 'block';
+            if (timeDifference < SPIN_COOLDOWN) {
+                let remainingTime = SPIN_COOLDOWN - timeDifference;
                 document.getElementById('spin-button').disabled = true;
-                updateTimer(remainingTime);
+                document.getElementById('timer-container').style.display = 'block';
+                startTimer(remainingTime);
+            } else {
+                document.getElementById('spin-button').disabled = false;
+                document.getElementById('timer-container').style.display = 'none';
             }
         }
 
-        function updateTimer(remainingTime) {
-            const timerInterval = setInterval(() => {
-                const seconds = Math.floor((remainingTime / 1000) % 60);
-                const minutes = Math.floor((remainingTime / (1000 * 60)) % 60);
-                const hours = Math.floor((remainingTime / (1000 * 60 * 60)) % 24);
-                document.getElementById('timer').textContent = `${hours}:${minutes}:${seconds}`;
+        function startTimer(time) {
+            let hours = Math.floor(time / (1000 * 60 * 60));
+            let minutes = Math.floor((time % (1000 * 60 * 60)) / (1000 * 60));
+            let seconds = Math.floor((time % (1000 * 60)) / 1000);
 
-                remainingTime -= 1000;
+            document.getElementById('timer').innerText = `${hours}:${minutes}:${seconds}`;
 
-                if (remainingTime <= 0) {
-                    clearInterval(timerInterval);
+            setTimeout(() => {
+                time -= 1000;
+                if (time >= 0) {
+                    startTimer(time);
+                } else {
                     document.getElementById('spin-button').disabled = false;
                     document.getElementById('timer-container').style.display = 'none';
                 }
@@ -317,28 +297,45 @@
         }
 
         function spinWheel() {
-            const totalWeight = coinValues.reduce((sum, segment) => sum + segment.weight, 0);
-            const randomWeight = Math.random() * totalWeight;
-            let accumulatedWeight = 0;
-
-            for (let segment of coinValues) {
-                accumulatedWeight += segment.weight;
-                if (randomWeight <= accumulatedWeight) {
-                    coin = segment.value;
-                    break;
-                }
-            }
-
+            let randomIndex = Math.floor(Math.random() * coinValues.length);
+            let winningAmount = coinValues[randomIndex];
+            coins += winningAmount;
+            localStorage.setItem('coins', coins);
+            document.getElementById('coins-won').innerText = winningAmount;
             document.getElementById('result-container').style.display = 'block';
-            document.getElementById('coins-won').textContent = coin;
-            updateBalance(coin);
+            document.getElementById('spin-button').disabled = true;
             localStorage.setItem('lastSpinTime', Date.now());
+            setTimeout(() => {
+                document.getElementById('result-container').style.display = 'none';
+                checkSpinCooldown();
+            }, 3000);
         }
 
-        function updateBalance(coinAmount) {
-            let currentBalance = parseInt(localStorage.getItem('coin')) || 0;
-            currentBalance += coinAmount;
-            localStorage.setItem('coin', currentBalance);
+        function toggleMenu() {
+            const menu = document.getElementById('menu');
+            const hamburger = document.getElementById('hamburger-icon');
+            
+            if (menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+                hamburger.classList.add('open');
+                menu.style.pointerEvents = 'auto'; // Enable interaction
+            } else {
+                menu.classList.add('hidden');
+                hamburger.classList.remove('open');
+                menu.style.pointerEvents = 'none'; // Disable interaction
+            }
+        }
+
+        function loadBettingPage() {
+            window.location.href = 'game.html';
+        }
+
+        function loadCoinsPage() {
+            window.location.href = 'coin.html';
+        }
+
+        function loadChangeUsernamePage() {
+            window.location.href = 'log.html';
         }
     </script>
 </body>
