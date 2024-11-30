@@ -185,7 +185,6 @@
             font-size: 16px;
             color: red;
         }
-
     </style>
 </head>
 <body>
@@ -228,12 +227,21 @@
     </div>
 
     <script>
-        let coins = 0; // Initial coins set to 0
+        let coin = 0; // Initial coins set to 0
         let userId = localStorage.getItem('userId');
         let lastSpinTime = localStorage.getItem('lastSpinTime') || 0;
 
-        // The coin values for the wheel
-        const coinValues = [15, 30, 45, 60, 90, 120, 150, 180];
+        // The coin values for the wheel with adjusted odds
+        const coinValues = [
+            { value: 15, weight: 50 },  // 15 coins
+            { value: 30, weight: 40 },  // 30 coins
+            { value: 45, weight: 30 },  // 45 coins
+            { value: 60, weight: 20 },  // 60 coins
+            { value: 90, weight: 15 },  // 90 coins
+            { value: 120, weight: 10 }, // 120 coins
+            { value: 150, weight: 5 },  // 150 coins
+            { value: 180, weight: 3 }   // 180 coins
+        ];
 
         const SPIN_COOLDOWN = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
@@ -248,92 +256,94 @@
             const inputUserId = document.getElementById('user-id').value.trim();
             if (inputUserId) {
                 localStorage.setItem('userId', inputUserId);
-                localStorage.setItem('coins', 0); // Set initial coin balance to 0
+                localStorage.setItem('coin', 0); // Set initial coin balance to 0
                 localStorage.setItem('lastSpinTime', Date.now());
                 loadWheelPage();
             } else {
-                alert("لطفاً شناسه خود را وارد کنید.");
+                alert("لطفا شناسه را وارد کنید.");
             }
         }
 
         function loadWheelPage() {
             document.getElementById('input-container').style.display = 'none';
             document.getElementById('wheel-container').style.display = 'block';
-            coins = parseInt(localStorage.getItem('coins')); // Get coins from localStorage
-            checkSpinCooldown();
+            checkCooldown();
         }
 
-        function checkSpinCooldown() {
-            let currentTime = Date.now();
-            let timeDifference = currentTime - lastSpinTime;
-
-            if (timeDifference < SPIN_COOLDOWN) {
-                let remainingTime = SPIN_COOLDOWN - timeDifference;
-                document.getElementById('spin-button').disabled = true;
-                document.getElementById('timer-container').style.display = 'block';
-                startTimer(remainingTime);
-            } else {
-                document.getElementById('spin-button').disabled = false;
-                document.getElementById('timer-container').style.display = 'none';
-            }
+        function loadBettingPage() {
+            // Handle betting page logic here
+            alert("بازی‌ها در دست توسعه است.");
         }
 
-        function startTimer(time) {
-            let hours = Math.floor(time / (1000 * 60 * 60));
-            let minutes = Math.floor((time % (1000 * 60 * 60)) / (1000 * 60));
-            let seconds = Math.floor((time % (1000 * 60)) / 1000);
-            let timer = `${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)}`;
-            document.getElementById('timer').textContent = timer;
-
-            if (time > 0) {
-                setTimeout(() => {
-                    startTimer(time - 1000);
-                }, 1000);
-            } else {
-                document.getElementById('spin-button').disabled = false;
-                document.getElementById('timer-container').style.display = 'none';
-            }
+        function loadCoinsPage() {
+            // Handle coins page logic here
+            alert("سکه‌ها در دست توسعه است.");
         }
 
-        function padZero(value) {
-            return value < 10 ? '0' + value : value;
-        }
-
-        function spinWheel() {
-            let spinResult = Math.floor(Math.random() * coinValues.length);
-            let coinsWon = coinValues[spinResult];
-            coins += coinsWon;
-            localStorage.setItem('coins', coins);
-            localStorage.setItem('lastSpinTime', Date.now()); // Reset spin time after spin
-
-            document.getElementById('coins-won').textContent = coinsWon;
-            document.getElementById('result-container').style.display = 'block';
+        function loadChangeUsernamePage() {
+            // Handle change username logic here
+            alert("تغییر شناسه در دست توسعه است.");
         }
 
         function toggleMenu() {
             const menu = document.getElementById('menu');
-            const hamburger = document.getElementById('hamburger-icon');
-            if (menu.style.display === 'block') {
-                menu.style.display = 'none';
-                hamburger.classList.remove('open');
-                menu.style.pointerEvents = 'none';
-            } else {
-                menu.style.display = 'block';
-                hamburger.classList.add('open');
-                menu.style.pointerEvents = 'auto';
+            const hamburgerIcon = document.getElementById('hamburger-icon');
+            menu.classList.toggle('hidden');
+            hamburgerIcon.classList.toggle('open');
+        }
+
+        function checkCooldown() {
+            const currentTime = Date.now();
+            const timeDiff = currentTime - lastSpinTime;
+            if (timeDiff < SPIN_COOLDOWN) {
+                const remainingTime = SPIN_COOLDOWN - timeDiff;
+                document.getElementById('timer-container').style.display = 'block';
+                document.getElementById('spin-button').disabled = true;
+                updateTimer(remainingTime);
             }
         }
 
-        function loadBettingPage() {
-            window.location.href = 'games.html'; // Redirect to games page
+        function updateTimer(remainingTime) {
+            const timerInterval = setInterval(() => {
+                const seconds = Math.floor((remainingTime / 1000) % 60);
+                const minutes = Math.floor((remainingTime / (1000 * 60)) % 60);
+                const hours = Math.floor((remainingTime / (1000 * 60 * 60)) % 24);
+                document.getElementById('timer').textContent = `${hours}:${minutes}:${seconds}`;
+
+                remainingTime -= 1000;
+
+                if (remainingTime <= 0) {
+                    clearInterval(timerInterval);
+                    document.getElementById('spin-button').disabled = false;
+                    document.getElementById('timer-container').style.display = 'none';
+                }
+            }, 1000);
         }
 
-        function loadCoinsPage() {
-            window.location.href = 'coin.html'; // Redirect to coins page
+        function spinWheel() {
+            // Simulate spinning the wheel
+            const totalWeight = coinValues.reduce((sum, segment) => sum + segment.weight, 0);
+            const randomWeight = Math.random() * totalWeight;
+            let accumulatedWeight = 0;
+
+            for (let segment of coinValues) {
+                accumulatedWeight += segment.weight;
+                if (randomWeight <= accumulatedWeight) {
+                    coin = segment.value;
+                    break;
+                }
+            }
+
+            document.getElementById('result-container').style.display = 'block';
+            document.getElementById('coins-won').textContent = coin;
+            updateBalance(coin);
+            localStorage.setItem('lastSpinTime', Date.now());
         }
 
-        function loadChangeUsernamePage() {
-            window.location.href = 'log.html'; // Redirect to change username page
+        function updateBalance(coinAmount) {
+            let currentBalance = parseInt(localStorage.getItem('coin')) || 0;
+            currentBalance += coinAmount;
+            localStorage.setItem('coin', currentBalance);
         }
     </script>
 </body>
