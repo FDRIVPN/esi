@@ -13,7 +13,6 @@
       height: 100vh;
       margin: 0;
       background-color: #f4f4f4;
-      position: relative;
     }
     .game-container {
       text-align: center;
@@ -23,23 +22,18 @@
       display: grid;
       grid-template-columns: repeat(3, 100px);
       grid-gap: 5px;
-      position: relative;
+      margin-bottom: 20px;
     }
     .cell {
       width: 100px;
       height: 100px;
-      background: white;
+      background-image: url('go.png'); /* تصویر پیش‌فرض */
+      background-size: cover;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 36px;
-      font-weight: bold;
       cursor: pointer;
       border: 2px solid #ccc;
-    }
-    .status {
-      margin-top: 20px;
-      font-size: 20px;
     }
     .ellipse {
       position: absolute;
@@ -57,26 +51,24 @@
     .ellipse-right {
       right: 10px;
     }
-    .line {
-      position: absolute;
-      background-color: red;
-      height: 5px;
-      width: 0;
-      transform-origin: left;
+    .status {
+      margin-top: 20px;
+      font-size: 20px;
     }
   </style>
 </head>
 <body>
   <div class="game-container">
+    <!-- بیضی‌ها -->
     <div class="ellipse ellipse-left">
       موجودی: <span id="balance">0</span>
     </div>
     <div class="ellipse ellipse-right">
       مبلغ شرط: <span id="betAmount">0</span>
     </div>
+    <!-- جدول بازی -->
     <div class="board" id="board"></div>
     <div class="status" id="status">نوبت شماست (X)</div>
-    <div class="line" id="line"></div>
   </div>
 
   <script>
@@ -85,31 +77,19 @@
     const ai = "O";
     let currentPlayer = human;
     let gameOver = false;
-    let betAmount = parseInt(localStorage.getItem('betAmount')) || 0;
-    let userId = localStorage.getItem('userId'); // دریافت شناسه کاربری
-    let dozbalance = parseInt(localStorage.getItem(userId + '_balance')) || 0;
+    let betAmount = 500; // مبلغ شرط بندی
+    let dozbalance = 1000; // موجودی اولیه کاربر
 
     const boardElement = document.getElementById("board");
     const statusElement = document.getElementById("status");
     const balanceElement = document.getElementById("balance");
     const betAmountElement = document.getElementById("betAmount");
-    const lineElement = document.getElementById("line");
 
     const winPatterns = [
       [0, 1, 2], [3, 4, 5], [6, 7, 8],
       [0, 3, 6], [1, 4, 7], [2, 5, 8],
       [0, 4, 8], [2, 4, 6],
     ];
-
-    if (userId === 'داسی') {
-      dozbalance = 6000; // تنظیم موجودی 6000 برای DASI
-    }
-    if (userId === '55') {
-      dozbalance = 60000000; // تنظیم موجودی 6000 برای DASI
-    }
-    if (userId === 'اسی') {
-      dozbalance = 999999999; // تنظیم موجودی 6000 برای DASI
-    }
 
     const loadGameData = () => {
       balanceElement.textContent = dozbalance;
@@ -123,7 +103,9 @@
         const cellElement = document.createElement('div');
         cellElement.classList.add('cell');
         if (cell) {
-          cellElement.textContent = cell; // نمایش X یا O به عنوان متن
+          // تغییر تصویر بر اساس X یا O
+          const imageSrc = cell === "X" ? "x.png" : "o.png";
+          cellElement.style.backgroundImage = `url('${imageSrc}')`;
         }
         cellElement.addEventListener('click', () => handleMove(index), { once: true });
         boardElement.appendChild(cellElement);
@@ -131,20 +113,17 @@
     }
 
     function handleMove(index) {
-      if (board[index] || gameOver) return;
+      if (board[index] || gameOver || dozbalance < betAmount) return;
 
-      if (dozbalance < betAmount) {
-        alert("موجودی ناکافی! برای ادامه بازی موجودی شما باید بیشتر از مبلغ شرط باشد.");
-        window.location.href = "betting.html"; // انتقال به صفحه betting.html
-        return;
-      }
+      // کسر مبلغ شرط از موجودی
+      dozbalance -= betAmount;
+      balanceElement.textContent = dozbalance;
 
       board[index] = currentPlayer;
       renderBoard();
 
       const winnerPattern = checkWinner(currentPlayer);
       if (winnerPattern) {
-        drawLine(winnerPattern);
         statusElement.textContent = currentPlayer === human ? 'شما برنده شدید!' : 'کامپیوتر برنده شد!';
         gameOver = true;
         updateBalance(currentPlayer === human);
@@ -172,7 +151,6 @@
 
       const winnerPattern = checkWinner(ai);
       if (winnerPattern) {
-        drawLine(winnerPattern);
         statusElement.textContent = 'کامپیوتر برنده شد!';
         gameOver = true;
         updateBalance(false);
@@ -206,35 +184,18 @@
       return board.map((cell, index) => (cell === null ? index : null)).filter(index => index !== null);
     }
 
-    function checkWinner(player, boardState = board) {
-      return winPatterns.find(pattern => pattern.every(index => boardState[index] === player)) || null;
-    }
-
-    function drawLine(pattern) {
-      const positions = [
-        [10, 10], [110, 10], [210, 10],
-        [10, 110], [110, 110], [210, 110],
-        [10, 210], [110, 210], [210, 210],
-      ];
-      const [start, middle, end] = pattern.map(index => positions[index]);
-      const x1 = start[0], y1 = start[1], x2 = end[0], y2 = end[1];
-      lineElement.style.left = `${x1}px`;
-      lineElement.style.top = `${y1}px`;
-      lineElement.style.width = `${Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)}px`;
-      lineElement.style.transform = `rotate(${Math.atan2(y2 - y1, x2 - x1)}rad)`;
-      lineElement.style.visibility = 'visible';
+    function checkWinner(player) {
+      return winPatterns.find(pattern => pattern.every(index => board[index] === player)) || null;
     }
 
     function updateBalance(won) {
       if (won) {
-        dozbalance += betAmount * 1.25; // اگر کاربر برنده شد
+        dozbalance += betAmount * 10; // اگر کاربر برنده شد
       } else {
         dozbalance -= betAmount; // اگر باخت
       }
 
       if (dozbalance < 0) dozbalance = 0;
-
-      localStorage.setItem(userId + '_balance', dozbalance); // ذخیره موجودی جدید
       loadGameData();
     }
 
