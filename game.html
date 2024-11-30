@@ -101,6 +101,8 @@
     let gameOver = false;
     let betAmount = 500; // مبلغ شرط بندی
     let dozbalance = 1000; // موجودی اولیه کاربر
+    let aiDifficulty = 1; // سطح سختی ربات
+    let gamesPlayed = 0; // تعداد بازی‌های انجام شده
 
     const boardElement = document.getElementById("board");
     const statusElement = document.getElementById("status");
@@ -138,9 +140,6 @@
       if (board[index] || gameOver || dozbalance < betAmount) return;
 
       // کسر مبلغ شرط از موجودی
-      dozbalance -= betAmount;
-      balanceElement.textContent = dozbalance;
-
       board[index] = currentPlayer;
       renderBoard();
 
@@ -154,6 +153,7 @@
 
       if (board.every(cell => cell)) {
         statusElement.textContent = 'بازی مساوی شد!';
+        gameOver = true;
         updateBalance(false);
         return;
       }
@@ -197,9 +197,11 @@
         moves.push({ index, score: result.score });
       });
 
+      // استفاده از سختی ربات برای بهبود انتخاب حرکت
+      const difficultyMultiplier = aiDifficulty > 1 ? aiDifficulty : 1;
       return player === ai
-        ? moves.reduce((best, move) => (move.score > best.score ? move : best), { score: -Infinity })
-        : moves.reduce((best, move) => (move.score < best.score ? move : best), { score: Infinity });
+        ? moves.reduce((best, move) => (move.score * difficultyMultiplier > best.score * difficultyMultiplier ? move : best), { score: -Infinity })
+        : moves.reduce((best, move) => (move.score * difficultyMultiplier < best.score * difficultyMultiplier ? move : best), { score: Infinity });
     }
 
     function getAvailableMoves(board) {
@@ -215,9 +217,19 @@
         dozbalance += betAmount * 10; // اگر کاربر برنده شد
       } else {
         dozbalance -= betAmount; // اگر باخت
+        if (board.every(cell => cell === null)) {
+          dozbalance -= betAmount / 2; // اگر مساوی شد
+        }
       }
 
       if (dozbalance < 0) dozbalance = 0;
+      gamesPlayed++;
+
+      // افزایش سختی ربات پس از 3 بازی
+      if (gamesPlayed >= 3) {
+        aiDifficulty = 2; // افزایش سطح سختی ربات
+      }
+
       loadGameData();
     }
 
