@@ -189,12 +189,14 @@
     </style>
 </head>
 <body>
+    <!-- Hamburger Icon -->
     <div class="hamburger-icon" id="hamburger-icon" onclick="toggleMenu()">
         <div></div>
         <div></div>
         <div></div>
     </div>
 
+    <!-- Menu -->
     <div class="menu-container" id="menu">
         <div class="close-menu" onclick="toggleMenu()">✖</div>
         <div class="menu-option" onclick="loadBettingPage()">بازی‌ها</div>
@@ -202,21 +204,25 @@
         <div class="menu-option" onclick="loadChangeUsernamePage()">تغییر شناسه</div>
     </div>
 
+    <!-- Input Container -->
     <div class="input-container" id="input-container" style="display: none;">
         <input type="text" id="user-id" class="input-box" placeholder="شناسه خود را وارد کنید" />
         <button class="confirm-button" onclick="confirmUserId()">تایید</button>
     </div>
 
+    <!-- Wheel Container -->
     <div class="wheel-container" id="wheel-container">
         <div class="pointer"></div>
         <div class="wheel" id="wheel"></div>
         <button onclick="spinWheel()" class="bet-button" id="spin-button">چرخاندن گردونه</button>
     </div>
 
+    <!-- Result -->
     <div class="result-container" id="result-container" style="display: none;">
         <p>شما برنده شدی! سکه‌های شما: <span id="coins-won">0</span></p>
     </div>
 
+    <!-- Timer -->
     <div class="timer-container" id="timer-container" style="display: none;">
         <p>زمان باقی‌مانده برای چرخش بعدی: <span id="timer">00:00:00</span></p>
     </div>
@@ -263,6 +269,8 @@
 
             if (timeDifference < SPIN_COOLDOWN) {
                 let remainingTime = SPIN_COOLDOWN - timeDifference;
+                document.getElementById('spin-button').disabled = true;
+                document.getElementById('timer-container').style.display = 'block';
                 startTimer(remainingTime);
             } else {
                 document.getElementById('spin-button').disabled = false;
