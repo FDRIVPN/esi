@@ -13,6 +13,7 @@
       height: 100vh;
       margin: 0;
       background-color: #f4f4f4;
+      flex-direction: column;
     }
     .game-container {
       text-align: center;
@@ -35,35 +36,56 @@
       cursor: pointer;
       border: 2px solid #ccc;
     }
+    /* بیضی‌ها با طراحی جدید */
     .ellipse {
       position: absolute;
       top: 10px;
-      padding: 10px;
-      border-radius: 50%;
-      background-color: rgba(0, 0, 0, 0.3);
+      padding: 10px 20px;
+      border-radius: 25px;
+      background-color: rgba(0, 0, 0, 0.4);
       color: white;
       font-size: 18px;
       font-weight: bold;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
     .ellipse-left {
-      left: 10px;
+      left: 20px;
     }
     .ellipse-right {
-      right: 10px;
+      right: 20px;
     }
     .status {
       margin-top: 20px;
       font-size: 20px;
     }
+    /* طراحی نوار موجودی و شرط */
+    .balance-bar, .bet-bar {
+      position: absolute;
+      top: 10px;
+      display: inline-block;
+      background-color: #333;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 25px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .balance-bar {
+      left: 20px;
+    }
+    .bet-bar {
+      right: 20px;
+    }
   </style>
 </head>
 <body>
   <div class="game-container">
-    <!-- بیضی‌ها -->
-    <div class="ellipse ellipse-left">
+    <!-- نوار موجودی و شرط -->
+    <div class="balance-bar">
       موجودی: <span id="balance">0</span>
     </div>
-    <div class="ellipse ellipse-right">
+    <div class="bet-bar">
       مبلغ شرط: <span id="betAmount">0</span>
     </div>
     <!-- جدول بازی -->
