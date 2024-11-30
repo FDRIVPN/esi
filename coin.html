@@ -28,7 +28,7 @@
     .cell {
       width: 100px;
       height: 100px;
-      background: url('go.png');
+      background-image: url('go.png'); /* تصویر پیش‌فرض */
       background-size: cover;
       display: flex;
       justify-content: center;
@@ -60,12 +60,14 @@
 </head>
 <body>
   <div class="game-container">
+    <!-- بیضی‌ها -->
     <div class="ellipse ellipse-left">
       موجودی: <span id="balance">0</span>
     </div>
     <div class="ellipse ellipse-right">
       مبلغ شرط: <span id="betAmount">0</span>
     </div>
+    <!-- جدول بازی -->
     <div class="board" id="board"></div>
     <div class="status" id="status">نوبت شماست (X)</div>
   </div>
@@ -76,7 +78,7 @@
     const ai = "O";
     let currentPlayer = human;
     let gameOver = false;
-    let betAmount = 500; // مبلغ شرط بندی که می‌توانید آن را از صفحه دیگر تنظیم کنید
+    let betAmount = 500; // مبلغ شرط بندی
     let dozbalance = 1000; // موجودی اولیه کاربر
 
     const boardElement = document.getElementById("board");
