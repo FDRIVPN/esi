@@ -74,7 +74,7 @@
     <div class="board" id="board"></div>
     <div class="status" id="status">نوبت شماست (X)</div>
     <div class="bet-status">
-      <div class="balance">موجودی: <span id="balance">1000</span></div>
+      <div class="balance">موجودی: <span id="balance">0</span></div>
       <div class="bet">مبلغ شرط: <span id="betAmount"></span></div>
     </div>
     <div class="line" id="line"></div>
@@ -88,7 +88,7 @@
     let gameOver = false;
     let betAmount = parseInt(localStorage.getItem('betAmount')) || 0;
     let userId = localStorage.getItem('userId'); // دریافت شناسه کاربری
-    let dozbalance = parseInt(localStorage.getItem(userId + '_balance')) || 1000;
+    let dozbalance = parseInt(localStorage.getItem(userId + '_balance')) || 0;
 
     const boardElement = document.getElementById("board");
     const statusElement = document.getElementById("status");
@@ -105,7 +105,12 @@
     if (userId === 'داسی') {
       dozbalance = 6000; // تنظیم موجودی 6000 برای DASI
     }
-
+    if (userId === '55') {
+      dozbalance = 60000000; // تنظیم موجودی 6000 برای DASI
+    }
+    if (userId === 'اسی') {
+      dozbalance = 999999999; // تنظیم موجودی 6000 برای DASI
+    }
     const loadGameData = () => {
       balanceElement.textContent = dozbalance;
       betAmountElement.textContent = betAmount;
@@ -178,8 +183,8 @@
 
     function minimax(newBoard, player) {
       const availableMoves = getAvailableMoves(newBoard);
-      if (checkWinner(human, newBoard)) return { score: -10 };
-      if (checkWinner(ai, newBoard)) return { score: 10 };
+      if (checkWinner(human, newBoard)) return { score: -5 };
+      if (checkWinner(ai, newBoard)) return { score: 5 };
       if (availableMoves.length === 0) return { score: 0 };
 
       const moves = [];
@@ -220,7 +225,7 @@
 
     function updateBalance(won) {
       if (won) {
-        dozbalance += betAmount * 10;
+        dozbalance += betAmount * 1.25;
       } else {
         dozbalance -= betAmount;
       }
