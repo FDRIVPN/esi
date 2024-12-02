@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بازی اسلات</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .slot-container {
+            margin-top: 50px;
+        }
+        .slots {
+            display: flex;
+            justify-content: center;
+            margin: 20px auto;
+            width: 300px;
+        }
+        .slot {
+            width: 80px;
+            height: 80px;
+            margin: 0 10px;
+            font-size: 2rem;
+            line-height: 80px;
+            text-align: center;
+            border: 2px solid #333;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .message {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="slot-container">
+        <h1>🎰 بازی اسلات</h1>
+        <div class="slots">
+            <div class="slot" id="slot1">🍒</div>
+            <div class="slot" id="slot2">🍋</div>
+            <div class="slot" id="slot3">🍇</div>
+        </div>
+        <button id="spinButton">چرخش</button>
+        <div class="message" id="message"></div>
+    </div>
+    <script>
+        const symbols = ["🍒", "🍋", "🍇", "🍉", "🍓", "⭐", "🔔"];
+        const slot1 = document.getElementById("slot1");
+        const slot2 = document.getElementById("slot2");
+        const slot3 = document.getElementById("slot3");
+        const spinButton = document.getElementById("spinButton");
+        const message = document.getElementById("message");
+
+        spinButton.addEventListener("click", () => {
+            // چرخاندن اسلات‌ها
+            const result1 = symbols[Math.floor(Math.random() * symbols.length)];
+            const result2 = symbols[Math.floor(Math.random() * symbols.length)];
+            const result3 = symbols[Math.floor(Math.random() * symbols.length)];
+
+            // نمایش نتایج
+            slot1.textContent = result1;
+            slot2.textContent = result2;
+            slot3.textContent = result3;
+
+            // نمایش پیام
+            if (result1 === result2 && result2 === result3) {
+                message.textContent = "🎉 شما برنده شدید! 🎉";
+                message.style.color = "green";
+            } else {
+                message.textContent = "😞 دوباره تلاش کنید.";
+                message.style.color = "red";
+            }
+        });
+    </script>
+</body>
+</html>
