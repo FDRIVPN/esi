@@ -207,13 +207,16 @@
             // Apply the corresponding degrees and coins
             const { degrees, coins: winningAmount } = selectedSection;
 
+            // ذخیره مقدار سکه برنده شده در متغیر coin2
+            let coin2 = winningAmount;
+
             // Show wheel spinning effect
             document.getElementById('wheel').style.transform = `rotate(${degrees + 3600}deg)`; // +3600 for spinning multiple times
 
             setTimeout(() => {
                 coins += winningAmount;
                 localStorage.setItem('coins', coins);
-                document.getElementById('coins-won').innerText = winningAmount;
+                document.getElementById('coins-won').innerText = coin2;  // نمایش مقدار سکه برنده شده در صفحه
                 document.getElementById('result-container').style.display = 'block';
                 
                 localStorage.setItem('lastSpinTime', Date.now()); // Update the last spin time
