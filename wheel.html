@@ -152,7 +152,7 @@
 
         function loadWheelPage() {
             document.getElementById('wheel-container').style.display = 'block';
-            coins = parseInt(localStorage.getItem('coins')); // Get coins from localStorage
+            coins = parseInt(localStorage.getItem('coins')) || 0; // Get coins from localStorage, default to 0 if not set
             checkSpinCooldown();
         }
 
@@ -214,8 +214,8 @@
             document.getElementById('wheel').style.transform = `rotate(${degrees + 3600}deg)`; // +3600 for spinning multiple times
 
             setTimeout(() => {
-                coins += winningAmount;
-                localStorage.setItem('coins', coins);
+                coins = winningAmount;  // Update the coins to the new value from the wheel
+                localStorage.setItem('coins', coins);  // Save new coin balance to localStorage
                 document.getElementById('coins-won').innerText = coin2;  // نمایش مقدار سکه برنده شده در صفحه
                 document.getElementById('result-container').style.display = 'block';
                 
@@ -237,7 +237,9 @@
 
         // When the user clicks the hamburger icon
         document.getElementById('hamburger-icon').addEventListener('click', function() {
-            window.location.href = 'menu.html'; // Redirect to the menu page
+            // Toggle the menu visibility
+            const menu = document.getElementById('menu');
+            menu.classList.toggle('hidden');
         });
     </script>
 </body>
