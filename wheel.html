@@ -231,6 +231,11 @@
             document.getElementById('spin-button').style.display = 'none';  // Hide button during spin
             spinWheel();
         });
+
+        // When the user clicks the hamburger icon
+        document.getElementById('hamburger-icon').addEventListener('click', function() {
+            window.location.href = 'menu.html'; // Redirect to the menu page
+        });
     </script>
 </body>
 </html>
