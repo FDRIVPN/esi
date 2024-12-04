@@ -62,7 +62,7 @@
         
         // If userId exists, redirect to the wheel page (game.html)
         if (userId) {
-            window.location.href = "game.html"; // Redirect to game page if ID exists
+            window.location.href = "wheel.html"; // Redirect to game page if ID exists
         }
 
         function confirmUserId() {
@@ -70,7 +70,7 @@
             if (inputUserId) {
                 localStorage.setItem('userId', inputUserId); // Save the user ID to localStorage
                 localStorage.setItem('coins', 0); // Set initial coin balance to 0
-                window.location.href = "game.html"; // Redirect to the game page
+                window.location.href = "wheel.html"; // Redirect to the game page
             } else {
                 alert("لطفاً شناسه خود را وارد کنید.");
             }
