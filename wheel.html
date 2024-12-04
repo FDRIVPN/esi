@@ -126,6 +126,7 @@
         let coins = 0; // Initial coins set to 0
         let userId = localStorage.getItem('userId');
         let lastSpinTime = localStorage.getItem('lastSpinTime') || 0;
+        let timerInterval; // This will hold the interval ID for clearing the timer later
 
         // The coin values for the wheel
         const coinValues = [15, 30, 45, 60, 90, 120, 150, 180];
@@ -161,19 +162,25 @@
         }
 
         function startTimer(time) {
+            // Update the timer immediately
             let hours = Math.floor((time / (1000 * 60 * 60)));
             let minutes = Math.floor((time % (1000 * 60 * 60)) / (1000 * 60));
             let seconds = Math.floor((time % (1000 * 60)) / 1000);
 
             document.getElementById('timer').innerText = `${hours}:${minutes}:${seconds}`;
 
-            setTimeout(() => {
+            // Update the timer every second
+            timerInterval = setInterval(() => {
                 time -= 1000;
                 if (time >= 0) {
-                    startTimer(time);
+                    hours = Math.floor((time / (1000 * 60 * 60)));
+                    minutes = Math.floor((time % (1000 * 60 * 60)) / (1000 * 60));
+                    seconds = Math.floor((time % (1000 * 60)) / 1000);
+                    document.getElementById('timer').innerText = `${hours}:${minutes}:${seconds}`;
                 } else {
-                    document.getElementById('spin-button').style.display = 'block'; // Show the spin button again after cooldown
-                    document.getElementById('timer-container').style.display = 'none'; // Hide timer
+                    clearInterval(timerInterval); // Stop the timer when it reaches 0
+                    document.getElementById('spin-button').style.display = 'block'; // Show the spin button
+                    document.getElementById('timer-container').style.display = 'none'; // Hide the timer
                 }
             }, 1000);
         }
@@ -190,7 +197,7 @@
 
             localStorage.setItem('lastSpinTime', Date.now()); // Update the last spin time
 
-            // Show the timer immediately
+            // Immediately update the cooldown status without refreshing the page
             checkSpinCooldown();
         }
 
