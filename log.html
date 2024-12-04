@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تغییر شناسه</title>
+    <title>تایید شناسه</title>
     <style>
         * {
             margin: 0;
@@ -12,107 +12,68 @@
         }
 
         body {
-            background-color: #f0f0f0;
             font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-
-        .ellipse-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 300px;
-            height: 300px;
-            background-color: #a5a5a5;
-            border-radius: 50%;
-        }
-
-        .ellipse.white {
-            width: 250px;
-            height: 250px;
-            background-color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border-radius: 50%;
+            background-color: #f4f4f4;
+            direction: rtl;
+            text-align: center;
             padding: 20px;
         }
 
-        #new-username {
-            width: 80%;
+        .input-container {
+            background-color: #d3d3d3;
+            padding: 20px;
+            border-radius: 50px;
+            max-width: 400px;
+            margin: 50px auto;
+            text-align: center;
+        }
+
+        .input-box {
+            width: 100%;
             padding: 10px;
-            margin-bottom: 20px;
-            border-radius: 5px;
+            margin: 10px 0;
+            border-radius: 50px;
             border: 1px solid #ccc;
+            background-color: white;
         }
 
-        #confirm-btn {
-            padding: 10px 20px;
-            background-color: #4CAF50;
+        .confirm-button {
+            background-color: green;
             color: white;
+            padding: 10px 20px;
+            font-size: 18px;
             border: none;
-            border-radius: 5px;
+            border-radius: 50px;
             cursor: pointer;
-        }
-
-        #confirm-btn:hover {
-            background-color: #45a049;
+            width: 100%;
         }
     </style>
 </head>
 <body>
-    <div class="overlay">
-        <div class="ellipse-container">
-            <div class="ellipse white">
-                <h2>تغییر شناسه</h2>
-                <input type="text" id="new-username" placeholder="شناسه جدید خود را وارد کنید" />
-                <button id="confirm-btn" onclick="changeUsername()">تایید</button>
-            </div>
-        </div>
+    <div id="input-container" class="input-container">
+        <h2>لطفاً شناسه جدید خود را وارد کنید</h2>
+        <input type="text" id="user-id" class="input-box" placeholder="شناسه جدید خود را وارد کنید" />
+        <button class="confirm-button" onclick="confirmUserId()">تایید</button>
     </div>
 
     <script>
-        // چک کردن اینکه آیا کاربر قبلاً شناسه خود را تغییر داده است یا خیر
-        let userId = localStorage.getItem("userId");
-
-        // اگر شناسه وجود داشته باشد، اجازه تغییر آن داده نمی‌شود
+        // Check if userId already exists in localStorage
+        let userId = localStorage.getItem('userId');
+        
+        // If userId exists, redirect to the wheel page (game.html)
         if (userId) {
-            alert("شما قبلاً شناسه خود را تغییر داده‌اید.");
-            window.location.href = "index.html"; // هدایت به صفحه اصلی یا هر صفحه دلخواه دیگر
+            window.location.href = "wheel.html"; // Redirect to game page if ID exists
         }
 
-        // تغییر شناسه و ذخیره در localStorage
-        function changeUsername() {
-            const newUsername = document.getElementById('new-username').value.trim();
-
-            if (newUsername === "") {
-                alert("لطفاً شناسه جدید را وارد کنید.");
-                return;
+        function confirmUserId() {
+            const inputUserId = document.getElementById('user-id').value.trim();
+            if (inputUserId) {
+                localStorage.setItem('userId', inputUserId); // Save the user ID to localStorage
+                localStorage.setItem('coins', 0); // Set initial coin balance to 0
+                window.location.href = "wheel.html"; // Redirect to the game page
+            } else {
+                alert("لطفا شناسه جدید خود را وارد کنید.");
             }
-
-            // ذخیره شناسه جدید در localStorage
-            localStorage.setItem("userId", newUsername);
-            alert("شناسه شما با موفقیت تغییر کرد.");
-
-            // هدایت به صفحه دیگر پس از تغییر شناسه
-            window.location.href = "index.html"; // یا هر صفحه دیگری که می‌خواهید
         }
     </script>
 </body>
