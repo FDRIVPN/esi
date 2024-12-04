@@ -28,7 +28,7 @@
             transform: translate(-50%, -50%);
             width: 300px;
             height: 300px;
-            display: none;
+            display: block;
         }
 
         .wheel {
@@ -61,6 +61,7 @@
             width: 100%;
             padding: 10px;
             border-radius: 50px;
+            font-size: 18px;
         }
 
         .hidden {
@@ -112,7 +113,8 @@
     <div class="wheel-container" id="wheel-container">
         <div class="pointer"></div>
         <div class="wheel" id="wheel"></div>
-        <button id="spin-button" class="bet-button" disabled>چرخاندن گردونه</button>
+        <!-- دکمه چرخاندن گردونه -->
+        <button id="spin-button" class="bet-button">چرخاندن گردونه</button>
     </div>
 
     <!-- Result -->
@@ -174,7 +176,7 @@
                     startTimer(time);
                 } else {
                     document.getElementById('spin-button').disabled = false; // Enable button after cooldown
-                    document.getElementById('timer-container').style.display = 'none';
+                    document.getElementById('timer-container').style.display = 'none'; // Hide the timer after cooldown
                 }
             }, 1000);
         }
@@ -182,23 +184,30 @@
         function spinWheel() {
             let randomIndex = Math.floor(Math.random() * coinValues.length);
             let winningAmount = coinValues[randomIndex];
-            coins += winningAmount;
-            localStorage.setItem('coins', coins);
-            document.getElementById('coins-won').innerText = winningAmount;
-            document.getElementById('result-container').style.display = 'block';
 
-            localStorage.setItem('lastSpinTime', Date.now()); // Update the last spin time
+            // Show wheel spinning effect
+            document.getElementById('wheel').style.transform = `rotate(${Math.floor(Math.random() * 360)}deg)`;
 
-            // Disable button and show timer immediately after spin
-            document.getElementById('spin-button').disabled = true;
-            document.getElementById('timer-container').style.display = 'block';
-            startTimer(SPIN_COOLDOWN); // Start the cooldown timer
+            setTimeout(() => {
+                coins += winningAmount;
+                localStorage.setItem('coins', coins);
+                document.getElementById('coins-won').innerText = winningAmount;
+                document.getElementById('result-container').style.display = 'block';
+                
+                localStorage.setItem('lastSpinTime', Date.now()); // Update the last spin time
+
+                // Hide the spin button and show timer
+                document.getElementById('spin-button').style.display = 'none';
+                document.getElementById('timer-container').style.display = 'block';
+                startTimer(SPIN_COOLDOWN); // Start the cooldown timer
+            }, 3000); // Set the timeout to match the wheel spin duration
         }
 
-        // Hamburger Icon Toggle Menu
-        document.getElementById('hamburger-icon').addEventListener('click', function() {
-            const menu = document.getElementById('menu');
-            menu.style.display = menu.style.display === 'none' || menu.style.display === '' ? 'block' : 'none';
+        // When the user clicks the "چرخاندن گردونه" button
+        document.getElementById('spin-button').addEventListener('click', function() {
+            document.getElementById('spin-button').disabled = true;  // Disable button immediately after click
+            document.getElementById('spin-button').style.display = 'none';  // Hide the button
+            spinWheel();  // Start spinning the wheel
         });
     </script>
 </body>
