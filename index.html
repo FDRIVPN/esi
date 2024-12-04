@@ -16,21 +16,15 @@
             background-color: #f4f4f4;
             direction: rtl;
             text-align: center;
-            overflow: hidden;
-            position: relative;
-            height: 100vh;
+            padding: 20px;
         }
 
         .input-container {
-            position: absolute;
-            top: 40%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80%;
-            max-width: 400px;
             background-color: #d3d3d3;
             padding: 20px;
             border-radius: 50px;
+            max-width: 400px;
+            margin: 50px auto;
             text-align: center;
         }
 
@@ -53,35 +47,34 @@
             cursor: pointer;
             width: 100%;
         }
-
-        .hidden {
-            display: none;
-        }
-
     </style>
 </head>
 <body>
-
-    <!-- Input Container -->
-    <div class="input-container" id="input-container">
+    <div id="input-container" class="input-container">
+        <h2>لطفاً شناسه خود را وارد کنید</h2>
         <input type="text" id="user-id" class="input-box" placeholder="شناسه خود را وارد کنید" />
         <button class="confirm-button" onclick="confirmUserId()">تایید</button>
     </div>
 
     <script>
+        // Check if userId already exists in localStorage
+        let userId = localStorage.getItem('userId');
+        
+        // If userId exists, redirect to the wheel page (game.html)
+        if (userId) {
+            window.location.href = "game.html"; // Redirect to game page if ID exists
+        }
+
         function confirmUserId() {
             const inputUserId = document.getElementById('user-id').value.trim();
             if (inputUserId) {
-                localStorage.setItem('userId', inputUserId); // ذخیره شناسه کاربری
-                localStorage.setItem('coins', 0); // تنظیم سکه‌ها به 0
-                localStorage.setItem('lastSpinTime', Date.now()); // ذخیره زمان چرخش آخرین گردونه
-                alert("شناسه شما با موفقیت ذخیره شد.");
-                window.location.href = "wheel.html"; // هدایت به صفحه گردونه
+                localStorage.setItem('userId', inputUserId); // Save the user ID to localStorage
+                localStorage.setItem('coins', 0); // Set initial coin balance to 0
+                window.location.href = "game.html"; // Redirect to the game page
             } else {
                 alert("لطفاً شناسه خود را وارد کنید.");
             }
         }
     </script>
-
 </body>
 </html>
