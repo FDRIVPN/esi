@@ -74,24 +74,24 @@
     <script>
         // بازیابی داده‌ها از localStorage
         let userid = localStorage.getItem('userId');  // شناسه کاربری از صفحه index.html
-        let coins = localStorage.getItem('coins');    // موجودی گردونه از صفحه index.html
-        let dozbalance = localStorage.getItem('dozbalance'); // فرضی: مقدار موجودی بازی‌ها، این رو می‌تونید از سرور بگیرید
+        let coin2 = localStorage.getItem('coin2');    // موجودی گردونه از صفحه index.html
+        let balance = localStorage.getItem('balance'); // فرضی: مقدار موجودی بازی‌ها، این رو می‌تونید از سرور بگیرید
 
         // بررسی و جایگزینی مقدار null با مقدار پیش‌فرض
         if (!userid) {
             userid = 'شناسه نامعتبر';
         }
-        if (!coins) {
-            coins = '0';
+        if (!coin2) {
+            coin2 = '0';
         }
-        if (!dozbalance) {
-            dozbalance = '0';
+        if (!balance) {
+            balance = '0';
         }
 
         // قرار دادن داده‌ها در المان‌ها
         document.getElementById('user-id').innerText = userid;
         document.getElementById('wheel-coin').innerText = coin2;
-        document.getElementById('game-balance').innerText = dozbalance;
+        document.getElementById('game-balance').innerText = balance;
     </script>
 </body>
 </html>
