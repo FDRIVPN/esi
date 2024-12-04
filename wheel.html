@@ -67,39 +67,6 @@
             display: none;
         }
 
-        .input-container {
-            position: absolute;
-            top: 40%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80%;
-            max-width: 400px;
-            background-color: #d3d3d3;
-            padding: 20px;
-            border-radius: 50px;
-            text-align: center;
-        }
-
-        .input-box {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 50px;
-            border: 1px solid #ccc;
-            background-color: white;
-        }
-
-        .confirm-button {
-            background-color: green;
-            color: white;
-            padding: 10px 20px;
-            font-size: 18px;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            width: 100%;
-        }
-
         .result-container {
             margin-top: 20px;
             font-size: 20px;
@@ -112,14 +79,33 @@
             color: red;
         }
 
+        /* جدید: آیکون همبرگر */
+        .hamburger-icon {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 30px;
+            height: 25px;
+            cursor: pointer;
+            z-index: 2000;
+        }
+
+        .hamburger-icon div {
+            width: 100%;
+            height: 5px;
+            background-color: black;
+            margin: 5px 0;
+            transition: 0.3s;
+        }
+
     </style>
 </head>
 <body>
-
-    <!-- Input Container -->
-    <div class="input-container" id="input-container" style="display: none;">
-        <input type="text" id="user-id" class="input-box" placeholder="شناسه خود را وارد کنید" />
-        <button class="confirm-button" onclick="confirmUserId()">تایید</button>
+    <!-- Hamburger Icon -->
+    <div class="hamburger-icon" id="hamburger-icon">
+        <div></div>
+        <div></div>
+        <div></div>
     </div>
 
     <!-- Wheel Container -->
@@ -153,23 +139,10 @@
         if (userId) {
             loadWheelPage();
         } else {
-            document.getElementById('input-container').style.display = 'block';
-        }
-
-        function confirmUserId() {
-            const inputUserId = document.getElementById('user-id').value.trim();
-            if (inputUserId) {
-                localStorage.setItem('userId', inputUserId);
-                localStorage.setItem('coins', 0); // Set initial coin balance to 0
-                localStorage.setItem('lastSpinTime', Date.now());
-                loadWheelPage();
-            } else {
-                alert("لطفاً شناسه خود را وارد کنید.");
-            }
+            window.location.href = "log.html"; // Redirect to the ID entry page if no user ID
         }
 
         function loadWheelPage() {
-            document.getElementById('input-container').style.display = 'none';
             document.getElementById('wheel-container').style.display = 'block';
             coins = parseInt(localStorage.getItem('coins')); // Get coins from localStorage
             checkSpinCooldown();
@@ -218,6 +191,11 @@
             localStorage.setItem('lastSpinTime', Date.now()); // Update the last spin time
         }
 
+        // Hamburger Icon Toggle Menu
+        document.getElementById('hamburger-icon').addEventListener('click', function() {
+            const menu = document.getElementById('menu');
+            menu.style.display = menu.style.display === 'none' || menu.style.display === '' ? 'block' : 'none';
+        });
     </script>
 </body>
 </html>
