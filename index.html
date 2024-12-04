@@ -130,6 +130,30 @@
             margin: 5px 0;
             transition: 0.3s;
         }
+
+        /* Menu style */
+        .menu {
+            position: absolute;
+            top: 50px;
+            left: 0;
+            width: 100%;
+            background-color: #333;
+            color: white;
+            display: none;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        .menu a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            display: block;
+        }
+
+        .menu a:hover {
+            background-color: #555;
+        }
     </style>
 </head>
 <body>
@@ -138,6 +162,13 @@
         <div></div>
         <div></div>
         <div></div>
+    </div>
+
+    <!-- Menu -->
+    <div class="menu" id="menu">
+        <a href="coin.html">سکه‌ها</a>
+        <a href="log.html">تغییر شناسه</a>
+        <a href="game.html">بازی‌ها</a>
     </div>
 
     <!-- Input Container -->
@@ -238,13 +269,15 @@
             localStorage.setItem('coins', coins);
             document.getElementById('coins-won').innerText = winningAmount;
             document.getElementById('result-container').style.display = 'block';
-            document.getElementById('spin-button').disabled = true;
-            localStorage.setItem('lastSpinTime', Date.now());
-            setTimeout(() => {
-                document.getElementById('result-container').style.display = 'none';
-                checkSpinCooldown();
-            }, 3000);
+
+            localStorage.setItem('lastSpinTime', Date.now()); // Update the last spin time
         }
+
+        // Hamburger Icon Toggle Menu
+        document.getElementById('hamburger-icon').addEventListener('click', function() {
+            const menu = document.getElementById('menu');
+            menu.style.display = menu.style.display === 'none' || menu.style.display === '' ? 'block' : 'none';
+        });
     </script>
 </body>
 </html>
