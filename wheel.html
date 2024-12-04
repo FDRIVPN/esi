@@ -79,6 +79,7 @@
             color: red;
         }
 
+        /* جدید: آیکون همبرگر */
         .hamburger-icon {
             position: absolute;
             top: 10px;
@@ -96,6 +97,7 @@
             margin: 5px 0;
             transition: 0.3s;
         }
+
     </style>
 </head>
 <body>
@@ -110,7 +112,7 @@
     <div class="wheel-container" id="wheel-container">
         <div class="pointer"></div>
         <div class="wheel" id="wheel"></div>
-        <button onclick="spinWheel()" class="bet-button" id="spin-button">چرخاندن گردونه</button>
+        <button id="spin-button" class="bet-button" disabled>چرخاندن گردونه</button>
     </div>
 
     <!-- Result -->
@@ -126,7 +128,6 @@
         let coins = 0; // Initial coins set to 0
         let userId = localStorage.getItem('userId');
         let lastSpinTime = localStorage.getItem('lastSpinTime') || 0;
-        let timerInterval; // This will hold the interval ID for clearing the timer later
 
         // The coin values for the wheel
         const coinValues = [15, 30, 45, 60, 90, 120, 150, 180];
@@ -153,41 +154,32 @@
             if (timeDifference < SPIN_COOLDOWN) {
                 let remainingTime = SPIN_COOLDOWN - timeDifference;
                 startTimer(remainingTime);
-                document.getElementById('spin-button').style.display = 'none'; // Hide button during cooldown
-                document.getElementById('timer-container').style.display = 'block'; // Show timer
+                document.getElementById('spin-button').disabled = true; // Disable button during cooldown
+                document.getElementById('timer-container').style.display = 'block';
             } else {
-                document.getElementById('spin-button').style.display = 'block'; // Show button if cooldown is over
-                document.getElementById('timer-container').style.display = 'none'; // Hide timer
+                document.getElementById('spin-button').disabled = false; // Enable button after cooldown
             }
         }
 
         function startTimer(time) {
-            // Update the timer immediately
             let hours = Math.floor((time / (1000 * 60 * 60)));
             let minutes = Math.floor((time % (1000 * 60 * 60)) / (1000 * 60));
             let seconds = Math.floor((time % (1000 * 60)) / 1000);
 
             document.getElementById('timer').innerText = `${hours}:${minutes}:${seconds}`;
 
-            // Update the timer every second
-            timerInterval = setInterval(() => {
+            setTimeout(() => {
                 time -= 1000;
                 if (time >= 0) {
-                    hours = Math.floor((time / (1000 * 60 * 60)));
-                    minutes = Math.floor((time % (1000 * 60 * 60)) / (1000 * 60));
-                    seconds = Math.floor((time % (1000 * 60)) / 1000);
-                    document.getElementById('timer').innerText = `${hours}:${minutes}:${seconds}`;
+                    startTimer(time);
                 } else {
-                    clearInterval(timerInterval); // Stop the timer when it reaches 0
-                    document.getElementById('spin-button').style.display = 'block'; // Show the spin button
-                    document.getElementById('timer-container').style.display = 'none'; // Hide the timer
+                    document.getElementById('spin-button').disabled = false; // Enable button after cooldown
+                    document.getElementById('timer-container').style.display = 'none';
                 }
             }, 1000);
         }
 
         function spinWheel() {
-            // Disable the spin button and hide it
-            document.getElementById('spin-button').style.display = 'none';
             let randomIndex = Math.floor(Math.random() * coinValues.length);
             let winningAmount = coinValues[randomIndex];
             coins += winningAmount;
@@ -197,8 +189,10 @@
 
             localStorage.setItem('lastSpinTime', Date.now()); // Update the last spin time
 
-            // Immediately update the cooldown status without refreshing the page
-            checkSpinCooldown();
+            // Disable button and show timer immediately after spin
+            document.getElementById('spin-button').disabled = true;
+            document.getElementById('timer-container').style.display = 'block';
+            startTimer(SPIN_COOLDOWN); // Start the cooldown timer
         }
 
         // Hamburger Icon Toggle Menu
