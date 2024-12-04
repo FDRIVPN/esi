@@ -152,10 +152,11 @@
             if (timeDifference < SPIN_COOLDOWN) {
                 let remainingTime = SPIN_COOLDOWN - timeDifference;
                 startTimer(remainingTime);
-                document.getElementById('spin-button').disabled = true;
-                document.getElementById('timer-container').style.display = 'block';
+                document.getElementById('spin-button').style.display = 'none'; // Hide button during cooldown
+                document.getElementById('timer-container').style.display = 'block'; // Show timer
             } else {
-                document.getElementById('spin-button').disabled = false;
+                document.getElementById('spin-button').style.display = 'block'; // Show button if cooldown is over
+                document.getElementById('timer-container').style.display = 'none'; // Hide timer
             }
         }
 
@@ -171,8 +172,8 @@
                 if (time >= 0) {
                     startTimer(time);
                 } else {
-                    document.getElementById('spin-button').disabled = false;
-                    document.getElementById('timer-container').style.display = 'none';
+                    document.getElementById('spin-button').style.display = 'block'; // Show the spin button again after cooldown
+                    document.getElementById('timer-container').style.display = 'none'; // Hide timer
                 }
             }, 1000);
         }
