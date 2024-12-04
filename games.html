@@ -42,6 +42,7 @@
         .image {
             width: 72px; /* اندازه تصویر */
             height: 72px; /* اندازه تصویر */
+            object-fit: cover; /* تنظیم تصویر به طور خودکار برای پوشش دادن دایره */
         }
 
         .text {
@@ -67,6 +68,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            overflow: hidden; /* جلوگیری از بیرون آمدن تصویر */
         }
 
         .close-text {
