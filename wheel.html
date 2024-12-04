@@ -60,6 +60,7 @@
             padding: 10px;
             border-radius: 50px;
             font-size: 18px;
+            display: none; /* Initially hide the button */
         }
 
         .hidden {
@@ -78,7 +79,6 @@
             color: red;
         }
 
-        /* جدید: آیکون همبرگر */
         .hamburger-icon {
             position: absolute;
             top: 10px;
@@ -167,6 +167,7 @@
                 document.getElementById('timer-container').style.display = 'block';
             } else {
                 document.getElementById('spin-button').disabled = false; // Enable button after cooldown
+                document.getElementById('spin-button').style.display = 'block'; // Show the button
             }
         }
 
@@ -183,6 +184,7 @@
                     startTimer(time);
                 } else {
                     document.getElementById('spin-button').disabled = false; // Enable button after cooldown
+                    document.getElementById('spin-button').style.display = 'block'; // Show the button
                     document.getElementById('timer-container').style.display = 'none'; // Hide the timer after cooldown
                 }
             }, 1000);
