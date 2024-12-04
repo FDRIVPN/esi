@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تایید شناسه</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            direction: rtl;
+            text-align: center;
+            overflow: hidden;
+            position: relative;
+            height: 100vh;
+        }
+
+        .input-container {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 400px;
+            background-color: #d3d3d3;
+            padding: 20px;
+            border-radius: 50px;
+            text-align: center;
+        }
+
+        .input-box {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 50px;
+            border: 1px solid #ccc;
+            background-color: white;
+        }
+
+        .confirm-button {
+            background-color: green;
+            color: white;
+            padding: 10px 20px;
+            font-size: 18px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Input Container -->
+    <div class="input-container" id="input-container">
+        <input type="text" id="user-id" class="input-box" placeholder="شناسه خود را وارد کنید" />
+        <button class="confirm-button" onclick="confirmUserId()">تایید</button>
+    </div>
+
+    <script>
+        function confirmUserId() {
+            const inputUserId = document.getElementById('user-id').value.trim();
+            if (inputUserId) {
+                localStorage.setItem('userId', inputUserId); // ذخیره شناسه کاربری
+                localStorage.setItem('coins', 0); // تنظیم سکه‌ها به 0
+                localStorage.setItem('lastSpinTime', Date.now()); // ذخیره زمان چرخش آخرین گردونه
+                alert("شناسه شما با موفقیت ذخیره شد.");
+                window.location.href = "wheel.html"; // هدایت به صفحه گردونه
+            } else {
+                alert("لطفاً شناسه خود را وارد کنید.");
+            }
+        }
+    </script>
+
+</body>
+</html>
