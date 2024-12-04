@@ -57,20 +57,32 @@
     </div>
 
     <script>
-        // Check if userId already exists in localStorage
+        // Get userId and changeCount from localStorage
         let userId = localStorage.getItem('userId');
+        let changeCount = parseInt(localStorage.getItem('changeCount')) || 0;
         
-        // If userId exists, redirect to the wheel page (game.html)
-        if (userId) {
+        // If userId exists and changeCount is 1, prevent further changes
+        if (userId && changeCount >= 1) {
+            alert("شما تنها یک بار قادر به تغییر شناسه خود بودید.");
             window.location.href = "wheel.html"; // Redirect to game page if ID exists
         }
 
         function confirmUserId() {
             const inputUserId = document.getElementById('user-id').value.trim();
             if (inputUserId) {
-                localStorage.setItem('userId', inputUserId); // Save the user ID to localStorage
-                localStorage.setItem('coins', 0); // Set initial coin balance to 0
-                window.location.href = "wheel.html"; // Redirect to the game page
+                if (!userId || (userId && changeCount < 1)) {
+                    localStorage.setItem('userId', inputUserId); // Save the user ID to localStorage
+                    localStorage.setItem('coins', 0); // Set initial coin balance to 0
+                    
+                    // If user has changed ID, increment changeCount
+                    if (changeCount === 0) {
+                        localStorage.setItem('changeCount', 1); // Mark that user has changed ID once
+                    }
+
+                    window.location.href = "wheel.html"; // Redirect to the game page
+                } else {
+                    alert("شما قبلاً شناسه خود را وارد کرده‌اید و نمی‌توانید دوباره تغییر دهید.");
+                }
             } else {
                 alert("لطفا شناسه جدید خود را وارد کنید.");
             }
