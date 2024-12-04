@@ -21,7 +21,7 @@
             height: 100vh;
         }
 
-        .wheel-container, .betting-container, .menu-container {
+        .wheel-container, .betting-container {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -100,42 +100,23 @@
             width: 100%;
         }
 
-        .menu-container {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 15px;
-            width: 250px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            display: none; /* منو به‌طور پیش‌فرض مخفی است */
-            z-index: 1000;
-            text-align: right;
-            display: flex;
-            flex-direction: column;
-            pointer-events: none; /* غیرفعال کردن تعامل تا منو نمایان شود */
+        .result-container {
+            margin-top: 20px;
+            font-size: 20px;
+            color: green;
         }
 
-        .menu-option {
-            margin: 10px 0;
-            font-size: 18px;
-            cursor: pointer;
-            border-radius: 25px;
-            text-align: center;
-            padding: 10px;
-            transition: background-color 0.3s;
+        .timer-container {
+            margin-top: 20px;
+            font-size: 16px;
+            color: red;
         }
 
-        .menu-option:hover {
-            background-color: #f0f0f0;
-        }
-
+        /* جدید: آیکون همبرگر */
         .hamburger-icon {
             position: absolute;
             top: 10px;
-            right: 10px;
+            left: 10px;
             width: 30px;
             height: 25px;
             cursor: pointer;
@@ -149,59 +130,14 @@
             margin: 5px 0;
             transition: 0.3s;
         }
-
-        .hamburger-icon.open div:nth-child(1) {
-            transform: rotate(45deg);
-            position: relative;
-            top: 10px;
-        }
-
-        .hamburger-icon.open div:nth-child(2) {
-            opacity: 0;
-        }
-
-        .hamburger-icon.open div:nth-child(3) {
-            transform: rotate(-45deg);
-            position: relative;
-            top: -10px;
-        }
-
-        .close-menu {
-            position: absolute;
-            top: 5px;
-            left: 5px;
-            font-size: 20px;
-            cursor: pointer;
-        }
-
-        .result-container {
-            margin-top: 20px;
-            font-size: 20px;
-            color: green;
-        }
-
-        .timer-container {
-            margin-top: 20px;
-            font-size: 16px;
-            color: red;
-        }
-
     </style>
 </head>
 <body>
     <!-- Hamburger Icon -->
-    <div class="hamburger-icon" id="hamburger-icon" onclick="toggleMenu()">
+    <div class="hamburger-icon" id="hamburger-icon">
         <div></div>
         <div></div>
         <div></div>
-    </div>
-
-    <!-- Menu -->
-    <div class="menu-container hidden" id="menu">
-        <div class="close-menu" onclick="toggleMenu()">✖</div>
-        <div class="menu-option" onclick="loadBettingPage()">بازی‌ها</div>
-        <div class="menu-option" onclick="loadCoinsPage()">سکه‌ها</div>
-        <div class="menu-option" onclick="loadChangeUsernamePage()">تغییر شناسه</div>
     </div>
 
     <!-- Input Container -->
@@ -308,33 +244,6 @@
                 document.getElementById('result-container').style.display = 'none';
                 checkSpinCooldown();
             }, 3000);
-        }
-
-        function toggleMenu() {
-            const menu = document.getElementById('menu');
-            const hamburger = document.getElementById('hamburger-icon');
-            
-            if (menu.classList.contains('hidden')) {
-                menu.classList.remove('hidden');
-                hamburger.classList.add('open');
-                menu.style.pointerEvents = 'auto'; // Enable interaction
-            } else {
-                menu.classList.add('hidden');
-                hamburger.classList.remove('open');
-                menu.style.pointerEvents = 'none'; // Disable interaction
-            }
-        }
-
-        function loadBettingPage() {
-            window.location.href = 'game.html';
-        }
-
-        function loadCoinsPage() {
-            window.location.href = 'coin.html';
-        }
-
-        function loadChangeUsernamePage() {
-            window.location.href = 'log.html';
         }
     </script>
 </body>
