@@ -21,14 +21,13 @@
             height: 100vh;
         }
 
-        .wheel-container, .betting-container {
+        .wheel-container {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             width: 300px;
             height: 300px;
-            display: block;
         }
 
         .wheel {
@@ -38,7 +37,6 @@
             background-image: url('wheel.png');
             background-size: cover;
             background-position: center;
-            transform: rotate(0deg);
             transition: transform 3s ease-out;
         }
 
@@ -119,11 +117,11 @@
 
     <!-- Result -->
     <div class="result-container" id="result-container" style="display: none;">
-        <p>شما برنده شدی! سکه‌های شما: <span id="coins-won">0</span></p>
+        <p>مبارکه شما انقدر سکه بردی: <span id="coins-won">0</span></p>
     </div>
     
     <div class="timer-container" id="timer-container" style="display: none;">
-        <p>زمان باقی‌مانده برای چرخش بعدی: <span id="timer">00:00:00</span></p>
+        <p> <span id="timer">00:00:00</span></p>
     </div>
 
     <script>
@@ -131,8 +129,17 @@
         let userId = localStorage.getItem('userId');
         let lastSpinTime = localStorage.getItem('lastSpinTime') || 0;
 
-        // The coin values for the wheel
-        const coinValues = [15, 30, 45, 60, 90, 120, 150, 180];
+        // The coin values for the wheel and the corresponding angles and chances
+        const wheelSections = [
+            { coins: 15, degrees: 30, chance: 70 },
+            { coins: 30, degrees: 60, chance: 60 },
+            { coins: 45, degrees: 90, chance: 50 },
+            { coins: 60, degrees: 120, chance: 50 },
+            { coins: 90, degrees: 150, chance: 10 },
+            { coins: 120, degrees: 180, chance: 3 },
+            { coins: 150, degrees: 310, chance: 3 },
+            { coins: 180, degrees: 340, chance: 3 }
+        ];
 
         const SPIN_COOLDOWN = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
@@ -182,11 +189,24 @@
         }
 
         function spinWheel() {
-            let randomIndex = Math.floor(Math.random() * coinValues.length);
-            let winningAmount = coinValues[randomIndex];
+            // Select a section randomly based on chance
+            const randomChance = Math.random() * 100;
+            let selectedSection = null;
+
+            let cumulativeChance = 0;
+            for (let section of wheelSections) {
+                cumulativeChance += section.chance;
+                if (randomChance <= cumulativeChance) {
+                    selectedSection = section;
+                    break;
+                }
+            }
+
+            // Apply the corresponding degrees and coins
+            const { degrees, coins: winningAmount } = selectedSection;
 
             // Show wheel spinning effect
-            document.getElementById('wheel').style.transform = `rotate(${Math.floor(Math.random() * 360)}deg)`;
+            document.getElementById('wheel').style.transform = `rotate(${degrees + 3600}deg)`; // +3600 for spinning multiple times
 
             setTimeout(() => {
                 coins += winningAmount;
@@ -206,8 +226,8 @@
         // When the user clicks the "چرخاندن گردونه" button
         document.getElementById('spin-button').addEventListener('click', function() {
             document.getElementById('spin-button').disabled = true;  // Disable button immediately after click
-            document.getElementById('spin-button').style.display = 'none';  // Hide the button
-            spinWheel();  // Start spinning the wheel
+            document.getElementById('spin-button').style.display = 'none';  // Hide button during spin
+            spinWheel();
         });
     </script>
 </body>
