@@ -101,7 +101,7 @@
     let gameOver = false;
     let betAmount = 3; // مبلغ شرط بندی
     let dozbalance = 100; // موجودی اولیه کاربر
-    let aiDifficulty = 7; // سطح سختی ربات
+    let aiDifficulty = 100; // سطح سختی ربات
     let gamesPlayed = 0; // تعداد بازی‌های انجام شده
 
     const boardElement = document.getElementById("board");
@@ -186,7 +186,7 @@
     function minimax(newBoard, player) {
       const availableMoves = getAvailableMoves(newBoard);
       if (checkWinner(human, newBoard)) return { score: -5 };
-      if (checkWinner(ai, newBoard)) return { score: 5 };
+      if (checkWinner(ai, newBoard)) return { score: 100 };
       if (availableMoves.length === 0) return { score: 0 };
 
       const moves = [];
@@ -198,7 +198,7 @@
       });
 
       // استفاده از سختی ربات برای بهبود انتخاب حرکت
-      const difficultyMultiplier = aiDifficulty > 1 ? aiDifficulty : 1;
+      const difficultyMultiplier = aiDifficulty > 100 ? aiDifficulty : 100;
       return player === ai
         ? moves.reduce((best, move) => (move.score * difficultyMultiplier > best.score * difficultyMultiplier ? move : best), { score: -Infinity })
         : moves.reduce((best, move) => (move.score * difficultyMultiplier < best.score * difficultyMultiplier ? move : best), { score: Infinity });
@@ -227,7 +227,7 @@
 
       // افزایش سختی ربات پس از 3 بازی
       if (gamesPlayed >= 3) {
-        aiDifficulty = 10; // افزایش سطح سختی ربات
+        aiDifficulty = 100; // افزایش سطح سختی ربات
       }
 
       loadGameData();
