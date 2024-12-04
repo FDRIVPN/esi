@@ -79,7 +79,6 @@
             color: red;
         }
 
-        /* جدید: آیکون همبرگر */
         .hamburger-icon {
             position: absolute;
             top: 10px;
@@ -97,7 +96,6 @@
             margin: 5px 0;
             transition: 0.3s;
         }
-
     </style>
 </head>
 <body>
@@ -119,7 +117,6 @@
     <div class="result-container" id="result-container" style="display: none;">
         <p>شما برنده شدی! سکه‌های شما: <span id="coins-won">0</span></p>
     </div>
-
     
     <div class="timer-container" id="timer-container" style="display: none;">
         <p>زمان باقی‌مانده برای چرخش بعدی: <span id="timer">00:00:00</span></p>
@@ -181,6 +178,8 @@
         }
 
         function spinWheel() {
+            // Disable the spin button and hide it
+            document.getElementById('spin-button').style.display = 'none';
             let randomIndex = Math.floor(Math.random() * coinValues.length);
             let winningAmount = coinValues[randomIndex];
             coins += winningAmount;
@@ -189,6 +188,9 @@
             document.getElementById('result-container').style.display = 'block';
 
             localStorage.setItem('lastSpinTime', Date.now()); // Update the last spin time
+
+            // Show the timer immediately
+            checkSpinCooldown();
         }
 
         // Hamburger Icon Toggle Menu
