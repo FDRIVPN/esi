@@ -6,12 +6,24 @@
     <title>بازی X و O</title>
     <style>
         /* استایل‌ها */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            flex-direction: column;
+        }
+
         #board {
             display: grid;
             grid-template-columns: repeat(3, 100px);
             grid-gap: 5px;
-            margin: 20px auto;
+            margin-top: 20px;
         }
+
         .cell {
             width: 100px;
             height: 100px;
@@ -23,15 +35,16 @@
             cursor: pointer;
             text-align: center;
         }
+
         #status, #balance {
             text-align: center;
             font-size: 1.5rem;
-            margin: 10px;
+            margin-top: 20px;
         }
+
     </style>
 </head>
 <body>
-    <h1>بازی X و O</h1>
     <div id="balance"></div>
     <div id="board"></div>
     <div id="status"></div>
