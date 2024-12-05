@@ -1,190 +1,186 @@
 <!DOCTYPE html>
 <html lang="fa">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>بازی دوز</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      background-color: #f4f4f4;
-      flex-direction: column;
-    }
-    .game-container {
-      text-align: center;
-    }
-    .board {
-      display: grid;
-      grid-template-columns: repeat(3, 100px);
-      grid-gap: 5px;
-      margin-top: 50px;
-    }
-    .cell {
-      width: 100px;
-      height: 100px;
-      background-color: #fff;
-      border: 1px solid #ccc;
-      font-size: 36px;
-      text-align: center;
-      line-height: 100px;
-      cursor: pointer;
-    }
-    .status {
-      margin-top: 20px;
-      font-size: 18px;
-    }
-    .balance {
-      font-size: 18px;
-      margin-top: 10px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بازی X و O</title>
+    <style>
+        /* استایل‌ها */
+        #board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-gap: 5px;
+            margin: 20px auto;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: lightgray;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            cursor: pointer;
+            text-align: center;
+        }
+        #status, #balance {
+            text-align: center;
+            font-size: 1.5rem;
+            margin: 10px;
+        }
+    </style>
 </head>
 <body>
-  <div class="game-container">
-    <div class="balance">موجودی شما: <span id="balance">0</span></div>
-    <div class="board" id="board"></div>
-    <div class="status" id="status">نوبت شماست!</div>
-  </div>
+    <h1>بازی X و O</h1>
+    <div id="balance"></div>
+    <div id="board"></div>
+    <div id="status"></div>
 
-  <script>
-    // کاربران و شناسه‌ها
-    const players = ["اسی", "سوگل", "امری", "ماهان", "لورد", "آریا", "سینا", "معین ایکس‌ام", "گودرت", "محسن لرستانی", "پدر", "امیر", "علیرضا"];
-    const computerName = players[Math.floor(Math.random() * players.length)]; // انتخاب تصادفی نام
+    <script>
+        const players = ["اسی", "سوگل", "امری", "ماهان", "لورد", "آریا", "سینا", "معین ایکس‌ام", "گودرت", "محسن لرستانی", "پدر", "امیر", "علیرضا"];
+        const computerName = players[Math.floor(Math.random() * players.length)]; // انتخاب تصادفی نام
 
-    // وضعیت اولیه
-    const human = "X";
-    const ai = "O";
-    let currentPlayer = human;
-    let gameOver = false;
-    const userId = "اسی"; // مثال شناسه کاربر
-    let balance = userId === "اسی" ? 6000 : 0; // موجودی اسی 6000، دیگر کاربران 0
-    const betAmount = 10;
+        const userId = "اسی"; // شناسه کاربر (برای مثال)
+        let balance = parseInt(localStorage.getItem(`balance_${userId}`)) || (userId === "اسی" ? 6000 : 0); // بارگذاری موجودی یا تنظیم مقدار اولیه
 
-    const board = Array(9).fill(null);
-    const boardElement = document.getElementById("board");
-    const statusElement = document.getElementById("status");
-    const balanceElement = document.getElementById("balance");
+        const human = "X";
+        const ai = "O";
+        let currentPlayer = human;
+        let gameOver = false;
+        const betAmount = 10;
 
-    const winPatterns = [
-      [0, 1, 2], [3, 4, 5], [6, 7, 8],
-      [0, 3, 6], [1, 4, 7], [2, 5, 8],
-      [0, 4, 8], [2, 4, 6],
-    ];
+        const board = Array(9).fill(null);
+        const boardElement = document.getElementById("board");
+        const statusElement = document.getElementById("status");
+        const balanceElement = document.getElementById("balance");
 
-    function initGame() {
-      balanceElement.textContent = balance;
-      renderBoard();
-      statusElement.textContent = `نوبت شماست!`;
-    }
+        const winPatterns = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6],
+        ];
 
-    function renderBoard() {
-      boardElement.innerHTML = '';
-      board.forEach((cell, index) => {
-        const cellElement = document.createElement('div');
-        cellElement.classList.add('cell');
-        cellElement.textContent = cell || '';
-        cellElement.addEventListener('click', () => handleMove(index), { once: true });
-        boardElement.appendChild(cellElement);
-      });
-    }
-
-    function handleMove(index) {
-      if (board[index] || gameOver) return;
-
-      board[index] = currentPlayer;
-      renderBoard();
-
-      const winnerPattern = checkWinner(currentPlayer);
-      if (winnerPattern) {
-        statusElement.textContent = currentPlayer === human ? 'شما برنده شدید!' : `${computerName} برنده شد!`;
-        gameOver = true;
-        updateBalance(currentPlayer === human);
-        return;
-      }
-
-      if (board.every(cell => cell)) {
-        statusElement.textContent = 'بازی مساوی شد!';
-        gameOver = true;
-        return;
-      }
-
-      currentPlayer = currentPlayer === human ? ai : human;
-      statusElement.textContent = `نوبت ${currentPlayer === human ? 'شما' : computerName}`;
-
-      if (currentPlayer === ai) {
-        setTimeout(aiMove, 500);
-      }
-    }
-
-    function aiMove() {
-      // تلاش برای مسدود کردن برد کاربر
-      const blockIndex = findBlockingMove(human);
-      if (blockIndex !== null) {
-        board[blockIndex] = ai;
-        renderBoard();
-        const winnerPattern = checkWinner(ai);
-        if (winnerPattern) {
-          statusElement.textContent = `${computerName} برنده شد!`;
-          gameOver = true;
-          updateBalance(false);
+        // بارگذاری بازی
+        function initGame() {
+            balanceElement.textContent = `موجودی: ${balance}`;
+            renderBoard();
+            statusElement.textContent = `نوبت شماست!`;
         }
-        currentPlayer = human;
-        statusElement.textContent = `نوبت شماست!`;
-        return;
-      }
 
-      // حرکت تصادفی
-      const availableMoves = getAvailableMoves();
-      const randomMove = availableMoves[Math.floor(Math.random() * availableMoves.length)];
-      board[randomMove] = ai;
-      renderBoard();
-
-      const winnerPattern = checkWinner(ai);
-      if (winnerPattern) {
-        statusElement.textContent = `${computerName} برنده شد!`;
-        gameOver = true;
-        updateBalance(false);
-        return;
-      }
-
-      currentPlayer = human;
-      statusElement.textContent = `نوبت شماست!`;
-    }
-
-    function findBlockingMove(player) {
-      for (let pattern of winPatterns) {
-        const values = pattern.map(index => board[index]);
-        if (values.filter(v => v === player).length === 2 && values.includes(null)) {
-          return pattern[values.indexOf(null)];
+        // رندر کردن تخته بازی
+        function renderBoard() {
+            boardElement.innerHTML = '';
+            board.forEach((cell, index) => {
+                const cellElement = document.createElement('div');
+                cellElement.classList.add('cell');
+                cellElement.textContent = cell || '';
+                cellElement.addEventListener('click', () => handleMove(index), { once: true });
+                boardElement.appendChild(cellElement);
+            });
         }
-      }
-      return null;
-    }
 
-    function getAvailableMoves() {
-      return board.map((cell, index) => (cell === null ? index : null)).filter(index => index !== null);
-    }
+        // حرکت بازیکن
+        function handleMove(index) {
+            if (board[index] || gameOver) return;
 
-    function checkWinner(player) {
-      return winPatterns.find(pattern => pattern.every(index => board[index] === player)) || null;
-    }
+            board[index] = currentPlayer;
+            renderBoard();
 
-    function updateBalance(won) {
-      if (won) {
-        balance += betAmount * 10; // برد
-      } else {
-        balance -= betAmount; // باخت
-      }
-      if (balance < 0) balance = 0;
-      balanceElement.textContent = balance;
-    }
+            const winnerPattern = checkWinner(currentPlayer);
+            if (winnerPattern) {
+                statusElement.textContent = currentPlayer === human ? 'شما برنده شدید!' : `${computerName} برنده شد!`;
+                gameOver = true;
+                updateBalance(currentPlayer === human);
+                return;
+            }
 
-    initGame();
-  </script>
+            if (board.every(cell => cell)) {
+                statusElement.textContent = 'بازی مساوی شد!';
+                gameOver = true;
+                updateBalance(false);
+                return;
+            }
+
+            currentPlayer = currentPlayer === human ? ai : human;
+            statusElement.textContent = `نوبت ${currentPlayer === human ? 'شما' : computerName}`;
+
+            if (currentPlayer === ai) {
+                setTimeout(aiMove, 500);
+            }
+        }
+
+        // حرکت هوش مصنوعی (کامپیوتر)
+        function aiMove() {
+            // تلاش برای مسدود کردن برد کاربر
+            const blockIndex = findBlockingMove(human);
+            if (blockIndex !== null) {
+                board[blockIndex] = ai;
+                renderBoard();
+                const winnerPattern = checkWinner(ai);
+                if (winnerPattern) {
+                    statusElement.textContent = `${computerName} برنده شد!`;
+                    gameOver = true;
+                    updateBalance(false);
+                }
+                currentPlayer = human;
+                statusElement.textContent = `نوبت شماست!`;
+                return;
+            }
+
+            // حرکت تصادفی
+            const availableMoves = getAvailableMoves();
+            const randomMove = availableMoves[Math.floor(Math.random() * availableMoves.length)];
+            board[randomMove] = ai;
+            renderBoard();
+
+            const winnerPattern = checkWinner(ai);
+            if (winnerPattern) {
+                statusElement.textContent = `${computerName} برنده شد!`;
+                gameOver = true;
+                updateBalance(false);
+                return;
+            }
+
+            currentPlayer = human;
+            statusElement.textContent = `نوبت شماست!`;
+        }
+
+        // پیدا کردن حرکت مسدودکننده برای بازیکن
+        function findBlockingMove(player) {
+            for (let pattern of winPatterns) {
+                const values = pattern.map(index => board[index]);
+                if (values.filter(v => v === player).length === 2 && values.includes(null)) {
+                    return pattern[values.indexOf(null)];
+                }
+            }
+            return null;
+        }
+
+        // دریافت حرکت‌های موجود
+        function getAvailableMoves() {
+            return board.map((cell, index) => (cell === null ? index : null)).filter(index => index !== null);
+        }
+
+        // بررسی برنده
+        function checkWinner(player) {
+            return winPatterns.find(pattern => pattern.every(index => board[index] === player)) || null;
+        }
+
+        // بروزرسانی موجودی
+        function updateBalance(won) {
+            if (won) {
+                balance += betAmount * 10; // برد
+            } else {
+                balance -= betAmount; // باخت
+            }
+            if (balance < 0) balance = 0;
+            balanceElement.textContent = `موجودی: ${balance}`;
+            
+            // ذخیره موجودی در Local Storage
+            localStorage.setItem(`balance_${userId}`, balance);
+        }
+
+        initGame();
+    </script>
 </body>
 </html>
