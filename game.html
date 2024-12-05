@@ -111,10 +111,26 @@
 
         // حرکت هوش مصنوعی (کامپیوتر)
         function aiMove() {
-            // تلاش برای مسدود کردن برد کاربر
-            const blockIndex = findBlockingMove(human);
-            if (blockIndex !== null) {
-                board[blockIndex] = ai;
+            // تلاش برای مسدود کردن برد کاربر یا برد کامپیوتر
+            const blockingMove = findBlockingMove(human);
+            if (blockingMove !== null) {
+                board[blockingMove] = ai;
+                renderBoard();
+                const winnerPattern = checkWinner(ai);
+                if (winnerPattern) {
+                    statusElement.textContent = `${computerName} برنده شد!`;
+                    gameOver = true;
+                    updateBalance(false);
+                }
+                currentPlayer = human;
+                statusElement.textContent = `نوبت شماست!`;
+                return;
+            }
+
+            // تلاش برای برد خود کامپیوتر
+            const winningMove = findBlockingMove(ai);
+            if (winningMove !== null) {
+                board[winningMove] = ai;
                 renderBoard();
                 const winnerPattern = checkWinner(ai);
                 if (winnerPattern) {
