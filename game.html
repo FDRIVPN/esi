@@ -80,7 +80,8 @@
     let currentPlayer = human;
     let gameOver = false;
     const userId = "اسی"; // مثال: شناسه کاربر DASI
-    let dozbalance = 6000; // موجودی اولیه برای مثال
+    const STORAGE_KEY = `balance_${userId}`;
+    let dozbalance = loadBalance() || 6000; // بارگذاری موجودی ذخیره شده یا مقدار پیش‌فرض
     let betAmount = 10;
 
     const boardElement = document.getElementById("board");
@@ -180,7 +181,16 @@
 
       if (dozbalance < 0) dozbalance = 0;
 
+      saveBalance(dozbalance);
       loadGameData();
+    }
+
+    function saveBalance(balance) {
+      localStorage.setItem(STORAGE_KEY, balance);
+    }
+
+    function loadBalance() {
+      return parseInt(localStorage.getItem(STORAGE_KEY), 10);
     }
 
     loadGameData();
