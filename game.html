@@ -60,6 +60,7 @@
 
         const userId = "اسی"; // شناسه کاربر (برای مثال)
         let balance = parseInt(localStorage.getItem(`balance_${userId}`)) || (userId === "اسی" ? 6000 : 0); // بارگذاری موجودی یا تنظیم مقدار اولیه
+        let gameCount = parseInt(localStorage.getItem(`gameCount_${userId}`)) || 0; // بارگذاری تعداد بازی‌ها
 
         const human = "X";
         const ai = "O";
@@ -107,6 +108,8 @@
             }
             balance -= betAmount;
             localStorage.setItem(`balance_${userId}`, balance);
+            gameCount += 1;
+            localStorage.setItem(`gameCount_${userId}`, gameCount); // ذخیره تعداد بازی‌ها
             balanceElement.textContent = `موجودی: ${balance}`;
             document.getElementById("betAmount").style.display = 'none'; // مخفی کردن فیلد شرط
             statusElement.textContent = `نوبت شماست!`;
@@ -145,6 +148,36 @@
 
         // حرکت هوش مصنوعی (کامپیوتر)
         function aiMove() {
+            // قدرت هوش مصنوعی بر اساس تعداد بازی‌ها
+            const isWeakAI = gameCount >= 20; // اگر تعداد بازی‌ها 20 یا بیشتر باشد، هوش مصنوعی ضعیف‌تر می‌شود
+            if (isWeakAI) {
+                weakAI(); // حرکت هوش مصنوعی ضعیف
+            } else {
+                strongAI(); // حرکت هوش مصنوعی قوی
+            }
+        }
+
+        // هوش مصنوعی ضعیف (پس از 20 بازی)
+        function weakAI() {
+            const availableMoves = getAvailableMoves();
+            const randomMove = availableMoves[Math.floor(Math.random() * availableMoves.length)];
+            board[randomMove] = ai;
+            renderBoard();
+
+            const winnerPattern = checkWinner(ai);
+            if (winnerPattern) {
+                statusElement.textContent = `${computerName} برنده شد!`;
+                gameOver = true;
+                updateBalance(false);
+                return;
+            }
+
+            currentPlayer = human;
+            statusElement.textContent = `نوبت شماست!`;
+        }
+
+        // هوش مصنوعی قوی (قبل از 20 بازی)
+        function strongAI() {
             // تلاش برای مسدود کردن برد کاربر یا برد کامپیوتر
             const blockingMove = findBlockingMove(human);
             if (blockingMove !== null) {
@@ -197,39 +230,43 @@
 
         // پیدا کردن حرکت مسدودکننده برای بازیکن
         function findBlockingMove(player) {
-            for (let pattern of winPatterns) {
-                const values = pattern.map(index => board[index]);
-                if (values.filter(v => v === player).length === 2 && values.includes(null)) {
-                    return pattern[values.indexOf(null)];
+            const availableMoves = getAvailableMoves();
+            for (let i = 0; i < availableMoves.length; i++) {
+                const index = availableMoves[i];
+                board[index] = player;
+                if (checkWinner(player)) {
+                    board[index] = null;
+                    return index;
                 }
+                board[index] = null;
             }
             return null;
         }
 
-        // دریافت حرکت‌های موجود
-        function getAvailableMoves() {
-            return board.map((cell, index) => (cell === null ? index : null)).filter(index => index !== null);
-        }
-
-        // بررسی برنده
+        // چک کردن برنده
         function checkWinner(player) {
-            return winPatterns.find(pattern => pattern.every(index => board[index] === player)) || null;
+            return winPatterns.find(pattern => pattern.every(index => board[index] === player));
         }
 
-        // بروزرسانی موجودی
+        // دریافت خانه‌های خالی
+        function getAvailableMoves() {
+            return board.map((cell, index) => cell === null ? index : null).filter(index => index !== null);
+        }
+
+        // به‌روزرسانی موجودی
         function updateBalance(won) {
             if (won) {
-                balance += betAmount * 10; // برد
+                balance += betAmount * 10;
+                statusElement.textContent = `شما برنده شدید! موجودی شما به ${balance} تغییر یافت.`;
             } else {
-                balance -= betAmount; // باخت
+                balance -= betAmount;
+                if (balance < 0) balance = 0;
+                statusElement.textContent = `شما باختید! موجودی شما به ${balance} تغییر یافت.`;
             }
-            if (balance < 0) balance = 0;
-            balanceElement.textContent = `موجودی: ${balance}`;
-            
-            // ذخیره موجودی در Local Storage
             localStorage.setItem(`balance_${userId}`, balance);
         }
 
+        // شروع بازی
         initGame();
     </script>
 </body>
