@@ -14,6 +14,7 @@
       margin: 0;
       background-color: #f4f4f4;
       flex-direction: column;
+      position: relative;
     }
     .game-container {
       text-align: center;
@@ -23,12 +24,12 @@
       display: grid;
       grid-template-columns: repeat(3, 100px);
       grid-gap: 5px;
-      margin-bottom: 20px;
+      margin-top: 50px;
     }
     .cell {
       width: 100px;
       height: 100px;
-      background-image: url('go.png'); /* تصویر پیش‌فرض */
+      background-image: url('go.png');
       background-size: cover;
       display: flex;
       justify-content: center;
@@ -36,10 +37,8 @@
       cursor: pointer;
       border: 2px solid #ccc;
     }
-    /* بیضی‌ها با طراحی جدید */
     .ellipse {
       position: absolute;
-      top: 10px;
       padding: 10px 20px;
       border-radius: 25px;
       background-color: rgba(0, 0, 0, 0.4);
@@ -49,46 +48,27 @@
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
     .ellipse-left {
+      top: 20px;
       left: 20px;
     }
     .ellipse-right {
+      top: 20px;
       right: 20px;
     }
     .status {
       margin-top: 20px;
       font-size: 20px;
     }
-    /* طراحی نوار موجودی و شرط */
-    .balance-bar, .bet-bar {
-      position: absolute;
-      top: 10px;
-      display: inline-block;
-      background-color: #333;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 25px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      font-size: 18px;
-      font-weight: bold;
-    }
-    .balance-bar {
-      left: 20px;
-    }
-    .bet-bar {
-      right: 20px;
-    }
   </style>
 </head>
 <body>
   <div class="game-container">
-    <!-- نوار موجودی و شرط -->
-    <div class="balance-bar">
+    <div class="ellipse ellipse-left">
       موجودی: <span id="balance">0</span>
     </div>
-    <div class="bet-bar">
+    <div class="ellipse ellipse-right">
       مبلغ شرط: <span id="betAmount">0</span>
     </div>
-    <!-- جدول بازی -->
     <div class="board" id="board"></div>
     <div class="status" id="status">نوبت شماست (X)</div>
   </div>
@@ -99,15 +79,14 @@
     const ai = "O";
     let currentPlayer = human;
     let gameOver = false;
-    let betAmount = 3; // مبلغ شرط بندی
-    let dozbalance = 100; // موجودی اولیه کاربر
-    let aiDifficulty = 100; // سطح سختی ربات
-    let gamesPlayed = 0; // تعداد بازی‌های انجام شده
 
     const boardElement = document.getElementById("board");
     const statusElement = document.getElementById("status");
     const balanceElement = document.getElementById("balance");
     const betAmountElement = document.getElementById("betAmount");
+
+    let dozbalance = parseInt(localStorage.getItem("userBalance")) || 0;
+    let betAmount = 10;
 
     const winPatterns = [
       [0, 1, 2], [3, 4, 5], [6, 7, 8],
@@ -115,11 +94,11 @@
       [0, 4, 8], [2, 4, 6],
     ];
 
-    const loadGameData = () => {
+    function loadGameData() {
       balanceElement.textContent = dozbalance;
       betAmountElement.textContent = betAmount;
       renderBoard();
-    };
+    }
 
     function renderBoard() {
       boardElement.innerHTML = '';
@@ -127,7 +106,6 @@
         const cellElement = document.createElement('div');
         cellElement.classList.add('cell');
         if (cell) {
-          // تغییر تصویر بر اساس X یا O
           const imageSrc = cell === "X" ? "x.png" : "o.png";
           cellElement.style.backgroundImage = `url('${imageSrc}')`;
         }
@@ -137,9 +115,12 @@
     }
 
     function handleMove(index) {
-      if (board[index] || gameOver || dozbalance < betAmount) return;
+      if (board[index] || gameOver) return;
+      if (dozbalance < betAmount) {
+        statusElement.textContent = 'موجودی کافی نیست!';
+        return;
+      }
 
-      // کسر مبلغ شرط از موجودی
       board[index] = currentPlayer;
       renderBoard();
 
@@ -167,8 +148,9 @@
     }
 
     function aiMove() {
-      const bestMove = minimax(board, ai).index;
-      board[bestMove] = ai;
+      const availableMoves = getAvailableMoves(board);
+      const randomMove = availableMoves[Math.floor(Math.random() * availableMoves.length)];
+      board[randomMove] = ai;
       renderBoard();
 
       const winnerPattern = checkWinner(ai);
@@ -183,27 +165,6 @@
       statusElement.textContent = 'نوبت شماست (X)';
     }
 
-    function minimax(newBoard, player) {
-      const availableMoves = getAvailableMoves(newBoard);
-      if (checkWinner(human, newBoard)) return { score: -5 };
-      if (checkWinner(ai, newBoard)) return { score: 100 };
-      if (availableMoves.length === 0) return { score: 0 };
-
-      const moves = [];
-      availableMoves.forEach(index => {
-        const boardCopy = [...newBoard];
-        boardCopy[index] = player;
-        const result = minimax(boardCopy, player === ai ? human : ai);
-        moves.push({ index, score: result.score });
-      });
-
-      // استفاده از سختی ربات برای بهبود انتخاب حرکت
-      const difficultyMultiplier = aiDifficulty > 100 ? aiDifficulty : 100;
-      return player === ai
-        ? moves.reduce((best, move) => (move.score * difficultyMultiplier > best.score * difficultyMultiplier ? move : best), { score: -Infinity })
-        : moves.reduce((best, move) => (move.score * difficultyMultiplier < best.score * difficultyMultiplier ? move : best), { score: Infinity });
-    }
-
     function getAvailableMoves(board) {
       return board.map((cell, index) => (cell === null ? index : null)).filter(index => index !== null);
     }
@@ -214,22 +175,14 @@
 
     function updateBalance(won) {
       if (won) {
-        dozbalance += betAmount * 1; // اگر کاربر برنده شد
+        dozbalance += betAmount * 10;
       } else {
-        dozbalance -= betAmount; // اگر باخت
-        if (board.every(cell => cell === null)) {
-          dozbalance -= betAmount / 2; // اگر مساوی شد
-        }
+        dozbalance -= betAmount;
       }
 
       if (dozbalance < 0) dozbalance = 0;
-      gamesPlayed++;
 
-      // افزایش سختی ربات پس از 3 بازی
-      if (gamesPlayed >= 3) {
-        aiDifficulty = 100; // افزایش سطح سختی ربات
-      }
-
+      localStorage.setItem("userBalance", dozbalance);
       loadGameData();
     }
 
