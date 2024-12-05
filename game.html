@@ -36,7 +36,7 @@
             text-align: center;
         }
 
-        #status, #balance {
+        #status, #balance, #betAmount {
             text-align: center;
             font-size: 1.5rem;
             margin-top: 20px;
@@ -46,6 +46,11 @@
 </head>
 <body>
     <div id="balance"></div>
+    <div id="betAmount">
+        <label for="betInput">مبلغ شرط را وارد کنید:</label>
+        <input type="number" id="betInput" min="1" step="1">
+        <button onclick="placeBet()">تایید شرط</button>
+    </div>
     <div id="board"></div>
     <div id="status"></div>
 
@@ -60,7 +65,7 @@
         const ai = "O";
         let currentPlayer = human;
         let gameOver = false;
-        const betAmount = 10;
+        let betAmount = 0; // مبلغ شرط
 
         const board = Array(9).fill(null);
         const boardElement = document.getElementById("board");
@@ -77,7 +82,7 @@
         function initGame() {
             balanceElement.textContent = `موجودی: ${balance}`;
             renderBoard();
-            statusElement.textContent = `نوبت شماست!`;
+            statusElement.textContent = `لطفاً مبلغ شرط را وارد کنید.`;
         }
 
         // رندر کردن تخته بازی
@@ -90,6 +95,22 @@
                 cellElement.addEventListener('click', () => handleMove(index), { once: true });
                 boardElement.appendChild(cellElement);
             });
+        }
+
+        // قرار دادن شرط
+        function placeBet() {
+            const betInput = document.getElementById("betInput");
+            betAmount = parseInt(betInput.value);
+            if (isNaN(betAmount) || betAmount <= 0 || betAmount > balance) {
+                alert("مبلغ شرط معتبر نیست.");
+                return;
+            }
+            balance -= betAmount;
+            localStorage.setItem(`balance_${userId}`, balance);
+            balanceElement.textContent = `موجودی: ${balance}`;
+            document.getElementById("betAmount").style.display = 'none'; // مخفی کردن فیلد شرط
+            statusElement.textContent = `نوبت شماست!`;
+            renderBoard();
         }
 
         // حرکت بازیکن
