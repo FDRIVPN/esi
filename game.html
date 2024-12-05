@@ -80,25 +80,13 @@
     let currentPlayer = human;
     let gameOver = false;
     const userId = "اسی"; // مثال: شناسه کاربر DASI
-    let userBalance = 0; // موجودی اولیه پیش‌فرض
-
-// لیستی از کاربران و موجودی‌هایشان
-   const usersData = {
-      "اسی": 6000,
-      "ASI": 4500,
-      "ZALA": 3000,
-   };
-
-   if (usersData[userId] !== undefined) {
-     userBalance = usersData[userId];
+    let dozbalance = 6000; // موجودی اولیه برای مثال
+    let betAmount = 10;
 
     const boardElement = document.getElementById("board");
     const statusElement = document.getElementById("status");
     const balanceElement = document.getElementById("balance");
     const betAmountElement = document.getElementById("betAmount");
-
-    let dozbalance = parseInt(localStorage.getItem("userBalance")) || 0;
-    let betAmount = 10;
 
     const winPatterns = [
       [0, 1, 2], [3, 4, 5], [6, 7, 8],
@@ -128,10 +116,6 @@
 
     function handleMove(index) {
       if (board[index] || gameOver) return;
-      if (dozbalance < betAmount) {
-        statusElement.textContent = 'موجودی کافی نیست!';
-        return;
-      }
 
       board[index] = currentPlayer;
       renderBoard();
@@ -147,7 +131,7 @@
       if (board.every(cell => cell)) {
         statusElement.textContent = 'بازی مساوی شد!';
         gameOver = true;
-        updateBalance(false);
+        updateBalance(false, true); // حالت مساوی
         return;
       }
 
@@ -169,7 +153,7 @@
       if (winnerPattern) {
         statusElement.textContent = 'کامپیوتر برنده شد!';
         gameOver = true;
-        updateBalance(false);
+        updateBalance(false); // باخت
         return;
       }
 
@@ -185,16 +169,17 @@
       return winPatterns.find(pattern => pattern.every(index => board[index] === player)) || null;
     }
 
-    function updateBalance(won) {
+    function updateBalance(won, isDraw = false) {
       if (won) {
-        dozbalance += betAmount * 10;
+        dozbalance += betAmount * 10; // برد
+      } else if (isDraw) {
+        dozbalance -= Math.floor(dozbalance * 0.01); // مساوی
       } else {
-        dozbalance -= betAmount;
+        dozbalance -= betAmount; // باخت
       }
 
       if (dozbalance < 0) dozbalance = 0;
 
-      localStorage.setItem("userBalance", dozbalance);
       loadGameData();
     }
 
