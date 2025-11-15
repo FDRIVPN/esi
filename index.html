@@ -1,696 +1,839 @@
-// =================================================================
-// توابع کمکی (Helper Functions)
-// =================================================================
-
-/**
- * یک شناسه رندوم با طول مشخص ایجاد می‌کند.
- * @param {number} length طول شناسه
- * @returns {string} شناسه رندوم
- */
-function generateRandomId(length) {
-    let result = '';
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    const charactersLength = characters.length;
-    for (let i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-    return result;
-}
-
-/**
-* پاسخ پیش‌فرض API را برمی‌گرداند.
-* @returns {Response}
-*/
-function _handleDefaultResponse() {
-    return new Response(JSON.stringify({
-        message: 'این یک API ساده برای سرگرمی است! هیچ چیز مهمی اینجا نیست. فقط چند جوک و فکت جالب.',
-        endpoints: {
-            user: 'GET /user?id=xxx',
-            create: 'GET /create?name=xxx',
-            update: 'POST /update',
-            stats: 'GET /stats',
-            treasures: 'GET /list_treasures',
-            treasure_timers: 'GET /get_treasure_timers?id=xxx',
-            claim_treasure: 'POST /claim_treasure',
-            admin: 'GET /admin'
-        }
-    }), { headers: { 'Content-Type': 'application/json' } });
-}
-
-/**
-* چک و پاک کردن بن منقضی
-* @param {object} env محیط Worker
-* @param {string} id شناسه کاربر
-* @param {object} user اطلاعات کاربر
-*/
-async function _checkAndClearExpiredBan(env, id, user) {
-    const now = Math.floor(Date.now() / 1000);
-    if (user.ban_until !== 0 && now >= user.ban_until) {
-        await env.DB.prepare('UPDATE users SET ban_until = 0, ban_date = NULL WHERE id = ?').bind(id).run();
-        console.log('بن منقضی برای ' + id + ' پاک شد');
-    }
-}
-
-/**
-* مدیریت منحصر به فرد بودن نام
-* @param {object} env محیط Worker
-* @param {string} desiredName نام مورد نظر
-* @param {string} currentId شناسه کاربر فعلی (برای چک نکردن خودش)
-* @returns {string} نام منحصر به فرد نهایی
-*/
-async function _getUniqueName(env, desiredName, currentId = null) {
-    let uniqueName = desiredName;
-    let counter = 1;
-    while (true) {
-        let stmt;
-        if (currentId) {
-            stmt = env.DB.prepare('SELECT id FROM users WHERE name = ? AND id != ?').bind(uniqueName, currentId);
-        } else {
-            stmt = env.DB.prepare('SELECT id FROM users WHERE name = ?').bind(uniqueName);
-        }
-        const existing = await stmt.first();
-        if (!existing) break;
-        uniqueName = desiredName + '_' + counter++;
-    }
-    return uniqueName;
-}
-
-// =================================================================
-// منطق اصلی درخواست‌ها (Request Handler)
-// =================================================================
-
-async function _handleRequest(request, env) {
-    const url = new URL(request.url);
-    const path = url.pathname;
-    
-    // ---------------------- GET /user (by ID) ----------------------
-    if (path === '/user' && request.method === 'GET') {
-        const id = url.searchParams.get('id');
-        if (!id) return new Response(JSON.stringify({ error: 'شناسه الزامی است' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-        try {
-            let user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first();
-            if (!user) return new Response(JSON.stringify({ error: 'کاربر یافت نشد' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
-            
-            await _checkAndClearExpiredBan(env, id, user);
-            await env.DB.prepare('UPDATE users SET last_login = ? WHERE id = ?').bind(new Date().toISOString(), id).run();
-            const updatedUser = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first();
-            
-            updatedUser.name_history = JSON.parse(updatedUser.name_history || '[]');
-            updatedUser.message_history = JSON.parse(updatedUser.message_history || '[]');
-
-            return new Response(JSON.stringify({ success: true, user: updatedUser }), { headers: { 'Content-Type': 'application/json' } });
-        } catch (error) {
-            console.error('خطا در get by id:', error.message);
-            return new Response(JSON.stringify({ error: 'خطا در دریافت داده: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-        }
-    }
-    
-    // ---------------------- GET /create ----------------------
-    else if (path === '/create' && request.method === 'GET') {
-        const name = url.searchParams.get('name');
-        if (!name) return new Response(JSON.stringify({ error: 'نام الزامی است' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-        
-        try {
-            const uniqueName = await _getUniqueName(env, name);
-            const id = generateRandomId(10);
-            const referral = generateRandomId(6).toUpperCase();
-            const now = Math.floor(Date.now() / 1000);
-            const nameHistory = JSON.stringify([{ name: uniqueName, timestamp: new Date().toISOString() }]);
-
-            await env.DB.prepare(`
-                INSERT INTO users (id, name, coins, job, level, experience, message_history, ban_until, ban_date, name_history, is_admin, active, referral_code, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            `).bind(id, uniqueName, 1000, 'بیکار', 1, 0, '[]', 0, null, nameHistory, 0, 1, referral, now).run();
-            
-            const newUser = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first();
-            return new Response(JSON.stringify(newUser), { headers: { 'Content-Type': 'application/json' } });
-        } catch (error) {
-            console.error('خطا در create:', error.message);
-            return new Response(JSON.stringify({ error: 'خطا در ایجاد کاربر: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-        }
-    }
-    
-    // ---------------------- POST /update (JSON Body) ----------------------
-    else if (path === '/update' && request.method === 'POST') {
-        let body;
-        try {
-            body = await request.json();
-        } catch (error) {
-            return new Response(JSON.stringify({ error: 'بدنه JSON نامعتبر' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-        }
-        const { id, name, job, message, coins_add, experience_add, coins, level, experience, active, is_admin } = body; 
-        
-        if (!id) return new Response(JSON.stringify({ error: 'شناسه الزامی است' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-        
-        try {
-            let user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first();
-            if (!user) return new Response(JSON.stringify({ error: 'کاربر یافت نشد' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
-
-            await _checkAndClearExpiredBan(env, id, user);
-            user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first(); 
-
-            const now = Math.floor(Date.now() / 1000);
-            if (message && (user.ban_until !== 0 && now < user.ban_until)) {
-                return new Response(JSON.stringify({ error: 'شما بن هستید و نمی‌توانید چت کنید. بن تا: ' + user.ban_date }), { status: 403, headers: { 'Content-Type': 'application/json' } });
-            }
-
-            let query = 'UPDATE users SET ';
-            const binds = [];
-            
-            let nameChanged = false;
-            let uniqueName = user.name;
-            if (name !== undefined && name !== user.name) {
-                uniqueName = await _getUniqueName(env, name, id);
-                query += 'name = ?, '; binds.push(uniqueName);
-                nameChanged = true;
-            }
-            
-            if (nameChanged) {
-                let nh_str = user.name_history || '[]';
-                let nameHist;
-                try {
-                    nameHist = JSON.parse(nh_str);
-                    if (!Array.isArray(nameHist)) nameHist = [];
-                } catch (e) { nameHist = []; }
-                
-                nameHist.push({ name: uniqueName, timestamp: new Date().toISOString() });
-                query += 'name_history = ?, '; binds.push(JSON.stringify(nameHist));
-            }
-
-            if (job !== undefined) { query += 'job = ?, '; binds.push(job); }
-            if (coins_add !== undefined) { query += 'coins = coins + ?, '; binds.push(parseInt(coins_add)); }
-            if (experience_add !== undefined) { query += 'experience = experience + ?, '; binds.push(parseInt(experience_add)); }
-            if (coins !== undefined) { query += 'coins = ?, '; binds.push(parseInt(coins)); }
-            if (level !== undefined) { query += 'level = ?, '; binds.push(parseInt(level)); }
-            if (experience !== undefined) { query += 'experience = ?, '; binds.push(parseInt(experience)); }
-            if (active !== undefined) { query += 'active = ?, '; binds.push(active ? 1 : 0); }
-            if (is_admin !== undefined) { query += 'is_admin = ?, '; binds.push(is_admin ? 1 : 0); }
-
-            if (message) {
-                let mh_str = user.message_history || '[]';
-                var messages;
-                try {
-                    messages = JSON.parse(mh_str);
-                    if (!Array.isArray(messages)) messages = [];
-                } catch (parseErr) { messages = []; }
-                
-                messages.push({ message: message, timestamp: new Date().toISOString() });
-                let new_mh = JSON.stringify(messages);
-                query += 'message_history = ?, ';
-                binds.push(new_mh);
-            }
-            
-            if (binds.length === 0) {
-                 return new Response(JSON.stringify({ success: false, error: 'هیچ فیلدی برای به‌روزرسانی ارسال نشد.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-            }
-
-            query = query.slice(0, -2) + ' WHERE id = ?';
-            binds.push(id);
-            await env.DB.prepare(query).bind(...binds).run();
-            
-            const updatedUser = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first();
-            updatedUser.name_history = JSON.parse(updatedUser.name_history || '[]');
-            updatedUser.message_history = JSON.parse(updatedUser.message_history || '[]');
-
-            return new Response(JSON.stringify({ success: true, user: updatedUser }), { headers: { 'Content-Type': 'application/json' } });
-        } catch (error) {
-            console.error('خطا در POST update:', error.message);
-            return new Response(JSON.stringify({ error: 'خطا در به‌روزرسانی: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-        }
-    }
-    
-    // ---------------------- GET /stats ----------------------
-    else if (path === '/stats' && request.method === 'GET') {
-        try {
-            const now = Math.floor(Date.now() / 1000);
-            const todayStart = now - (now % 86400); 
-            const newToday = await env.DB.prepare('SELECT COUNT(*) as count FROM users WHERE created_at >= ?').bind(todayStart).first();
-            const totalCoins = await env.DB.prepare('SELECT SUM(coins) as sum FROM users').first(); 
-            const totalUsers = await env.DB.prepare('SELECT COUNT(*) as count FROM users').first();
-            const activeUsers = await env.DB.prepare('SELECT COUNT(*) as count FROM users WHERE active = 1').first();
-            const bannedNow = await env.DB.prepare('SELECT COUNT(*) as count FROM users WHERE ban_until > ?').bind(now).first();
-
-            return new Response(JSON.stringify({
-                success: true,
-                stats: {
-                    new_today: newToday.count,
-                    total_coins: totalCoins.sum || 0,
-                    total_users: totalUsers.count,
-                    active_users: activeUsers.count,
-                    banned_now: bannedNow.count
-                }
-            }), { headers: { 'Content-Type': 'application/json' } });
-        } catch (error) {
-            console.error('خطا در stats:', error.message);
-            return new Response(JSON.stringify({ error: 'خطا در آمار: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-        }
-    }
-
-    // ---------------------- GET /top_coins ----------------------
-    else if (path === '/top_coins' && request.method === 'GET') {
-        const limit = parseInt(url.searchParams.get('limit') || '10');
-        try {
-            const topUsers = await env.DB.prepare('SELECT id, name, coins, level FROM users WHERE active = 1 ORDER BY coins DESC LIMIT ?').bind(limit).all();
-            return new Response(JSON.stringify({ success: true, top_users: topUsers.results }), { headers: { 'Content-Type': 'application/json' } });
-        } catch (error) {
-            return new Response(JSON.stringify({ error: 'خطا در دریافت کاربران برتر: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-        }
-    }
-
-    // ---------------------- GET /banned_users ----------------------
-    else if (path === '/banned_users' && request.method === 'GET') {
-        try {
-            const now = Math.floor(Date.now() / 1000);
-            const bannedUsers = await env.DB.prepare('SELECT id, name, ban_date, ban_until FROM users WHERE ban_until > ? ORDER BY ban_until DESC').bind(now).all();
-            return new Response(JSON.stringify({ success: true, banned_users: bannedUsers.results }), { headers: { 'Content-Type': 'application/json' } });
-        } catch (error) {
-            return new Response(JSON.stringify({ error: 'خطا در دریافت کاربران بن شده: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-        }
-    }
-    
-    // ---------------------- GET /top_new ----------------------
-    else if (path === '/top_new' && request.method === 'GET') {
-        const limit = parseInt(url.searchParams.get('limit') || '10');
-        try {
-            const topNew = await env.DB.prepare('SELECT id, name, created_at FROM users ORDER BY created_at DESC LIMIT ?').bind(limit).all();
-            return new Response(JSON.stringify({ success: true, new_users: topNew.results }), { headers: { 'Content-Type': 'application/json' } });
-        } catch (error) {
-            return new Response(JSON.stringify({ error: 'خطا در دریافت کاربران جدید: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-        }
-    }
-
-    // ---------------------- GET /list_treasures ----------------------
-    else if (path === '/list_treasures' && request.method === 'GET') {
-        try {
-            let treasures = await env.DB.prepare('SELECT * FROM treasures ORDER BY id').all();
-            if (treasures.results.length === 0) {
-                for (let i = 1; i <= 10; i++) {
-                    const coins_reward = 100 + Math.floor(Math.random() * 900);
-                    await env.DB.prepare('INSERT INTO treasures (id, name, coins_reward, timer_duration_seconds) VALUES (?, ?, ?, ?)')
-                        .bind(i, `گنج ${i}`, coins_reward, 300).run();
-                }
-                treasures = await env.DB.prepare('SELECT * FROM treasures ORDER BY id').all();
-            }
-            return new Response(JSON.stringify({ success: true, treasures: treasures.results }), { headers: { 'Content-Type': 'application/json' } });
-        } catch (error) {
-            console.error('خطا در list_treasures:', error.message);
-            return new Response(JSON.stringify({ error: 'خطا در دریافت گنج‌ها: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-        }
-    }
-
-    // ---------------------- GET /get_treasure_timers ----------------------
-    else if (path === '/get_treasure_timers' && request.method === 'GET') {
-        const user_id = url.searchParams.get('id');
-        if (!user_id) return new Response(JSON.stringify({ error: 'شناسه کاربر الزامی است' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-
-        try {
-            const user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(user_id).first();
-            if (!user) return new Response(JSON.stringify({ error: 'کاربر یافت نشد' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
-
-            const now = Math.floor(Date.now() / 1000);
-
-            let treasures = await env.DB.prepare('SELECT * FROM treasures ORDER BY id').all();
-            if (treasures.results.length === 0) {
-                for (let i = 1; i <= 10; i++) {
-                    const coins_reward = 100 + Math.floor(Math.random() * 900);
-                    await env.DB.prepare('INSERT INTO treasures (id, name, coins_reward, timer_duration_seconds) VALUES (?, ?, ?, ?)')
-                        .bind(i, `گنج ${i}`, coins_reward, 300).run();
-                }
-                treasures = await env.DB.prepare('SELECT * FROM treasures ORDER BY id').all();
-            }
-
-            const timers = [];
-            for (let treasure of treasures.results) {
-                let last_claimed = await env.DB.prepare('SELECT last_claimed FROM user_treasures WHERE user_id = ? AND treasure_id = ?').bind(user_id, treasure.id).first();
-                last_claimed = last_claimed ? last_claimed.last_claimed : 0;
-
-                const timer_duration = treasure.timer_duration_seconds || 300;
-                const next_available = last_claimed + timer_duration;
-                const is_ready = now >= next_available;
-                const remaining_seconds = is_ready ? 0 : next_available - now;
-
-                timers.push({
-                    treasure_id: treasure.id,
-                    name: treasure.name,
-                    coins_reward: treasure.coins_reward,
-                    is_ready: is_ready,
-                    remaining_seconds: remaining_seconds,
-                    next_available: next_available,
-                    timer_duration: timer_duration
-                });
-            }
-
-            return new Response(JSON.stringify({ success: true, timers: timers }), { headers: { 'Content-Type': 'application/json' } });
-        } catch (error) {
-            console.error('خطا در get_treasure_timers:', error.message);
-            return new Response(JSON.stringify({ error: 'خطا در دریافت تایمرها: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-        }
-    }
-
-    // ---------------------- POST /claim_treasure (رفع مشکل) ----------------------
-    else if (path === '/claim_treasure' && request.method === 'POST') {
-        let body;
-        try {
-            body = await request.json();
-        } catch (error) {
-            return new Response(JSON.stringify({ error: 'بدنه JSON نامعتبر' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-        }
-        const { user_id, treasure_id } = body;
-        if (!user_id || !treasure_id) return new Response(JSON.stringify({ error: 'شناسه کاربر و گنج الزامی است' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-
-        try {
-            const now = Math.floor(Date.now() / 1000);
-
-            const user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(user_id).first();
-            if (!user) return new Response(JSON.stringify({ error: 'کاربر یافت نشد' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
-
-            const treasure = await env.DB.prepare('SELECT * FROM treasures WHERE id = ?').bind(treasure_id).first();
-            if (!treasure) return new Response(JSON.stringify({ error: 'گنج یافت نشد' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
-
-            const timer_duration = treasure.timer_duration_seconds || 300;
-
-            let last_claimed_row = await env.DB.prepare('SELECT last_claimed FROM user_treasures WHERE user_id = ? AND treasure_id = ?').bind(user_id, treasure_id).first();
-            const last_claimed = last_claimed_row ? last_claimed_row.last_claimed : 0;
-            const next_available = last_claimed + timer_duration;
-
-            if (now < next_available) {
-                return new Response(JSON.stringify({ error: 'گنج هنوز آماده نیست. زمان باقی: ' + (next_available - now) + ' ثانیه' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
-            }
-
-            await env.DB.prepare('UPDATE users SET coins = coins + ? WHERE id = ?').bind(treasure.coins_reward, user_id).run();
-
-            if (last_claimed_row) {
-                await env.DB.prepare('UPDATE user_treasures SET last_claimed = ? WHERE user_id = ? AND treasure_id = ?').bind(now, user_id, treasure_id).run();
-            } else {
-                await env.DB.prepare('INSERT INTO user_treasures (user_id, treasure_id, last_claimed) VALUES (?, ?, ?)').bind(user_id, treasure_id, now).run();
-            }
-
-            const updated_user = await env.DB.prepare('SELECT coins FROM users WHERE id = ?').bind(user_id).first();
-
-            // ✅ رفع مشکل: اضافه کردن فیلدهای مورد نیاز کلاینت
-            return new Response(JSON.stringify({
-                success: true,
-                message: `گنج ${treasure.name} ادعا شد! ${treasure.coins_reward} سکه اضافه شد.`,
-                new_coins: updated_user.coins,
-                next_available: now + timer_duration,
-                treasure_id: treasure_id,  // ✅ اضافه شد
-                coins_reward: treasure.coins_reward  // ✅ اضافه شد
-            }), { headers: { 'Content-Type': 'application/json' } });
-        } catch (error) {
-            console.error('خطا در claim_treasure:', error.message);
-            return new Response(JSON.stringify({ error: 'خطا در ادعای گنج: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-        }
-    }
-
-    // ---------------------- POST /add_treasure ----------------------
-    else if (path === '/add_treasure' && request.method === 'POST') {
-        let body;
-        try {
-            body = await request.json();
-        } catch (error) {
-            return new Response(JSON.stringify({ error: 'بدنه JSON نامعتبر' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-        }
-        const { name, coins_reward, timer_duration_seconds } = body;
-        if (!name || coins_reward === undefined || timer_duration_seconds === undefined) {
-             return new Response(JSON.stringify({ error: 'نام، مقدار سکه و زمان انتظار (ثانیه) الزامی است' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-        }
-        
-        try {
-            const maxId = await env.DB.prepare('SELECT MAX(id) as max_id FROM treasures').first();
-            const newId = (maxId.max_id || 0) + 1;
-            
-            await env.DB.prepare('INSERT INTO treasures (id, name, coins_reward, timer_duration_seconds) VALUES (?, ?, ?, ?)')
-                .bind(newId, name, parseInt(coins_reward), parseInt(timer_duration_seconds)).run();
-                
-            return new Response(JSON.stringify({ success: true, message: 'گنج جدید اضافه شد', treasure_id: newId }), { headers: { 'Content-Type': 'application/json' } });
-        } catch (error) {
-            console.error('خطا در add_treasure:', error.message);
-            return new Response(JSON.stringify({ error: 'خطا در اضافه کردن گنج: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-        }
-    }
-
-    // ---------------------- POST /delete_treasure ----------------------
-    else if (path === '/delete_treasure' && request.method === 'POST') {
-        let body;
-        try {
-            body = await request.json();
-        } catch (error) {
-            return new Response(JSON.stringify({ error: 'بدنه JSON نامعتبر' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-        }
-        const { treasure_id } = body;
-        if (!treasure_id) return new Response(JSON.stringify({ error: 'شناسه گنج الزامی است' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-        
-        try {
-            await env.DB.prepare('DELETE FROM treasures WHERE id = ?').bind(treasure_id).run();
-            await env.DB.prepare('DELETE FROM user_treasures WHERE treasure_id = ?').bind(treasure_id).run();
-            return new Response(JSON.stringify({ success: true, message: 'گنج حذف شد' }), { headers: { 'Content-Type': 'application/json' } });
-        } catch (error) {
-            console.error('خطا در delete_treasure:', error.message);
-            return new Response(JSON.stringify({ error: 'خطا در حذف گنج: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-        }
-    }
-
-    // ---------------------- POST /update_treasure (برای پنل ادمین) ----------------------
-    else if (path === '/update_treasure' && request.method === 'POST') {
-        let body;
-        try {
-            body = await request.json();
-        } catch (error) {
-            return new Response(JSON.stringify({ error: 'بدنه JSON نامعتبر' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-        }
-        const { treasure_id, coins_reward, timer_duration_seconds } = body;
-        
-        if (!treasure_id || coins_reward === undefined || timer_duration_seconds === undefined) {
-            return new Response(JSON.stringify({ error: 'شناسه گنج، مقدار سکه و زمان انتظار الزامی است' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-        }
-        try {
-            await env.DB.prepare('UPDATE treasures SET coins_reward = ?, timer_duration_seconds = ? WHERE id = ?')
-                .bind(parseInt(coins_reward), parseInt(timer_duration_seconds), parseInt(treasure_id)).run();
-                
-            return new Response(JSON.stringify({ success: true, message: 'گنج به‌روزرسانی شد' }), { headers: { 'Content-Type': 'application/json' } });
-        } catch (error) {
-            return new Response(JSON.stringify({ error: 'خطا در به‌روزرسانی گنج: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-        }
-    }
-
-    // ---------------------- سایر مسیرها ----------------------
-    else if (path === '/delete' && request.method === 'POST') {
-        let body;
-        try { body = await request.json(); } catch (error) { return new Response(JSON.stringify({ error: 'بدنه JSON نامعتبر' }), { status: 400, headers: { 'Content-Type': 'application/json' } }); }
-        const { id } = body;
-        if (!id) return new Response(JSON.stringify({ error: 'شناسه الزامی است' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-        try {
-            await env.DB.prepare('DELETE FROM users WHERE id = ?').bind(id).run();
-            return new Response(JSON.stringify({ success: true, message: 'کاربر حذف شد' }), { headers: { 'Content-Type': 'application/json' } });
-        } catch (error) {
-            return new Response(JSON.stringify({ error: 'خطا در حذف: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-        }
-    }
-    
-    else if (path === '/ban' && request.method === 'POST') {
-        let body;
-        try { body = await request.json(); } catch (error) { return new Response(JSON.stringify({ error: 'بدنه JSON نامعتبر' }), { status: 400, headers: { 'Content-Type': 'application/json' } }); }
-        const { id, duration_minutes } = body;
-        if (!id || duration_minutes === undefined) { return new Response(JSON.stringify({ error: 'شناسه و مدت زمان الزامی است' }), { status: 400, headers: { 'Content-Type': 'application/json' } }); }
-        try {
-            const now = Math.floor(Date.now() / 1000);
-            const ban_until = now + (duration_minutes * 60);
-            const ban_date = new Date(ban_until * 1000).toLocaleDateString('fa-IR') + ' ' + new Date(ban_until * 1000).toLocaleTimeString('fa-IR');
-            
-            await env.DB.prepare('UPDATE users SET ban_until = ?, ban_date = ? WHERE id = ?').bind(ban_until, ban_date, id).run();
-            const updatedUser = await env.DB.prepare('SELECT id, ban_until, ban_date FROM users WHERE id = ?').bind(id).first();
-            
-            return new Response(JSON.stringify({
-                success: true,
-                user: updatedUser
-            }), { headers: { 'Content-Type': 'application/json' } });
-        } catch (error) {
-            return new Response(JSON.stringify({ error: 'خطا در بن کردن: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-        }
-    }
-
-    else if (path === '/all_users' && request.method === 'GET') {
-        const page = parseInt(url.searchParams.get('page') || '1');
-        const limit = parseInt(url.searchParams.get('limit') || '20');
-        const offset = (page - 1) * limit;
-        try {
-            const users = await env.DB.prepare('SELECT id, name, coins, job, level, created_at, active, is_admin, ban_until FROM users ORDER BY created_at DESC LIMIT ? OFFSET ?').bind(limit, offset).all();
-            const countRes = await env.DB.prepare('SELECT COUNT(*) as count FROM users').all();
-            const total = countRes.results[0].count;
-            return new Response(JSON.stringify({ success: true, users: users.results, total, page, limit }), { headers: { 'Content-Type': 'application/json' } });
-        } catch (error) {
-            return new Response(JSON.stringify({ error: 'خطا در لیست کاربران: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-        }
-    }
-    
-    // ---------------------- مسیر پیش‌فرض ----------------------
-    else {
-        return _handleDefaultResponse();
-    }
-}
-
-
-// =================================================================
-// پنل مدیریت HTML (با Vanilla JS)
-// =================================================================
-
-function _getAdminHTML() {
-    return `
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>پنل مدیریت بازی پیشرفته</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جنگ دار | سیستم فرماندهی تاکتیکی پیشرفته</title>
     <style>
-        :root { --primary: #6366f1; --danger: #ef4444; --success: #10b981; --dark: #1f2937; --light: #f9fafb; }
-        .dark { background: #111827; color: #e5e7eb; }
-        .card { transition: all 0.3s; cursor: pointer; }
-        .card:hover { transform: translateY(-3px); box-shadow: 0 15px 20px -5px rgba(0,0,0,0.1); }
-        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .hidden { display: none; }
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); z-index: 999; display: flex; justify-content: center; align-items: center; }
-        .modal-content { background: #fff; dark:bg-gray-800; padding: 20px; border-radius: 10px; max-width: 90%; max-height: 90%; overflow-y: auto; position: relative; }
-        .modal-dark { background: #1f2937; color: #e5e7eb; }
+        /* --- متغیرها و فونت --- */
+        @font-face {
+            font-family: 'Vazirmatn';
+            src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn/v1.3.0/dist/font-files/vazirmatn-regular.woff2') format('woff2');
+            font-weight: 400;
+            font-style: normal;
+        }
+        :root {
+            --color-bg: #0d0d0d;
+            --color-surface: #1a1a1a;
+            --color-text: #e0e0e0;
+            --color-primary: #00ff99; /* سبز روشن (Hacker Green) */
+            --color-secondary: #333333;
+            --color-error: #ff6b6b;
+            --font-family: 'Vazirmatn', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* --- طرح‌بندی اصلی --- */
+        #main-container {
+            width: 100%;
+            max-width: 1400px;
+            display: grid;
+            grid-template-columns: 1fr 2fr; /* نقشه/وضعیت در چپ، کنسول در راست */
+            gap: 30px;
+            align-items: start;
+        }
+
+        /* --- ستون چپ: نقشه و وضعیت بات‌ها --- */
+        #side-panel {
+            background-color: var(--color-surface);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--color-secondary);
+        }
+        
+        .panel-header {
+            color: var(--color-primary);
+            border-bottom: 1px solid var(--color-secondary);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        /* نقشه SVG مینیمال */
+        #interactive-map-container {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        #war-map {
+            width: 100%;
+            height: auto;
+            background-color: #2a2a2a; /* رنگ پس‌زمینه نقشه */
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+        
+        .map-region {
+            fill: #444; /* رنگ پیش‌فرض مناطق */
+            stroke: var(--color-bg);
+            stroke-width: 1px;
+            transition: fill 0.3s, stroke 0.3s, transform 0.1s;
+            cursor: pointer;
+        }
+        
+        .map-region:hover {
+            fill: var(--color-primary);
+            transform: scale(1.01);
+        }
+        
+        .map-region.selected {
+            fill: var(--color-primary) !important;
+            stroke: var(--color-text);
+            stroke-width: 2px;
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { opacity: 1; }
+            to { opacity: 0.7; }
+        }
+
+        /* وضعیت بات‌ها */
+        .bot-status {
+            margin-top: 20px;
+        }
+
+        .bot-card {
+            background-color: var(--color-bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid transparent;
+            transition: border-left 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .bot-card.neutral { border-left-color: #888; }
+        .bot-card.hostile { border-left-color: var(--color-error); }
+        .bot-card.ally { border-left-color: var(--color-primary); }
+        .bot-card.defeated { border-left-color: #333; opacity: 0.6; cursor: default;}
+        .bot-card:hover { box-shadow: 0 0 10px rgba(0, 255, 153, 0.3); }
+        .bot-card.defeated:hover { box-shadow: none; }
+
+        .bot-name { font-weight: bold; font-size: 1.1rem; margin-bottom: 5px; }
+        .bot-power { font-size: 0.9rem; color: #aaa; }
+
+        /* --- ستون راست: کنسول فرماندهی --- */
+        #command-area {
+            background-color: var(--color-surface);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--color-secondary);
+        }
+
+        #output-console {
+            min-height: 350px;
+            max-height: 50vh;
+            overflow-y: auto;
+            padding: 15px;
+            background-color: rgba(0, 0, 0, 0.4); 
+            border: 1px solid var(--color-secondary);
+            border-radius: 8px;
+            text-align: right;
+            direction: rtl;
+            white-space: pre-wrap; 
+            font-family: monospace;
+            color: var(--color-primary);
+            margin-bottom: 15px;
+        }
+        
+        .console-prompt { color: #ccc; }
+        .console-action { color: var(--color-primary); }
+        .console-result { color: #e0e0e0; }
+        .console-danger { color: var(--color-error); }
+        .console-system { color: #00bfff; }
+
+        .action-menu {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .action-button {
+            flex-grow: 1;
+            padding: 12px 15px;
+            background-color: var(--color-primary);
+            color: var(--color-bg);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .action-button:hover {
+            background-color: #00cc88;
+        }
+        .action-button:disabled {
+            background-color: #333;
+            color: #888;
+            cursor: not-allowed;
+        }
+        
+        /* --- مودال بازار --- */
+        .modal {
+            display: none; 
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.8);
+        }
+
+        .modal-content {
+            background-color: var(--color-surface);
+            margin: 10% auto;
+            padding: 25px;
+            border: 1px solid var(--color-primary);
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 5px 15px rgba(0, 255, 153, 0.5);
+            text-align: right;
+            direction: rtl;
+        }
+
+        .close-button {
+            color: var(--color-error);
+            float: left;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .market-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px dotted #444;
+            align-items: center;
+        }
+
+        .market-item button {
+            padding: 5px 10px;
+            background-color: var(--color-primary);
+            color: var(--color-bg);
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        /* ریسپانسیو */
+        @media (max-width: 900px) {
+            #main-container {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white min-h-screen transition-colors">
+<body>
 
-    <div class="container mx-auto p-4 max-w-7xl">
-
-        <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold gradient-bg bg-clip-text text-transparent">پنل مدیریت بازی پیشرفته</h1>
-            <p class="text-gray-600 dark:text-gray-400 mt-2">مدیریت کاربران، سکه، سطح، بن، آمار و گنج‌ها</p>
-            <button id="themeToggle" class="mt-4 p-2 rounded-full bg-gray-200 dark:bg-gray-700">
-                <i class="fas fa-moon"></i>
-            </button>
-        </header>
-
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-            <div id="cardTotalUsers" class="card bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col justify-between">
-                <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">کل کاربران</p>
-                    <p id="totalUsers" class="text-3xl font-extrabold mt-1">...</p>
-                </div>
-                <i class="fas fa-users text-4xl text-indigo-400 self-end"></i>
-            </div>
-            <div id="cardTotalActive" class="card bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col justify-between">
-                <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">کاربران فعال</p>
-                    <p id="totalActive" class="text-3xl font-extrabold mt-1">...</p>
-                </div>
-                <i class="fas fa-user-check text-4xl text-green-400 self-end"></i>
-            </div>
-            <div id="cardNewToday" class="card bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col justify-between">
-                <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">جدید امروز</p>
-                    <p id="newToday" class="text-3xl font-extrabold mt-1">...</p>
-                </div>
-                <i class="fas fa-user-plus text-4xl text-yellow-400 self-end"></i>
-            </div>
-            <div id="cardTotalCoins" class="card bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col justify-between">
-                <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">کل سکه‌های سیستم</p>
-                    <p id="totalCoins" class="text-3xl font-extrabold mt-1">...</p>
-                </div>
-                <i class="fas fa-coins text-4xl text-amber-400 self-end"></i>
-            </div>
-            <div id="cardBannedNow" class="card bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col justify-between">
-                <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">بن شده‌ها</p>
-                    <p id="bannedNow" class="text-3xl font-extrabold mt-1">...</p>
-                </div>
-                <i class="fas fa-ban text-4xl text-red-400 self-end"></i>
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg mb-8">
-            <h2 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-gem ml-2"></i> مدیریت گنج‌ها</h2>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">مقدار سکه و زمان انتظار (به ثانیه) هر گنج را اینجا تنظیم کنید.</p>
-            <div class="mb-4 flex flex-col md:flex-row gap-4">
-                <input id="newTreasureName" type="text" placeholder="نام گنج جدید" class="flex-grow p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-lg"/>
-                <input id="newTreasureCoins" type="number" placeholder="سکه جایزه" class="w-full md:w-28 p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-lg"/>
-                <input id="newTreasureDuration" type="number" placeholder="زمان (ثانیه)" class="w-full md:w-28 p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-lg"/>
-                <button id="addTreasureBtn" class="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition w-full md:w-auto flex items-center justify-center">
-                    <i class="fas fa-plus ml-2"></i> اضافه کردن گنج
-                </button>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-700">
-                        <tr>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID گنج</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">نام</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">سکه جایزه</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">زمان (ثانیه)</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">عملیات</th>
-                        </tr>
-                    </thead>
-                    <tbody id="treasureListBody" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        <tr><td colspan="5" class="p-4 text-center text-gray-500 dark:text-gray-400">درحال بارگذاری گنج‌ها...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+    <div id="main-container">
         
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg mb-8">
-            <h2 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-search ml-2"></i> جستجو و مدیریت کاربر</h2>
-            <div class="flex flex-col md:flex-row gap-4">
-                <input id="userIdInput" type="text" placeholder="شناسه (ID) کاربر را وارد کنید..." class="flex-grow p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"/>
-                <button id="searchButton" class="bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 transition w-full md:w-auto flex items-center justify-center">
-                    <i class="fas fa-search ml-2"></i> جستجو
-                </button>
-            </div>
-        </div>
-        
-        <div id="userDetails" class="hidden bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg mb-8">
-            <h2 class="text-2xl font-bold mb-4 text-indigo-600 dark:text-indigo-400 flex items-center"><i class="fas fa-user-circle ml-2"></i> جزئیات کاربر: <span id="userName" class="mr-1"></span></h2>
+        <!-- ستون چپ: نقشه و وضعیت بات‌ها -->
+        <div id="side-panel">
+            <div class="panel-header">۱. انتخاب پایگاه فرماندهی (نقشه)</div>
             
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div class="col-span-1 md:col-span-4 border-b pb-4 mb-4">
-                    <p class="text-sm text-gray-500 dark:text-gray-400">شناسه: <span id="detailId" class="text-gray-900 dark:text-white font-mono text-sm"></span></p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">تاریخ ساخت: <span id="detailCreatedAt" class="text-gray-900 dark:text-white text-sm"></span></p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">آخرین ورود: <span id="detailLastLogin" class="text-gray-900 dark:text-white text-sm"></span></p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">کد دعوت: <span id="detailReferral" class="text-gray-900 dark:text-white font-mono text-sm"></span></p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                        وضعیت: <span id="detailActive" class="mr-1 font-bold"></span>
-                        <span id="detailAdmin" class="text-xs mr-2 p-1 rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"></span>
-                    </p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">بن تا: <span id="detailBan" class="text-red-500 font-bold"></span></p>
-                </div>
+            <div id="interactive-map-container">
+                <svg id="war-map" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+                    <rect id="region-A" class="map-region" data-country-id="persia" x="50" y="100" width="150" height="120" />
+                    <rect id="region-B" class="map-region" data-country-id="axis" x="250" y="50" width="100" height="100" />
+                    <rect id="region-C" class="map-region" data-country-id="allies" x="400" y="150" width="200" height="150" />
+                    <rect id="region-D" class="map-region" data-country-id="neutral" x="650" y="80" width="120" height="100" />
+                    
+                    <text x="125" y="165" class="map-label" fill="#ffffff" text-anchor="middle" font-size="16">ایران</text>
+                    <text x="300" y="105" class="map-label" fill="#ffffff" text-anchor="middle" font-size="16">بات A</text>
+                    <text x="500" y="225" class="map-label" fill="#ffffff" text-anchor="middle" font-size="16">بات B</text>
+                    <text x="710" y="130" class="map-label" fill="#ffffff" text-anchor="middle" font-size="16">بات C</text>
+                </svg>
+            </div>
+            
+            <div class="panel-header">۲. وضعیت نیروهای دشمن</div>
+            <div id="bot-status-display" class="bot-status">
+                <!-- کارت‌های بات‌ها توسط JS اینجا قرار می‌گیرند -->
+            </div>
+        </div>
+
+        <!-- ستون راست: کنسول فرماندهی -->
+        <div id="command-area">
+            
+            <div class="panel-header">۳. منابع و فرمان‌ها</div>
+            <div id="status-bar" style="padding: 10px; border: 1px solid #444; border-radius: 5px; margin-bottom: 15px;">
+                <!-- وضعیت منابع اینجا نمایش داده می‌شود -->
+            </div>
+            
+            <div class="action-menu">
+                <button id="btn-scan" class="action-button" disabled>اسکن وضعیت</button>
+                <button id="btn-engage" class="action-button" disabled>درگیری با هدف</button>
+                <button id="btn-market" class="action-button" disabled>بازار و اقتصاد</button> 
+                <button id="btn-end-day" class="action-button" style="background-color: var(--color-error); color: white;">پایان روز</button>
+            </div>
+
+            <div class="panel-header" style="margin-top: 20px;">۴. کنسول عملیات (JANGDAR_OS)</div>
+            <div id="output-console">
+                <span class="console-prompt">[[JANGDAR_OS v3.3 - FIXED]] &gt;</span> 
+                منتظر انتخاب پایگاه فرماندهی از نقشه...
+            </div>
+            
+        </div>
+
+    </div>
+
+    <!-- مودال بازار -->
+    <div id="marketModal" class="modal">
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <div class="panel-header">بازار و مدیریت منابع</div>
+        
+        <h4>۱. عملیات اقتصادی</h4>
+        <div id="economy-ops" style="margin-bottom: 20px;">
+            <div class="market-item">
+                <span>تنظیم مالیات (تأثیر بر درآمد روزانه):</span>
+                <input type="number" id="tax-rate" value="10" min="0" max="50" style="width: 60px; background: #222; color: white; border: 1px solid #444; padding: 5px; border-radius: 3px;"> %
+                <button onclick="applyTax()">اعمال مالیات</button>
+            </div>
+            
+            <div class="market-item">
+                <span>درآمد روزانه (بر اساس مالیات):</span>
+                <span id="daily-income">0</span> واحد
+            </div>
+        </div>
+
+        <h4>۲. خرید آیتم‌ها</h4>
+        <div id="market-list">
+            <!-- آیتم‌های خرید/فروش توسط JS اضافه می‌شوند -->
+        </div>
+      </div>
+    </div>
+
+    <script>
+        const mapRegions = document.querySelectorAll('.map-region');
+        const botStatusDisplay = document.getElementById('bot-status-display');
+        const consoleElement = document.getElementById('output-console');
+        const btnScan = document.getElementById('btn-scan');
+        const btnEngage = document.getElementById('btn-engage');
+        const btnMarket = document.getElementById('btn-market');
+        const btnEndDay = document.getElementById('btn-end-day');
+        const statusBar = document.getElementById('status-bar');
+        
+        // --- وضعیت بازی ---
+        let selectedCountryId = 'none';
+        let selectedBotIndex = -1;
+        let dayCount = 1;
+        let taxRate = 10; // درصد
+        let gameActive = true; 
+        
+        let gameState = {
+            money: 5000,
+            mines: 1, 
+            power: 850, // این مقدار در ابتدای هر روز با منطقه انتخابی تنظیم می‌شود
+            espionage_tokens: 0,
+            nuclear_missiles: 0
+        };
+        
+        const MARKET_PRICES = {
+            mine_buy: 1500,
+            mine_sell: 800,
+            base_power_boost: 500, 
+            daily_income_base: 100,
+            espionage_cost: 1200,
+            nuke_cost: 10000,
+            espionage_power_debuff: 150,
+        };
+
+        const countryPowerMap = {
+            'persia': { name: "ایران (پایگاه اصلی)", power: 850, initialBotStatus: "ally" },
+            'axis':   { name: "منطقه دشمن (Axis)", power: 400, initialBotStatus: "hostile" },
+            'allies': { name: "منطقه متفقین (Allies)", power: 550, initialBotStatus: "neutral" },
+            'neutral':{ name: "منطقه بی‌طرف", power: 200, initialBotStatus: "neutral" }
+        };
+
+        const bots = [
+            { name: "بات تاکتیکی - شبکه S-1", power: 350, status: "hostile", id: 0 },
+            { name: "بات استراتژیک - هسته مرکزی", power: 500, status: "hostile", id: 1 },
+            { name: "بات پشتیبانی - لجستیک", power: 150, status: "neutral", id: 2 }
+        ];
+
+        // --- توابع کمکی کنسول و UI ---
+        function logToConsole(message, type = 'info') {
+            const formattedMessage = `<div class="${type}">${message}</div>`;
+            consoleElement.innerHTML += formattedMessage;
+            consoleElement.scrollTop = consoleElement.scrollHeight;
+        }
+
+        function logPrompt(action) {
+            const currentContext = selectedCountryId === 'persia' ? countryPowerMap[selectedCountryId].name : (selectedCountryId === 'none' ? `Day ${dayCount}` : 'Operation');
+            const prompt = `<span class="console-prompt">[[${currentContext}]] &gt;</span> <span class="console-action">${action}</span>`;
+            logToConsole(prompt, 'action');
+        }
+        
+        function updateStatusBar() {
+            const baseIncome = gameState.mines * MARKET_PRICES.daily_income_base;
+            const taxAmount = Math.floor(baseIncome * (taxRate / 100));
+            const netIncome = baseIncome - taxAmount;
+            
+            document.getElementById('daily-income').textContent = netIncome.toLocaleString() + " تومان";
+            
+            statusBar.innerHTML = `
+                <strong>روز: ${dayCount}</strong> | 
+                پول: ${gameState.money.toLocaleString()} تومان | 
+                معادن: ${gameState.mines} | 
+                قدرت پایگاه: ${gameState.power.toLocaleString()} | 
+                مالیات: ${taxRate}% (${netIncome.toLocaleString()} درآمد روزانه) | 
+                جاسوسی: ${gameState.espionage_tokens} | 
+                موشک هسته‌ای: ${gameState.nuclear_missiles}
+            `;
+        }
+        
+        function setButtonStates(active) {
+            // اگر بازی فعال نیست، همه را غیرفعال کن
+            if (!gameActive) {
+                 btnScan.disabled = true;
+                 btnEngage.disabled = true;
+                 btnMarket.disabled = true;
+                 btnEndDay.disabled = true;
+                 return;
+            }
+            
+            // وضعیت عادی
+            btnScan.disabled = active ? (selectedCountryId === 'none') : true;
+            btnEngage.disabled = active ? (selectedBotIndex === -1 || bots[selectedBotIndex]?.status === 'defeated') : true;
+            btnMarket.disabled = !active; 
+            btnEndDay.disabled = !active;
+        }
+        
+        function renderBotStatus() {
+             botStatusDisplay.innerHTML = '';
+             bots.forEach((bot, index) => {
+                let statusClass = bot.status;
+                if (bot.status === 'defeated') {
+                    statusClass = 'defeated';
+                } else if (bot.status === 'hostile') {
+                    statusClass = 'hostile';
+                } else {
+                    statusClass = 'neutral';
+                }
+
+                const isTarget = index === selectedBotIndex;
+                const card = document.createElement('div');
+                card.className = `bot-card ${statusClass} ${isTarget ? 'selected' : ''}`;
+                card.setAttribute('data-bot-index', index);
                 
-                <div class="p-4 border dark:border-gray-700 rounded-lg col-span-1 md:col-span-2">
-                    <h3 class="font-semibold mb-3">اطلاعات اصلی (نام، سکه، شغل)</h3>
-                    <div class="mb-3">
-                        <label class="block text-sm font-medium mb-1">نام جدید (<span id="currentName"></span>)</label>
-                        <input id="editName" type="text" placeholder="نام جدید (منحصر به فرد می‌شود)" class="w-full p-2 border dark:border-gray-600 dark:bg-gray-700 rounded-md"/>
-                    </div>
-                    <div class="mb-3">
-                        <label class="block text-sm font-medium mb-1">سکه‌ها (<span id="currentCoins">0</span>)</label>
-                        <input id="editCoins" type="number" placeholder="مقدار جدید سکه" class="w-full p-2 border dark:border-gray-600 dark:bg-gray-700 rounded-md"/>
-                    </div>
-                    <div class="mb-3">
-                        <label class="block text-sm font-medium mb-1">شغل (<span id="currentJob">بیکار</span>)</label>
-                        <input id="editJob" type="text" placeholder="شغل جدید" class="w-full p-2 border dark:border-gray-600 dark:bg-gray-700 rounded-md"/>
-                    </div>
-                    <button id="updateInfoButton" class="bg-green-600 text-white p-2 rounded-lg hover:bg-green-700 transition w-full mt-2">
-                        <i class="fas fa-save ml-2"></i> ذخیره اطلاعات
-                    </button>
-                    <button id="viewNameHistoryButton" class="bg-gray-600 text-white p-2 rounded-lg hover:bg-gray-700 transition w-full mt-2">
-                        <i class="fas fa-history ml-2"></i> تاریخچه نام‌ها
-                    </button>
-                </div>
+                let powerText = bot.status === 'defeated' ? 'منهدم' : `${bot.power.toLocaleString()}`;
+
+                card.innerHTML = `
+                    <div class="bot-name">${bot.name} ${isTarget ? '<span style="color: yellow;">(هدف انتخاب شده)</span>' : ''}</div>
+                    <div class="bot-power">وضعیت: ${bot.status.toUpperCase()} | قدرت: ${powerText}</div>
+                `;
                 
-                <div class="p-4 border dark:border-gray-700 rounded-lg">
-                    <h3 class="font-semibold mb-3">سطح/تجربه</h3>
-                    <div class="mb-3">
-                        <label class="block text-sm font-medium mb-1">سطح (<span id="currentLevel">1</span>)</label>
-                        <input id="editLevel" type="number" placeholder="سطح جدید" class="w-full p-2 border dark:border-gray-600 dark:bg-gray-700 rounded-md"/>
+                if (bot.status !== 'defeated') {
+                    card.addEventListener('click', () => {
+                        if (!gameActive) return;
+                        selectedBotIndex = index;
+                        logPrompt(`هدف درگیری به ${bot.name} تغییر یافت.`);
+                        renderBotStatus(); // برای نمایش انتخاب جدید
+                        setButtonStates(true); // برای فعال کردن مجدد دکمه درگیری
+                    });
+                }
+                
+                botStatusDisplay.appendChild(card);
+             });
+        }
+
+
+        // --- عملیات بازار (Market Modal) ---
+        const marketModal = document.getElementById('marketModal');
+        const closeButton = document.querySelector('.close-button');
+        const marketList = document.getElementById('market-list');
+
+        closeButton.onclick = () => marketModal.style.display = "none";
+        window.onclick = (event) => {
+            if (event.target == marketModal) {
+                marketModal.style.display = "none";
+            }
+        }
+        
+        function renderMarket() {
+            marketList.innerHTML = '';
+            
+            marketList.innerHTML += `
+                <div class="market-item">
+                    <span>خرید معدن (قیمت: ${MARKET_PRICES.mine_buy.toLocaleString()}):</span>
+                    <button onclick="buyResource('mine')">خرید (X1)</button>
+                </div>
+            `;
+            
+             marketList.innerHTML += `
+                <div class="market-item">
+                    <span>افزایش قدرت تاکتیکی (قیمت: ${MARKET_PRICES.base_power_boost.toLocaleString()}):</span>
+                    <button onclick="buyResource('power_boost')">خرید (X1)</button>
+                </div>
+            `;
+            
+            marketList.innerHTML += `
+                <div class="market-item">
+                    <span>عملیات جاسوسی (قیمت: ${MARKET_PRICES.espionage_cost.toLocaleString()}):</span>
+                    <button onclick="buyResource('espionage')" ${gameState.money < MARKET_PRICES.espionage_cost ? 'disabled' : ''}>خرید (X1)</button>
+                </div>
+            `;
+            
+            marketList.innerHTML += `
+                <div class="market-item" style="color: var(--color-error);">
+                    <span>موشک هسته‌ای (قیمت: ${MARKET_PRICES.nuke_cost.toLocaleString()}):</span>
+                    <button onclick="buyResource('nuke')" style="background-color: var(--color-error); color: white;" ${gameState.money < MARKET_PRICES.nuke_cost || gameState.nuclear_missiles > 0 ? 'disabled' : ''}>خرید (X1)</button>
+                </div>
+            `;
+            
+            if (gameState.mines > 1) {
+                 marketList.innerHTML += `
+                    <div class="market-item">
+                        <span>فروش یک معدن (دریافتی: ${MARKET_PRICES.mine_sell.toLocaleString()}):</span>
+                        <button onclick="sellResource('mine')" style="background-color: #888;">فروش (X1)</button>
                     </div>
-                    <div class="mb-3">
-                        <label class="block text-sm font-medium mb-1">تجربه (<span id="currentExp">0</span>)</label>
-                        <input id="editExp" type="number" placeholder="تجربه جدید" class="w-full p-2 border dark:border-gray-600 dark:bg-gray-700 rounded-md"/>
-                    </div>
-                    <button id="updateLevelExpButton" 
+                `;
+            }
+            
+            updateStatusBar();
+        }
+
+        function openMarket() {
+            if (!gameActive) return; // **بررسی وضعیت بازی**
+            renderMarket();
+            marketModal.style.display = "block";
+        }
+        
+        function applyTax() {
+            if (!gameActive) return;
+            const newTax = parseInt(document.getElementById('tax-rate').value);
+            if (isNaN(newTax) || newTax < 0 || newTax > 50) {
+                logToConsole("[MARKET ERROR] نرخ مالیات باید بین ۰ تا ۵۰ درصد باشد.", 'danger');
+                return;
+            }
+            taxRate = newTax;
+            logPrompt(`نرخ مالیات به ${taxRate}% تنظیم شد.`);
+            updateStatusBar();
+            renderMarket();
+        }
+        
+        function buyResource(resourceType) {
+            if (!gameActive) return;
+            // ... (کد خرید منابع بدون تغییر)
+            if (resourceType === 'mine') {
+                if (gameState.money >= MARKET_PRICES.mine_buy) {
+                    gameState.money -= MARKET_PRICES.mine_buy;
+                    gameState.mines += 1;
+                    logPrompt(`معدن جدید خریداری شد.`);
+                } else {
+                    logToConsole("[MARKET FAIL] پول کافی برای خرید معدن وجود ندارد.", 'danger');
+                }
+            } else if (resourceType === 'power_boost') {
+                if (gameState.money >= MARKET_PRICES.base_power_boost) {
+                    gameState.money -= MARKET_PRICES.base_power_boost;
+                    gameState.power += 100; 
+                    logPrompt(`قدرت نظامی ${gameState.power.toLocaleString()} واحد افزایش یافت (تأثیر موقت).`);
+                } else {
+                    logToConsole("[MARKET FAIL] پول کافی برای تقویت قدرت وجود ندارد.", 'danger');
+                }
+            } else if (resourceType === 'espionage') {
+                 if (gameState.money >= MARKET_PRICES.espionage_cost) {
+                    gameState.money -= MARKET_PRICES.espionage_cost;
+                    gameState.espionage_tokens += 1;
+                    logPrompt(`توکن جاسوسی ${gameState.espionage_tokens} خریداری شد. آماده اعمال بر بات هدف در نوبت بعدی.`);
+                } else {
+                    logToConsole("[MARKET FAIL] پول کافی برای خرید توکن جاسوسی وجود ندارد.", 'danger');
+                }
+            } else if (resourceType === 'nuke') {
+                 if (gameState.money >= MARKET_PRICES.nuke_cost && gameState.nuclear_missiles === 0) {
+                    gameState.money -= MARKET_PRICES.nuke_cost;
+                    gameState.nuclear_missiles = 1;
+                    logPrompt(`موشک هسته‌ای خریداری شد! آماده برای شلیک در روز ۶.`);
+                } else if (gameState.nuclear_missiles > 0) {
+                    logToConsole("[MARKET FAIL] شما قبلاً یک موشک هسته‌ای خریداری کرده‌اید.", 'danger');
+                } else {
+                    logToConsole("[MARKET FAIL] پول کافی برای خرید موشک هسته‌ای وجود ندارد.", 'danger');
+                }
+            }
+            updateStatusBar();
+            renderMarket();
+        }
+        
+        function sellResource(resourceType) {
+            if (!gameActive) return;
+            if (resourceType === 'mine' && gameState.mines > 1) {
+                gameState.money += MARKET_PRICES.mine_sell;
+                gameState.mines -= 1;
+                logPrompt(`یک معدن فروخته شد. ${MARKET_PRICES.mine_sell.toLocaleString()} واحد نقدینگی دریافت شد.`);
+            }
+            updateStatusBar();
+            renderMarket();
+        }
+
+        // --- عملیات اصلی بازی ---
+        
+        function handleScan() {
+            if (!gameActive) return;
+            if (selectedCountryId === 'none') {
+                logToConsole("[ERROR] لطفاً ابتدا یک پایگاه فرماندهی را از روی نقشه انتخاب کنید.", 'danger');
+                return;
+            }
+            
+            setButtonStates(false); // غیرفعال کردن همه دکمه‌ها در حین عملیات
+            const basePower = countryPowerMap[selectedCountryId].power;
+            logPrompt(`شروع عملیات اسکن و ارزیابی قدرت در منطقه ${countryPowerMap[selectedCountryId].name}`);
+            
+            setTimeout(() => {
+                logToConsole(`[RESULT] قدرت پایگاه شما (Base Power): ${basePower}`, 'result');
+                
+                bots.forEach(bot => {
+                    logToConsole(`[${bot.name}] | قدرت: ${bot.power.toLocaleString()} | وضعیت: ${bot.status.toUpperCase()}`, 'result');
+                });
+                
+                setButtonStates(true); // فعال‌سازی مجدد
+            }, 1500);
+        }
+
+        function handleEngage() {
+            if (!gameActive) return;
+            if (selectedBotIndex === -1 || selectedCountryId === 'none') return;
+            
+            const targetBot = bots[selectedBotIndex];
+            if (targetBot.status === 'defeated') return;
+
+            const basePower = gameState.power; 
+            
+            setButtonStates(false); // غیرفعال کردن همه دکمه‌ها در حین عملیات
+            logPrompt(`شروع درگیری نظامی علیه ${targetBot.name}`);
+            
+            setTimeout(() => {
+                const attackRoll = Math.floor(Math.random() * 100) + 1;
+                // فرمول شانس پیروزی کمی تعدیل شد تا وابسته به قدرت شما باشد
+                const successChance = Math.min(95, (basePower / (basePower + targetBot.power)) * 100 + 10); 
+
+                logToConsole(`[ENGAGE SIM] شانس تئوری پیروزی: ${successChance.toFixed(1)}%`, 'info');
+
+                let damageDealt = 0;
+                let damageTaken = 0;
+                
+                if (attackRoll < successChance) {
+                    damageDealt = Math.floor(basePower * 0.15); 
+                    targetBot.power = Math.max(0, targetBot.power - damageDealt);
+                    
+                    logToConsole(`[SUCCESS] هدف با ضربه مستقیم ${damageDealt.toLocaleString()} واحد تضعیف شد.`, 'result');
+                    
+                    if (targetBot.power === 0) {
+                        logToConsole(`[TERMINATED] واحد ${targetBot.name} کاملاً غیرفعال شد.`, 'danger');
+                        targetBot.status = 'defeated';
+                    }
+                    
+                } else {
+                    damageTaken = Math.floor(targetBot.power * 0.05); 
+                    gameState.power = Math.max(100, gameState.power - damageTaken); 
+                    
+                    logToConsole(`[FAILURE] پدافند فعال شد. قدرت شما ${damageTaken.toLocaleString()} واحد کاهش یافت.`, 'danger');
+                }
+                
+                renderBotStatus();
+                updateStatusBar();
+                selectedBotIndex = -1; 
+                setButtonStates(true); 
+                
+            }, 2500);
+        }
+        
+        // --- منطق پایان روز ---
+        function applyEspionageDebuff() {
+            const activeBots = bots.filter(b => b.status !== 'defeated');
+            if (activeBots.length > 0 && gameState.espionage_tokens > 0) {
+                const targetBot = activeBots[Math.floor(Math.random() * activeBots.length)];
+                const debuff = MARKET_PRICES.espionage_power_debuff;
+                targetBot.power = Math.max(50, targetBot.power - debuff);
+                gameState.espionage_tokens -= 1;
+                
+                logToConsole(`[ESPIONAGE SUCCESS] جاسوسی موفقیت‌آمیز بود. قدرت ${targetBot.name} به میزان ${debuff.toLocaleString()} واحد کاهش یافت.`, 'console-danger');
+                renderBotStatus();
+                return true;
+            }
+            return false;
+        }
+        
+        function nukeStrike() {
+            if (dayCount === 6 && gameState.nuclear_missiles === 1) {
+                const activeBots = bots.filter(b => b.status !== 'defeated');
+                if (activeBots.length > 0) {
+                    const targetBot = activeBots[Math.floor(Math.random() * activeBots.length)];
+                    
+                    logToConsole(`*** هشدار فوق بحرانی *** موشک هسته‌ای فعال شد! هدف: ${targetBot.name}`, 'console-danger');
+                    
+                    setTimeout(() => {
+                         targetBot.power = 0;
+                         targetBot.status = 'defeated';
+                         gameState.nuclear_missiles = 0;
+                         logToConsole(`[NUCLEAR DETONATION] ${targetBot.name} به طور کامل منهدم شد. اثرات جانبی ناشناخته است...`, 'console-danger');
+                         renderBotStatus();
+                         updateStatusBar();
+                    }, 3000);
+                    
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function randomBotAction() {
+            const activeBots = bots.filter(b => b.status !== 'defeated');
+            if (activeBots.length === 0) {
+                logToConsole("تمام بات‌ها غیرفعال شدند. پیروزی تاکتیکی.", 'console-system');
+                gameActive = false; // **بازی تمام شد**
+                return;
+            }
+            
+            const randomBot = activeBots[Math.floor(Math.random() * activeBots.length)];
+            const actionType = Math.random();
+            
+            if (actionType < 0.6) { // 60% شانس حمله
+                const attackPower = Math.floor(randomBot.power * (0.8 + Math.random() * 0.4)); 
+                
+                if (selectedCountryId === 'persia') {
+                    gameState.power = Math.max(100, gameState.power - attackPower);
+                    logToConsole(`[${randomBot.name} - تهاجم] نیروهای شما مورد حمله قرار گرفتند. ${attackPower.toLocaleString()} واحد قدرت از دست رفت.`, 'console-danger');
+                } else {
+                    const targetIndex = Math.floor(Math.random() * bots.length);
+                    const targetBot = bots[targetIndex];
+                    if (targetBot.id !== randomBot.id && targetBot.status !== 'defeated') {
+                        targetBot.power = Math.max(50, targetBot.power - Math.floor(attackPower * 0.3));
+                        logToConsole(`[${randomBot.name} - درگیری داخلی] بات ${targetBot.name} تضعیف شد (قدرت از دست رفته: ${Math.floor(attackPower * 0.3)}).`, 'console-system');
+                    } else {
+                         randomBot.power = Math.min(randomBot.power + 50, 1000);
+                         logToConsole(`[${randomBot.name} - بازسازی] ${randomBot.name} کمی خود را تقویت کرد.`, 'console-system');
+                    }
+                }
+            } else { // 40% شانس تقویت
+                randomBot.power = Math.min(randomBot.power + 100, 1000);
+                logToConsole(`[${randomBot.name} - تقویت] ${randomBot.name} موقعیت خود را تثبیت کرد.`, 'console-system');
+            }
+        }
+        
+        function advanceDay() {
+            if (!gameActive) return;
+
+            // 1. چک کردن باخت
+            if (gameState.power <= 100 && selectedCountryId === 'persia') {
+                logToConsole(`[GAME OVER] قدرت پایگاه شما به زیر حد بحرانی رسید. سقوط فرماندهی.`, 'console-danger');
+                gameActive = false;
+                setButtonStates(false); 
+                return;
+            }
+            
+            logPrompt(`پایان عملیات روز ${dayCount}. آغاز شبیه‌سازی شبانه...`);
+            setButtonStates(false); // غیرفعال کردن همه دکمه‌ها برای اجرای شب
+            
+            // 2. درآمد روزانه
+            const baseIncome = gameState.mines * MARKET_PRICES.daily_income_base;
+            const taxAmount = Math.floor(baseIncome * (taxRate / 100));
+            const netIncome = baseIncome - taxAmount;
+            
+            gameState.money += netIncome;
+            
+            logToConsole(`[FINANCE] درآمد خالص روزانه: ${netIncome.toLocaleString()} تومان.`, 'console-system');
+
+            // 3. اجرای جاسوسی (اگر توکن فعال باشد)
+            applyEspionageDebuff();
+            
+            // 4. اجرای رندوم بات‌ها و شلیک هسته‌ای (با تأخیر شبیه‌سازی)
+            setTimeout(() => {
+                
+                const nukeFired = nukeStrike();
+                
+                if (!nukeFired) {
+                    randomBotAction();
+                }
+                
+                // 5. بازگشت قدرت موقت به حالت پایه (این باید قبل از ریست کامل انجام شود)
+                if (selectedCountryId === 'persia') {
+                    const basePower = countryPowerMap[selectedCountryId].power;
+                    if (gameState.power > basePower) {
+                         const decay = gameState.power - basePower;
+                         gameState.power = basePower;
+                         logToConsole(`[REVERT] قدرت موقت ${decay.toLocaleString()} واحد کاهش یافت و به سطح ${basePower} بازگشت.`, 'console-system');
+                    }
+                }
+                
+                // چک کردن دوباره باخت پس از حمله دشمن
+                if (gameState.power <= 100 && selectedCountryId === 'persia') {
+                    logToConsole(`[GAME OVER] قدرت پایگاه شما پس از حمله دشمن به زیر حد بحرانی رسید.`, 'console-danger');
+                    gameActive = false;
+                    setButtonStates(false); 
+                    return;
+                }
+
+                // 6. ریست UI و افزایش روز
+                dayCount++;
+                logToConsole(`*** پایان روز ${dayCount - 1} | آغاز روز ${dayCount} ***`, 'console-system');
+                
+                renderBotStatus();
+                updateStatusBar();
+                selectedBotIndex = -1; // ریست هدف
+                setButtonStates(true); // **فعال‌سازی مجدد همه دکمه‌ها برای روز جدید**
+                
+            }, 2000);
+        }
+
+        // --- مقداردهی اولیه ---
+        function initialize() {
+            // انتخاب پیش‌فرض ایران
+            const initialRegion = document.getElementById('region-A');
+            initialRegion.click(); 
+            
+            logToConsole("سیستم فرماندهی تاکتیکی بارگذاری شد.", 'console-system');
+            
+            renderBotStatus();
+            updateStatusBar();
+            setButtonStates(true); // **تنظیم اولیه وضعیت دکمه‌ها**
+        }
+
+        // --- شنوندگان (Event Listeners) ---
+        mapRegions.forEach(region => {
+            region.addEventListener('click', function() {
+                if (!gameActive) return;
+                mapRegions.forEach(r => r.classList.remove('selected'));
+                
+                selectedCountryId = this.getAttribute('data-country-id');
+                this.classList.add('selected');
+                
+                const countryData = countryPowerMap[selectedCountryId];
+                
+                logPrompt(`پایگاه فرماندهی به ${countryData.name} تغییر یافت.`);
+                
+                // تنظیم قدرت بر اساس منطقه انتخابی (برای استفاده در اسکن و حمله)
+                gameState.power = countryData.power; 
+                
+                selectedBotIndex = -1;
+                renderBotStatus();
+                updateStatusBar();
+                setButtonStates(true);
+            });
+        });
+
+        btnMarket.addEventListener('click', openMarket);
+        btnEndDay.addEventListener('click', advanceDay);
+        btnScan.addEventListener('click', handleScan);
+        btnEngage.addEventListener('click', handleEngage);
+
+        initialize();
+    </script>
+</body>
+</html>
