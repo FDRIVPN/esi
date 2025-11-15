@@ -1,80 +1,696 @@
+// =================================================================
+// توابع کمکی (Helper Functions)
+// =================================================================
+
+/**
+ * یک شناسه رندوم با طول مشخص ایجاد می‌کند.
+ * @param {number} length طول شناسه
+ * @returns {string} شناسه رندوم
+ */
+function generateRandomId(length) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+}
+
+/**
+* پاسخ پیش‌فرض API را برمی‌گرداند.
+* @returns {Response}
+*/
+function _handleDefaultResponse() {
+    return new Response(JSON.stringify({
+        message: 'این یک API ساده برای سرگرمی است! هیچ چیز مهمی اینجا نیست. فقط چند جوک و فکت جالب.',
+        endpoints: {
+            user: 'GET /user?id=xxx',
+            create: 'GET /create?name=xxx',
+            update: 'POST /update',
+            stats: 'GET /stats',
+            treasures: 'GET /list_treasures',
+            treasure_timers: 'GET /get_treasure_timers?id=xxx',
+            claim_treasure: 'POST /claim_treasure',
+            admin: 'GET /admin'
+        }
+    }), { headers: { 'Content-Type': 'application/json' } });
+}
+
+/**
+* چک و پاک کردن بن منقضی
+* @param {object} env محیط Worker
+* @param {string} id شناسه کاربر
+* @param {object} user اطلاعات کاربر
+*/
+async function _checkAndClearExpiredBan(env, id, user) {
+    const now = Math.floor(Date.now() / 1000);
+    if (user.ban_until !== 0 && now >= user.ban_until) {
+        await env.DB.prepare('UPDATE users SET ban_until = 0, ban_date = NULL WHERE id = ?').bind(id).run();
+        console.log('بن منقضی برای ' + id + ' پاک شد');
+    }
+}
+
+/**
+* مدیریت منحصر به فرد بودن نام
+* @param {object} env محیط Worker
+* @param {string} desiredName نام مورد نظر
+* @param {string} currentId شناسه کاربر فعلی (برای چک نکردن خودش)
+* @returns {string} نام منحصر به فرد نهایی
+*/
+async function _getUniqueName(env, desiredName, currentId = null) {
+    let uniqueName = desiredName;
+    let counter = 1;
+    while (true) {
+        let stmt;
+        if (currentId) {
+            stmt = env.DB.prepare('SELECT id FROM users WHERE name = ? AND id != ?').bind(uniqueName, currentId);
+        } else {
+            stmt = env.DB.prepare('SELECT id FROM users WHERE name = ?').bind(uniqueName);
+        }
+        const existing = await stmt.first();
+        if (!existing) break;
+        uniqueName = desiredName + '_' + counter++;
+    }
+    return uniqueName;
+}
+
+// =================================================================
+// منطق اصلی درخواست‌ها (Request Handler)
+// =================================================================
+
+async function _handleRequest(request, env) {
+    const url = new URL(request.url);
+    const path = url.pathname;
+    
+    // ---------------------- GET /user (by ID) ----------------------
+    if (path === '/user' && request.method === 'GET') {
+        const id = url.searchParams.get('id');
+        if (!id) return new Response(JSON.stringify({ error: 'شناسه الزامی است' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        try {
+            let user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first();
+            if (!user) return new Response(JSON.stringify({ error: 'کاربر یافت نشد' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+            
+            await _checkAndClearExpiredBan(env, id, user);
+            await env.DB.prepare('UPDATE users SET last_login = ? WHERE id = ?').bind(new Date().toISOString(), id).run();
+            const updatedUser = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first();
+            
+            updatedUser.name_history = JSON.parse(updatedUser.name_history || '[]');
+            updatedUser.message_history = JSON.parse(updatedUser.message_history || '[]');
+
+            return new Response(JSON.stringify({ success: true, user: updatedUser }), { headers: { 'Content-Type': 'application/json' } });
+        } catch (error) {
+            console.error('خطا در get by id:', error.message);
+            return new Response(JSON.stringify({ error: 'خطا در دریافت داده: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        }
+    }
+    
+    // ---------------------- GET /create ----------------------
+    else if (path === '/create' && request.method === 'GET') {
+        const name = url.searchParams.get('name');
+        if (!name) return new Response(JSON.stringify({ error: 'نام الزامی است' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        
+        try {
+            const uniqueName = await _getUniqueName(env, name);
+            const id = generateRandomId(10);
+            const referral = generateRandomId(6).toUpperCase();
+            const now = Math.floor(Date.now() / 1000);
+            const nameHistory = JSON.stringify([{ name: uniqueName, timestamp: new Date().toISOString() }]);
+
+            await env.DB.prepare(`
+                INSERT INTO users (id, name, coins, job, level, experience, message_history, ban_until, ban_date, name_history, is_admin, active, referral_code, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `).bind(id, uniqueName, 1000, 'بیکار', 1, 0, '[]', 0, null, nameHistory, 0, 1, referral, now).run();
+            
+            const newUser = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first();
+            return new Response(JSON.stringify(newUser), { headers: { 'Content-Type': 'application/json' } });
+        } catch (error) {
+            console.error('خطا در create:', error.message);
+            return new Response(JSON.stringify({ error: 'خطا در ایجاد کاربر: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        }
+    }
+    
+    // ---------------------- POST /update (JSON Body) ----------------------
+    else if (path === '/update' && request.method === 'POST') {
+        let body;
+        try {
+            body = await request.json();
+        } catch (error) {
+            return new Response(JSON.stringify({ error: 'بدنه JSON نامعتبر' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+        const { id, name, job, message, coins_add, experience_add, coins, level, experience, active, is_admin } = body; 
+        
+        if (!id) return new Response(JSON.stringify({ error: 'شناسه الزامی است' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        
+        try {
+            let user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first();
+            if (!user) return new Response(JSON.stringify({ error: 'کاربر یافت نشد' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+
+            await _checkAndClearExpiredBan(env, id, user);
+            user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first(); 
+
+            const now = Math.floor(Date.now() / 1000);
+            if (message && (user.ban_until !== 0 && now < user.ban_until)) {
+                return new Response(JSON.stringify({ error: 'شما بن هستید و نمی‌توانید چت کنید. بن تا: ' + user.ban_date }), { status: 403, headers: { 'Content-Type': 'application/json' } });
+            }
+
+            let query = 'UPDATE users SET ';
+            const binds = [];
+            
+            let nameChanged = false;
+            let uniqueName = user.name;
+            if (name !== undefined && name !== user.name) {
+                uniqueName = await _getUniqueName(env, name, id);
+                query += 'name = ?, '; binds.push(uniqueName);
+                nameChanged = true;
+            }
+            
+            if (nameChanged) {
+                let nh_str = user.name_history || '[]';
+                let nameHist;
+                try {
+                    nameHist = JSON.parse(nh_str);
+                    if (!Array.isArray(nameHist)) nameHist = [];
+                } catch (e) { nameHist = []; }
+                
+                nameHist.push({ name: uniqueName, timestamp: new Date().toISOString() });
+                query += 'name_history = ?, '; binds.push(JSON.stringify(nameHist));
+            }
+
+            if (job !== undefined) { query += 'job = ?, '; binds.push(job); }
+            if (coins_add !== undefined) { query += 'coins = coins + ?, '; binds.push(parseInt(coins_add)); }
+            if (experience_add !== undefined) { query += 'experience = experience + ?, '; binds.push(parseInt(experience_add)); }
+            if (coins !== undefined) { query += 'coins = ?, '; binds.push(parseInt(coins)); }
+            if (level !== undefined) { query += 'level = ?, '; binds.push(parseInt(level)); }
+            if (experience !== undefined) { query += 'experience = ?, '; binds.push(parseInt(experience)); }
+            if (active !== undefined) { query += 'active = ?, '; binds.push(active ? 1 : 0); }
+            if (is_admin !== undefined) { query += 'is_admin = ?, '; binds.push(is_admin ? 1 : 0); }
+
+            if (message) {
+                let mh_str = user.message_history || '[]';
+                var messages;
+                try {
+                    messages = JSON.parse(mh_str);
+                    if (!Array.isArray(messages)) messages = [];
+                } catch (parseErr) { messages = []; }
+                
+                messages.push({ message: message, timestamp: new Date().toISOString() });
+                let new_mh = JSON.stringify(messages);
+                query += 'message_history = ?, ';
+                binds.push(new_mh);
+            }
+            
+            if (binds.length === 0) {
+                 return new Response(JSON.stringify({ success: false, error: 'هیچ فیلدی برای به‌روزرسانی ارسال نشد.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+            }
+
+            query = query.slice(0, -2) + ' WHERE id = ?';
+            binds.push(id);
+            await env.DB.prepare(query).bind(...binds).run();
+            
+            const updatedUser = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(id).first();
+            updatedUser.name_history = JSON.parse(updatedUser.name_history || '[]');
+            updatedUser.message_history = JSON.parse(updatedUser.message_history || '[]');
+
+            return new Response(JSON.stringify({ success: true, user: updatedUser }), { headers: { 'Content-Type': 'application/json' } });
+        } catch (error) {
+            console.error('خطا در POST update:', error.message);
+            return new Response(JSON.stringify({ error: 'خطا در به‌روزرسانی: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        }
+    }
+    
+    // ---------------------- GET /stats ----------------------
+    else if (path === '/stats' && request.method === 'GET') {
+        try {
+            const now = Math.floor(Date.now() / 1000);
+            const todayStart = now - (now % 86400); 
+            const newToday = await env.DB.prepare('SELECT COUNT(*) as count FROM users WHERE created_at >= ?').bind(todayStart).first();
+            const totalCoins = await env.DB.prepare('SELECT SUM(coins) as sum FROM users').first(); 
+            const totalUsers = await env.DB.prepare('SELECT COUNT(*) as count FROM users').first();
+            const activeUsers = await env.DB.prepare('SELECT COUNT(*) as count FROM users WHERE active = 1').first();
+            const bannedNow = await env.DB.prepare('SELECT COUNT(*) as count FROM users WHERE ban_until > ?').bind(now).first();
+
+            return new Response(JSON.stringify({
+                success: true,
+                stats: {
+                    new_today: newToday.count,
+                    total_coins: totalCoins.sum || 0,
+                    total_users: totalUsers.count,
+                    active_users: activeUsers.count,
+                    banned_now: bannedNow.count
+                }
+            }), { headers: { 'Content-Type': 'application/json' } });
+        } catch (error) {
+            console.error('خطا در stats:', error.message);
+            return new Response(JSON.stringify({ error: 'خطا در آمار: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        }
+    }
+
+    // ---------------------- GET /top_coins ----------------------
+    else if (path === '/top_coins' && request.method === 'GET') {
+        const limit = parseInt(url.searchParams.get('limit') || '10');
+        try {
+            const topUsers = await env.DB.prepare('SELECT id, name, coins, level FROM users WHERE active = 1 ORDER BY coins DESC LIMIT ?').bind(limit).all();
+            return new Response(JSON.stringify({ success: true, top_users: topUsers.results }), { headers: { 'Content-Type': 'application/json' } });
+        } catch (error) {
+            return new Response(JSON.stringify({ error: 'خطا در دریافت کاربران برتر: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        }
+    }
+
+    // ---------------------- GET /banned_users ----------------------
+    else if (path === '/banned_users' && request.method === 'GET') {
+        try {
+            const now = Math.floor(Date.now() / 1000);
+            const bannedUsers = await env.DB.prepare('SELECT id, name, ban_date, ban_until FROM users WHERE ban_until > ? ORDER BY ban_until DESC').bind(now).all();
+            return new Response(JSON.stringify({ success: true, banned_users: bannedUsers.results }), { headers: { 'Content-Type': 'application/json' } });
+        } catch (error) {
+            return new Response(JSON.stringify({ error: 'خطا در دریافت کاربران بن شده: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        }
+    }
+    
+    // ---------------------- GET /top_new ----------------------
+    else if (path === '/top_new' && request.method === 'GET') {
+        const limit = parseInt(url.searchParams.get('limit') || '10');
+        try {
+            const topNew = await env.DB.prepare('SELECT id, name, created_at FROM users ORDER BY created_at DESC LIMIT ?').bind(limit).all();
+            return new Response(JSON.stringify({ success: true, new_users: topNew.results }), { headers: { 'Content-Type': 'application/json' } });
+        } catch (error) {
+            return new Response(JSON.stringify({ error: 'خطا در دریافت کاربران جدید: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        }
+    }
+
+    // ---------------------- GET /list_treasures ----------------------
+    else if (path === '/list_treasures' && request.method === 'GET') {
+        try {
+            let treasures = await env.DB.prepare('SELECT * FROM treasures ORDER BY id').all();
+            if (treasures.results.length === 0) {
+                for (let i = 1; i <= 10; i++) {
+                    const coins_reward = 100 + Math.floor(Math.random() * 900);
+                    await env.DB.prepare('INSERT INTO treasures (id, name, coins_reward, timer_duration_seconds) VALUES (?, ?, ?, ?)')
+                        .bind(i, `گنج ${i}`, coins_reward, 300).run();
+                }
+                treasures = await env.DB.prepare('SELECT * FROM treasures ORDER BY id').all();
+            }
+            return new Response(JSON.stringify({ success: true, treasures: treasures.results }), { headers: { 'Content-Type': 'application/json' } });
+        } catch (error) {
+            console.error('خطا در list_treasures:', error.message);
+            return new Response(JSON.stringify({ error: 'خطا در دریافت گنج‌ها: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        }
+    }
+
+    // ---------------------- GET /get_treasure_timers ----------------------
+    else if (path === '/get_treasure_timers' && request.method === 'GET') {
+        const user_id = url.searchParams.get('id');
+        if (!user_id) return new Response(JSON.stringify({ error: 'شناسه کاربر الزامی است' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+
+        try {
+            const user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(user_id).first();
+            if (!user) return new Response(JSON.stringify({ error: 'کاربر یافت نشد' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+
+            const now = Math.floor(Date.now() / 1000);
+
+            let treasures = await env.DB.prepare('SELECT * FROM treasures ORDER BY id').all();
+            if (treasures.results.length === 0) {
+                for (let i = 1; i <= 10; i++) {
+                    const coins_reward = 100 + Math.floor(Math.random() * 900);
+                    await env.DB.prepare('INSERT INTO treasures (id, name, coins_reward, timer_duration_seconds) VALUES (?, ?, ?, ?)')
+                        .bind(i, `گنج ${i}`, coins_reward, 300).run();
+                }
+                treasures = await env.DB.prepare('SELECT * FROM treasures ORDER BY id').all();
+            }
+
+            const timers = [];
+            for (let treasure of treasures.results) {
+                let last_claimed = await env.DB.prepare('SELECT last_claimed FROM user_treasures WHERE user_id = ? AND treasure_id = ?').bind(user_id, treasure.id).first();
+                last_claimed = last_claimed ? last_claimed.last_claimed : 0;
+
+                const timer_duration = treasure.timer_duration_seconds || 300;
+                const next_available = last_claimed + timer_duration;
+                const is_ready = now >= next_available;
+                const remaining_seconds = is_ready ? 0 : next_available - now;
+
+                timers.push({
+                    treasure_id: treasure.id,
+                    name: treasure.name,
+                    coins_reward: treasure.coins_reward,
+                    is_ready: is_ready,
+                    remaining_seconds: remaining_seconds,
+                    next_available: next_available,
+                    timer_duration: timer_duration
+                });
+            }
+
+            return new Response(JSON.stringify({ success: true, timers: timers }), { headers: { 'Content-Type': 'application/json' } });
+        } catch (error) {
+            console.error('خطا در get_treasure_timers:', error.message);
+            return new Response(JSON.stringify({ error: 'خطا در دریافت تایمرها: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        }
+    }
+
+    // ---------------------- POST /claim_treasure (رفع مشکل) ----------------------
+    else if (path === '/claim_treasure' && request.method === 'POST') {
+        let body;
+        try {
+            body = await request.json();
+        } catch (error) {
+            return new Response(JSON.stringify({ error: 'بدنه JSON نامعتبر' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+        const { user_id, treasure_id } = body;
+        if (!user_id || !treasure_id) return new Response(JSON.stringify({ error: 'شناسه کاربر و گنج الزامی است' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+
+        try {
+            const now = Math.floor(Date.now() / 1000);
+
+            const user = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(user_id).first();
+            if (!user) return new Response(JSON.stringify({ error: 'کاربر یافت نشد' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+
+            const treasure = await env.DB.prepare('SELECT * FROM treasures WHERE id = ?').bind(treasure_id).first();
+            if (!treasure) return new Response(JSON.stringify({ error: 'گنج یافت نشد' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+
+            const timer_duration = treasure.timer_duration_seconds || 300;
+
+            let last_claimed_row = await env.DB.prepare('SELECT last_claimed FROM user_treasures WHERE user_id = ? AND treasure_id = ?').bind(user_id, treasure_id).first();
+            const last_claimed = last_claimed_row ? last_claimed_row.last_claimed : 0;
+            const next_available = last_claimed + timer_duration;
+
+            if (now < next_available) {
+                return new Response(JSON.stringify({ error: 'گنج هنوز آماده نیست. زمان باقی: ' + (next_available - now) + ' ثانیه' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
+            }
+
+            await env.DB.prepare('UPDATE users SET coins = coins + ? WHERE id = ?').bind(treasure.coins_reward, user_id).run();
+
+            if (last_claimed_row) {
+                await env.DB.prepare('UPDATE user_treasures SET last_claimed = ? WHERE user_id = ? AND treasure_id = ?').bind(now, user_id, treasure_id).run();
+            } else {
+                await env.DB.prepare('INSERT INTO user_treasures (user_id, treasure_id, last_claimed) VALUES (?, ?, ?)').bind(user_id, treasure_id, now).run();
+            }
+
+            const updated_user = await env.DB.prepare('SELECT coins FROM users WHERE id = ?').bind(user_id).first();
+
+            // ✅ رفع مشکل: اضافه کردن فیلدهای مورد نیاز کلاینت
+            return new Response(JSON.stringify({
+                success: true,
+                message: `گنج ${treasure.name} ادعا شد! ${treasure.coins_reward} سکه اضافه شد.`,
+                new_coins: updated_user.coins,
+                next_available: now + timer_duration,
+                treasure_id: treasure_id,  // ✅ اضافه شد
+                coins_reward: treasure.coins_reward  // ✅ اضافه شد
+            }), { headers: { 'Content-Type': 'application/json' } });
+        } catch (error) {
+            console.error('خطا در claim_treasure:', error.message);
+            return new Response(JSON.stringify({ error: 'خطا در ادعای گنج: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        }
+    }
+
+    // ---------------------- POST /add_treasure ----------------------
+    else if (path === '/add_treasure' && request.method === 'POST') {
+        let body;
+        try {
+            body = await request.json();
+        } catch (error) {
+            return new Response(JSON.stringify({ error: 'بدنه JSON نامعتبر' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+        const { name, coins_reward, timer_duration_seconds } = body;
+        if (!name || coins_reward === undefined || timer_duration_seconds === undefined) {
+             return new Response(JSON.stringify({ error: 'نام، مقدار سکه و زمان انتظار (ثانیه) الزامی است' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+        
+        try {
+            const maxId = await env.DB.prepare('SELECT MAX(id) as max_id FROM treasures').first();
+            const newId = (maxId.max_id || 0) + 1;
+            
+            await env.DB.prepare('INSERT INTO treasures (id, name, coins_reward, timer_duration_seconds) VALUES (?, ?, ?, ?)')
+                .bind(newId, name, parseInt(coins_reward), parseInt(timer_duration_seconds)).run();
+                
+            return new Response(JSON.stringify({ success: true, message: 'گنج جدید اضافه شد', treasure_id: newId }), { headers: { 'Content-Type': 'application/json' } });
+        } catch (error) {
+            console.error('خطا در add_treasure:', error.message);
+            return new Response(JSON.stringify({ error: 'خطا در اضافه کردن گنج: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        }
+    }
+
+    // ---------------------- POST /delete_treasure ----------------------
+    else if (path === '/delete_treasure' && request.method === 'POST') {
+        let body;
+        try {
+            body = await request.json();
+        } catch (error) {
+            return new Response(JSON.stringify({ error: 'بدنه JSON نامعتبر' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+        const { treasure_id } = body;
+        if (!treasure_id) return new Response(JSON.stringify({ error: 'شناسه گنج الزامی است' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        
+        try {
+            await env.DB.prepare('DELETE FROM treasures WHERE id = ?').bind(treasure_id).run();
+            await env.DB.prepare('DELETE FROM user_treasures WHERE treasure_id = ?').bind(treasure_id).run();
+            return new Response(JSON.stringify({ success: true, message: 'گنج حذف شد' }), { headers: { 'Content-Type': 'application/json' } });
+        } catch (error) {
+            console.error('خطا در delete_treasure:', error.message);
+            return new Response(JSON.stringify({ error: 'خطا در حذف گنج: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        }
+    }
+
+    // ---------------------- POST /update_treasure (برای پنل ادمین) ----------------------
+    else if (path === '/update_treasure' && request.method === 'POST') {
+        let body;
+        try {
+            body = await request.json();
+        } catch (error) {
+            return new Response(JSON.stringify({ error: 'بدنه JSON نامعتبر' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+        const { treasure_id, coins_reward, timer_duration_seconds } = body;
+        
+        if (!treasure_id || coins_reward === undefined || timer_duration_seconds === undefined) {
+            return new Response(JSON.stringify({ error: 'شناسه گنج، مقدار سکه و زمان انتظار الزامی است' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+        try {
+            await env.DB.prepare('UPDATE treasures SET coins_reward = ?, timer_duration_seconds = ? WHERE id = ?')
+                .bind(parseInt(coins_reward), parseInt(timer_duration_seconds), parseInt(treasure_id)).run();
+                
+            return new Response(JSON.stringify({ success: true, message: 'گنج به‌روزرسانی شد' }), { headers: { 'Content-Type': 'application/json' } });
+        } catch (error) {
+            return new Response(JSON.stringify({ error: 'خطا در به‌روزرسانی گنج: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        }
+    }
+
+    // ---------------------- سایر مسیرها ----------------------
+    else if (path === '/delete' && request.method === 'POST') {
+        let body;
+        try { body = await request.json(); } catch (error) { return new Response(JSON.stringify({ error: 'بدنه JSON نامعتبر' }), { status: 400, headers: { 'Content-Type': 'application/json' } }); }
+        const { id } = body;
+        if (!id) return new Response(JSON.stringify({ error: 'شناسه الزامی است' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        try {
+            await env.DB.prepare('DELETE FROM users WHERE id = ?').bind(id).run();
+            return new Response(JSON.stringify({ success: true, message: 'کاربر حذف شد' }), { headers: { 'Content-Type': 'application/json' } });
+        } catch (error) {
+            return new Response(JSON.stringify({ error: 'خطا در حذف: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        }
+    }
+    
+    else if (path === '/ban' && request.method === 'POST') {
+        let body;
+        try { body = await request.json(); } catch (error) { return new Response(JSON.stringify({ error: 'بدنه JSON نامعتبر' }), { status: 400, headers: { 'Content-Type': 'application/json' } }); }
+        const { id, duration_minutes } = body;
+        if (!id || duration_minutes === undefined) { return new Response(JSON.stringify({ error: 'شناسه و مدت زمان الزامی است' }), { status: 400, headers: { 'Content-Type': 'application/json' } }); }
+        try {
+            const now = Math.floor(Date.now() / 1000);
+            const ban_until = now + (duration_minutes * 60);
+            const ban_date = new Date(ban_until * 1000).toLocaleDateString('fa-IR') + ' ' + new Date(ban_until * 1000).toLocaleTimeString('fa-IR');
+            
+            await env.DB.prepare('UPDATE users SET ban_until = ?, ban_date = ? WHERE id = ?').bind(ban_until, ban_date, id).run();
+            const updatedUser = await env.DB.prepare('SELECT id, ban_until, ban_date FROM users WHERE id = ?').bind(id).first();
+            
+            return new Response(JSON.stringify({
+                success: true,
+                user: updatedUser
+            }), { headers: { 'Content-Type': 'application/json' } });
+        } catch (error) {
+            return new Response(JSON.stringify({ error: 'خطا در بن کردن: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        }
+    }
+
+    else if (path === '/all_users' && request.method === 'GET') {
+        const page = parseInt(url.searchParams.get('page') || '1');
+        const limit = parseInt(url.searchParams.get('limit') || '20');
+        const offset = (page - 1) * limit;
+        try {
+            const users = await env.DB.prepare('SELECT id, name, coins, job, level, created_at, active, is_admin, ban_until FROM users ORDER BY created_at DESC LIMIT ? OFFSET ?').bind(limit, offset).all();
+            const countRes = await env.DB.prepare('SELECT COUNT(*) as count FROM users').all();
+            const total = countRes.results[0].count;
+            return new Response(JSON.stringify({ success: true, users: users.results, total, page, limit }), { headers: { 'Content-Type': 'application/json' } });
+        } catch (error) {
+            return new Response(JSON.stringify({ error: 'خطا در لیست کاربران: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        }
+    }
+    
+    // ---------------------- مسیر پیش‌فرض ----------------------
+    else {
+        return _handleDefaultResponse();
+    }
+}
+
+
+// =================================================================
+// پنل مدیریت HTML (با Vanilla JS)
+// =================================================================
+
+function _getAdminHTML() {
+    return `
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="fa" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تایید شناسه</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>پنل مدیریت بازی پیشرفته</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            direction: rtl;
-            text-align: center;
-            padding: 20px;
-        }
-
-        .input-container {
-            background-color: #d3d3d3;
-            padding: 20px;
-            border-radius: 50px;
-            max-width: 400px;
-            margin: 50px auto;
-            text-align: center;
-        }
-
-        .input-box {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 50px;
-            border: 1px solid #ccc;
-            background-color: white;
-        }
-
-        .confirm-button {
-            background-color: green;
-            color: white;
-            padding: 10px 20px;
-            font-size: 18px;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            width: 100%;
-        }
+        :root { --primary: #6366f1; --danger: #ef4444; --success: #10b981; --dark: #1f2937; --light: #f9fafb; }
+        .dark { background: #111827; color: #e5e7eb; }
+        .card { transition: all 0.3s; cursor: pointer; }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 15px 20px -5px rgba(0,0,0,0.1); }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .hidden { display: none; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); z-index: 999; display: flex; justify-content: center; align-items: center; }
+        .modal-content { background: #fff; dark:bg-gray-800; padding: 20px; border-radius: 10px; max-width: 90%; max-height: 90%; overflow-y: auto; position: relative; }
+        .modal-dark { background: #1f2937; color: #e5e7eb; }
     </style>
 </head>
-<body>
-    <div id="input-container" class="input-container">
-        <h2>لطفاً شناسه خود را وارد کنید</h2>
-        <input type="text" id="user-id" class="input-box" placeholder="شناسه خود را وارد کنید" />
-        <button class="confirm-button" onclick="confirmUserId()">تایید</button>
-    </div>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white min-h-screen transition-colors">
 
-    <script>
-        // Check if userId already exists in localStorage
-        let userId = localStorage.getItem('userId');
+    <div class="container mx-auto p-4 max-w-7xl">
+
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold gradient-bg bg-clip-text text-transparent">پنل مدیریت بازی پیشرفته</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-2">مدیریت کاربران، سکه، سطح، بن، آمار و گنج‌ها</p>
+            <button id="themeToggle" class="mt-4 p-2 rounded-full bg-gray-200 dark:bg-gray-700">
+                <i class="fas fa-moon"></i>
+            </button>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+            <div id="cardTotalUsers" class="card bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">کل کاربران</p>
+                    <p id="totalUsers" class="text-3xl font-extrabold mt-1">...</p>
+                </div>
+                <i class="fas fa-users text-4xl text-indigo-400 self-end"></i>
+            </div>
+            <div id="cardTotalActive" class="card bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">کاربران فعال</p>
+                    <p id="totalActive" class="text-3xl font-extrabold mt-1">...</p>
+                </div>
+                <i class="fas fa-user-check text-4xl text-green-400 self-end"></i>
+            </div>
+            <div id="cardNewToday" class="card bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">جدید امروز</p>
+                    <p id="newToday" class="text-3xl font-extrabold mt-1">...</p>
+                </div>
+                <i class="fas fa-user-plus text-4xl text-yellow-400 self-end"></i>
+            </div>
+            <div id="cardTotalCoins" class="card bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">کل سکه‌های سیستم</p>
+                    <p id="totalCoins" class="text-3xl font-extrabold mt-1">...</p>
+                </div>
+                <i class="fas fa-coins text-4xl text-amber-400 self-end"></i>
+            </div>
+            <div id="cardBannedNow" class="card bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">بن شده‌ها</p>
+                    <p id="bannedNow" class="text-3xl font-extrabold mt-1">...</p>
+                </div>
+                <i class="fas fa-ban text-4xl text-red-400 self-end"></i>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg mb-8">
+            <h2 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-gem ml-2"></i> مدیریت گنج‌ها</h2>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">مقدار سکه و زمان انتظار (به ثانیه) هر گنج را اینجا تنظیم کنید.</p>
+            <div class="mb-4 flex flex-col md:flex-row gap-4">
+                <input id="newTreasureName" type="text" placeholder="نام گنج جدید" class="flex-grow p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-lg"/>
+                <input id="newTreasureCoins" type="number" placeholder="سکه جایزه" class="w-full md:w-28 p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-lg"/>
+                <input id="newTreasureDuration" type="number" placeholder="زمان (ثانیه)" class="w-full md:w-28 p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-lg"/>
+                <button id="addTreasureBtn" class="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition w-full md:w-auto flex items-center justify-center">
+                    <i class="fas fa-plus ml-2"></i> اضافه کردن گنج
+                </button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID گنج</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">نام</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">سکه جایزه</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">زمان (ثانیه)</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="treasureListBody" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        <tr><td colspan="5" class="p-4 text-center text-gray-500 dark:text-gray-400">درحال بارگذاری گنج‌ها...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
         
-        // If userId exists, redirect to the wheel page (game.html)
-        if (userId) {
-            window.location.href = "wheel.html"; // Redirect to game page if ID exists
-        }
-
-        function confirmUserId() {
-            const inputUserId = document.getElementById('user-id').value.trim();
-            if (inputUserId) {
-                localStorage.setItem('userId', inputUserId); // Save the user ID to localStorage
-                localStorage.setItem('coins', 0); // Set initial coin balance to 0
-                window.location.href = "wheel.html"; // Redirect to the game page
-            } else {
-                alert("لطفاً شناسه خود را وارد کنید.");
-            }
-        }
-    </script>
-</body>
-</html>
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg mb-8">
+            <h2 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-search ml-2"></i> جستجو و مدیریت کاربر</h2>
+            <div class="flex flex-col md:flex-row gap-4">
+                <input id="userIdInput" type="text" placeholder="شناسه (ID) کاربر را وارد کنید..." class="flex-grow p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"/>
+                <button id="searchButton" class="bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 transition w-full md:w-auto flex items-center justify-center">
+                    <i class="fas fa-search ml-2"></i> جستجو
+                </button>
+            </div>
+        </div>
+        
+        <div id="userDetails" class="hidden bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg mb-8">
+            <h2 class="text-2xl font-bold mb-4 text-indigo-600 dark:text-indigo-400 flex items-center"><i class="fas fa-user-circle ml-2"></i> جزئیات کاربر: <span id="userName" class="mr-1"></span></h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="col-span-1 md:col-span-4 border-b pb-4 mb-4">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">شناسه: <span id="detailId" class="text-gray-900 dark:text-white font-mono text-sm"></span></p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">تاریخ ساخت: <span id="detailCreatedAt" class="text-gray-900 dark:text-white text-sm"></span></p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">آخرین ورود: <span id="detailLastLogin" class="text-gray-900 dark:text-white text-sm"></span></p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">کد دعوت: <span id="detailReferral" class="text-gray-900 dark:text-white font-mono text-sm"></span></p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 flex items-center">
+                        وضعیت: <span id="detailActive" class="mr-1 font-bold"></span>
+                        <span id="detailAdmin" class="text-xs mr-2 p-1 rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"></span>
+                    </p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">بن تا: <span id="detailBan" class="text-red-500 font-bold"></span></p>
+                </div>
+                
+                <div class="p-4 border dark:border-gray-700 rounded-lg col-span-1 md:col-span-2">
+                    <h3 class="font-semibold mb-3">اطلاعات اصلی (نام، سکه، شغل)</h3>
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium mb-1">نام جدید (<span id="currentName"></span>)</label>
+                        <input id="editName" type="text" placeholder="نام جدید (منحصر به فرد می‌شود)" class="w-full p-2 border dark:border-gray-600 dark:bg-gray-700 rounded-md"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium mb-1">سکه‌ها (<span id="currentCoins">0</span>)</label>
+                        <input id="editCoins" type="number" placeholder="مقدار جدید سکه" class="w-full p-2 border dark:border-gray-600 dark:bg-gray-700 rounded-md"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium mb-1">شغل (<span id="currentJob">بیکار</span>)</label>
+                        <input id="editJob" type="text" placeholder="شغل جدید" class="w-full p-2 border dark:border-gray-600 dark:bg-gray-700 rounded-md"/>
+                    </div>
+                    <button id="updateInfoButton" class="bg-green-600 text-white p-2 rounded-lg hover:bg-green-700 transition w-full mt-2">
+                        <i class="fas fa-save ml-2"></i> ذخیره اطلاعات
+                    </button>
+                    <button id="viewNameHistoryButton" class="bg-gray-600 text-white p-2 rounded-lg hover:bg-gray-700 transition w-full mt-2">
+                        <i class="fas fa-history ml-2"></i> تاریخچه نام‌ها
+                    </button>
+                </div>
+                
+                <div class="p-4 border dark:border-gray-700 rounded-lg">
+                    <h3 class="font-semibold mb-3">سطح/تجربه</h3>
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium mb-1">سطح (<span id="currentLevel">1</span>)</label>
+                        <input id="editLevel" type="number" placeholder="سطح جدید" class="w-full p-2 border dark:border-gray-600 dark:bg-gray-700 rounded-md"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium mb-1">تجربه (<span id="currentExp">0</span>)</label>
+                        <input id="editExp" type="number" placeholder="تجربه جدید" class="w-full p-2 border dark:border-gray-600 dark:bg-gray-700 rounded-md"/>
+                    </div>
+                    <button id="updateLevelExpButton" 
